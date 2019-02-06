@@ -48,7 +48,7 @@
 		system.addChild(planet2);
 
 		ship = game.rectangle(25, 10, 'red');
-		ship.rotation = 0;
+		ship.rotation = Math.floor(Math.random() * Math.floor(360));
 		ship.setPivot(0.5, 0.5);
 		game.stage.putCenter(ship);
 		const upArrow = game.keyboard(38);
