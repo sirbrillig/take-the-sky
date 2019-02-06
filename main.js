@@ -17,13 +17,9 @@
 	function play(game) {
 		if (pressing.up) {
 			speed.y =
-				speed.y >= maxAcceleration
-					? speed.y
-					: speed.y + accelerationRate * Math.sin(ship.rotation + 90);
+				speed.y >= maxAcceleration ? speed.y : speed.y + accelerationRate * Math.sin(ship.rotation);
 			speed.x =
-				speed.x >= maxAcceleration
-					? speed.x
-					: speed.x + accelerationRate * Math.cos(ship.rotation + 90);
+				speed.x >= maxAcceleration ? speed.x : speed.x + accelerationRate * Math.cos(ship.rotation);
 		}
 		if (pressing.left) {
 			ship.rotation -= rotationRate;
@@ -51,7 +47,7 @@
 		planets.push(planet2);
 		system.addChild(planet2);
 
-		ship = game.rectangle(10, 25, 'red');
+		ship = game.rectangle(25, 10, 'red');
 		ship.rotation = 0;
 		ship.setPivot(0.5, 0.5);
 		game.stage.putCenter(ship);
