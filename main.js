@@ -4,6 +4,7 @@
 (function app() {
 	const canvasWidth = 512;
 	const canvasHeight = 512;
+	const filesToLoad = ['ship.png'];
 
 	let ship;
 	const planets = [];
@@ -52,7 +53,7 @@
 		planets.push(planet2);
 		system.addChild(planet2);
 
-		ship = game.rectangle(25, 10, 'red');
+		ship = game.sprite('ship.png');
 		ship.rotation = Math.floor(Math.random() * Math.floor(360));
 		ship.setPivot(0.5, 0.5);
 		game.stage.putCenter(ship);
@@ -87,8 +88,12 @@
 		game.state = () => play(game);
 	}
 
+	function load(game) {
+		game.loadingBar();
+	}
+
 	function begin() {
-		const game = hexi(canvasWidth, canvasHeight, () => setup(game));
+		const game = hexi(canvasWidth, canvasHeight, () => setup(game), filesToLoad, () => load(game));
 		game.backgroundColor = 0x000000;
 		game.start();
 	}
