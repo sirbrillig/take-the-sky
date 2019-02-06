@@ -8,22 +8,28 @@
 	let ship;
 	const planets = [];
 	let system;
-	const pressing = { up: false, down: false };
+	const pressing = { up: false, down: false, left: false, right: false };
 	const speed = { x: 0, y: 0 };
 	const accelerationRate = 0.1;
+	const maxAcceleration = 3;
+	const rotationRate = 0.1;
 
 	function play(game) {
 		if (pressing.up) {
-			speed.y += accelerationRate;
-		}
-		if (pressing.down) {
-			speed.y -= accelerationRate;
+			speed.y =
+				speed.y >= maxAcceleration
+					? speed.y
+					: speed.y + accelerationRate * Math.sin(ship.rotation + 90);
+			speed.x =
+				speed.x >= maxAcceleration
+					? speed.x
+					: speed.x + accelerationRate * Math.cos(ship.rotation + 90);
 		}
 		if (pressing.left) {
-			speed.x += accelerationRate;
+			ship.rotation -= rotationRate;
 		}
 		if (pressing.right) {
-			speed.x -= accelerationRate;
+			ship.rotation += rotationRate;
 		}
 		system.vy = speed.y;
 		system.vx = speed.x;
@@ -46,6 +52,8 @@
 		system.addChild(planet2);
 
 		ship = game.rectangle(10, 25, 'red');
+		ship.rotation = 0;
+		ship.setPivot(0.5, 0.5);
 		game.stage.putCenter(ship);
 		const upArrow = game.keyboard(38);
 		const downArrow = game.keyboard(40);
