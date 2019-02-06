@@ -16,11 +16,16 @@
 
 	function play(game) {
 		if (pressing.up) {
-			speed.y =
-				speed.y >= maxAcceleration ? speed.y : speed.y + accelerationRate * Math.sin(ship.rotation);
-			speed.x =
-				speed.x >= maxAcceleration ? speed.x : speed.x + accelerationRate * Math.cos(ship.rotation);
+			speed.y += accelerationRate * Math.sin(ship.rotation);
+			speed.x += accelerationRate * Math.cos(ship.rotation);
 		}
+		if (speed.y > maxAcceleration) {
+			speed.y = maxAcceleration;
+		}
+		if (speed.x > maxAcceleration) {
+			speed.x = maxAcceleration;
+		}
+		// TODO: handle negative max speed
 		if (pressing.left) {
 			ship.rotation -= rotationRate;
 		}
