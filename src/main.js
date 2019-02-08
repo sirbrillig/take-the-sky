@@ -14,7 +14,7 @@ let sky;
 const pressing = { up: false, down: false, left: false, right: false };
 let speed = { x: 0, y: 0 };
 
-function play(game) {
+function renderGame(game) {
 	speed = adjustSpeed(pressing, ship.rotation, speed);
 	ship.rotation = adjustRotation(pressing, ship.rotation);
 	system.vy = speed.y;
@@ -61,7 +61,7 @@ function setup(game) {
 	ship = createAndPlaceShip(game);
 	setUpKeyboardControls(game);
 
-	game.state = () => play(game);
+	game.state = () => renderGame(game);
 }
 
 function load(game) {
