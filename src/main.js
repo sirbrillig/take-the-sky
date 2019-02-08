@@ -1,6 +1,8 @@
 /* @format */
 /* globals hexi */
 
+import { adjustSpeed, adjustRotation } from './sprites';
+
 const canvasWidth = 512;
 const canvasHeight = 512;
 const filesToLoad = ['assets/ship.png', 'assets/star-field.png'];
@@ -10,37 +12,11 @@ const planets = [];
 let system;
 let sky;
 const pressing = { up: false, down: false, left: false, right: false };
-const speed = { x: 0, y: 0 };
-const accelerationRate = 0.1;
-const maxAcceleration = 3;
-const rotationRate = 0.1;
-
-function adjustSpeed() {
-	if (pressing.up) {
-		speed.y += accelerationRate * Math.sin(ship.rotation);
-		speed.x += accelerationRate * Math.cos(ship.rotation);
-	}
-	if (speed.y > maxAcceleration) {
-		speed.y = maxAcceleration;
-	}
-	if (speed.x > maxAcceleration) {
-		speed.x = maxAcceleration;
-	}
-	// TODO: handle negative max speed
-}
-
-function adjustRotation() {
-	if (pressing.left) {
-		ship.rotation -= rotationRate;
-	}
-	if (pressing.right) {
-		ship.rotation += rotationRate;
-	}
-}
+let speed = { x: 0, y: 0 };
 
 function play(game) {
-	adjustSpeed();
-	adjustRotation();
+	speed = adjustSpeed(pressing, ship.rotation, speed);
+	ship.rotation = adjustRotation(pressing, ship.rotation);
 	system.vy = speed.y;
 	system.vx = speed.x;
 	sky.tileX += speed.x;
