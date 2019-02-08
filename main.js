@@ -15,7 +15,7 @@ const accelerationRate = 0.1;
 const maxAcceleration = 3;
 const rotationRate = 0.1;
 
-function play(game) {
+function adjustSpeed() {
 	if (pressing.up) {
 		speed.y += accelerationRate * Math.sin(ship.rotation);
 		speed.x += accelerationRate * Math.cos(ship.rotation);
@@ -27,12 +27,20 @@ function play(game) {
 		speed.x = maxAcceleration;
 	}
 	// TODO: handle negative max speed
+}
+
+function adjustRotation() {
 	if (pressing.left) {
 		ship.rotation -= rotationRate;
 	}
 	if (pressing.right) {
 		ship.rotation += rotationRate;
 	}
+}
+
+function play(game) {
+	adjustSpeed();
+	adjustRotation();
 	system.vy = speed.y;
 	system.vx = speed.x;
 	sky.tileX += speed.x;
