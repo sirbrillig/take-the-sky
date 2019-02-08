@@ -40,11 +40,13 @@ function play(game) {
 	game.move([ship, system, sky]);
 }
 
-function setup(game) {
-	system = game.group();
-
+function createAndPlaceBackground(game) {
 	sky = game.tilingSprite('star-field.png', game.canvas.width, game.canvas.height);
 	game.stage.addChild(sky);
+}
+
+function createAndPlacePlanets(game) {
+	system = game.group();
 
 	const planet = game.circle(50, 'blue');
 	planet.x = 20;
@@ -59,11 +61,16 @@ function setup(game) {
 	system.addChild(planet2);
 
 	game.stage.addChild(system);
+}
 
+function createAndPlaceShip(game) {
 	ship = game.sprite('ship.png');
 	ship.rotation = Math.floor(Math.random() * Math.floor(360));
 	ship.setPivot(0.5, 0.5);
 	game.stage.putCenter(ship);
+}
+
+function setUpKeyboardControls(game) {
 	const upArrow = game.keyboard(38);
 	const downArrow = game.keyboard(40);
 	const leftArrow = game.keyboard(37);
@@ -92,6 +99,14 @@ function setup(game) {
 	rightArrow.release = () => {
 		pressing.right = false;
 	};
+}
+
+function setup(game) {
+	createAndPlaceBackground(game);
+	createAndPlacePlanets(game);
+	createAndPlaceShip(game);
+	setUpKeyboardControls(game);
+
 	game.state = () => play(game);
 }
 
@@ -99,10 +114,10 @@ function load(game) {
 	game.loadingBar();
 }
 
-function begin() {
+function initGame() {
 	const game = hexi(canvasWidth, canvasHeight, () => setup(game), filesToLoad, () => load(game));
 	game.backgroundColor = 0x000000;
 	game.start();
 }
 
-begin();
+initGame();
