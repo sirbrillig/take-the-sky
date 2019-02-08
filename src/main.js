@@ -3,7 +3,7 @@
 
 const canvasWidth = 512;
 const canvasHeight = 512;
-const filesToLoad = ['ship.png', 'star-field.png'];
+const filesToLoad = ['assets/ship.png', 'assets/star-field.png'];
 
 let ship;
 const planets = [];
@@ -49,7 +49,7 @@ function play(game) {
 }
 
 function createAndPlaceBackground(game) {
-	sky = game.tilingSprite('star-field.png', game.canvas.width, game.canvas.height);
+	sky = game.tilingSprite('assets/star-field.png', game.canvas.width, game.canvas.height);
 	game.stage.addChild(sky);
 }
 
@@ -72,7 +72,7 @@ function createAndPlacePlanets(game) {
 }
 
 function createAndPlaceShip(game) {
-	ship = game.sprite('ship.png');
+	ship = game.sprite('assets/ship.png');
 	ship.rotation = Math.floor(Math.random() * Math.floor(360));
 	ship.setPivot(0.5, 0.5);
 	game.stage.putCenter(ship);
