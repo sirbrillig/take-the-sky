@@ -4,11 +4,12 @@
 (function app() {
 	const canvasWidth = 512;
 	const canvasHeight = 512;
-	const filesToLoad = ['ship.png'];
+	const filesToLoad = ['ship.png', 'star-field.png'];
 
 	let ship;
 	const planets = [];
 	let system;
+	let sky;
 	const pressing = { up: false, down: false, left: false, right: false };
 	const speed = { x: 0, y: 0 };
 	const accelerationRate = 0.1;
@@ -35,11 +36,16 @@
 		}
 		system.vy = speed.y;
 		system.vx = speed.x;
-		game.move([ship, system]);
+		sky.tileX += speed.x;
+		sky.tileY += speed.y;
+		game.move([ship, system, sky]);
 	}
 
 	function setup(game) {
 		system = game.group();
+
+		sky = game.tilingSprite('star-field.png', game.canvas.width, game.canvas.height);
+		game.stage.addChild(sky);
 
 		const planet = game.circle(50, 'blue');
 		planet.x = 20;
@@ -52,6 +58,8 @@
 		planet2.y = 170;
 		planets.push(planet2);
 		system.addChild(planet2);
+
+		game.stage.addChild(system);
 
 		ship = game.sprite('ship.png');
 		ship.rotation = Math.floor(Math.random() * Math.floor(360));
