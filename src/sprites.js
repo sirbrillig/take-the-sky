@@ -1,20 +1,18 @@
+/* @format */
 const accelerationRate = 0.1;
 const maxAcceleration = 3;
 const rotationRate = 0.1;
 
 export function adjustSpeed(pressing, rotation, speed) {
+	let { x, y } = speed;
 	if (pressing.up) {
-		speed.y += accelerationRate * Math.sin(rotation);
-		speed.x += accelerationRate * Math.cos(rotation);
+		y += accelerationRate * Math.sin(rotation);
+		x += accelerationRate * Math.cos(rotation);
 	}
-	if (speed.y > maxAcceleration) {
-		speed.y = maxAcceleration;
-	}
-	if (speed.x > maxAcceleration) {
-		speed.x = maxAcceleration;
-	}
+	y = y > maxAcceleration ? maxAcceleration : y;
+	x = x > maxAcceleration ? maxAcceleration : x;
 	// TODO: handle negative max speed
-	return speed;
+	return { x, y };
 }
 
 export function adjustRotation(pressing, rotation) {
