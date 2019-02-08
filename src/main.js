@@ -2,7 +2,12 @@
 /* globals hexi */
 
 import { adjustSpeed, adjustRotation } from './math';
-import { createAndPlaceBackground, createAndPlacePlanets, createAndPlaceShip } from './sprites';
+import {
+	createAndPlaceBackground,
+	createAndPlacePlanets,
+	createAndPlaceShip,
+	createAndPlaceNavigationRing
+} from './sprites';
 
 const canvasWidth = 512;
 const canvasHeight = 512;
@@ -11,6 +16,7 @@ const filesToLoad = ['assets/ship.png', 'assets/star-field.png'];
 let ship;
 let system;
 let sky;
+let ring;
 const pressing = { up: false, down: false, left: false, right: false };
 let speed = { x: 0, y: 0 };
 
@@ -21,7 +27,7 @@ function renderGame(game) {
 	system.vx = speed.x;
 	sky.tileX += speed.x;
 	sky.tileY += speed.y;
-	game.move([ship, system, sky]);
+	game.move([ship, system, sky, ring]);
 }
 
 function setUpKeyboardControls(game) {
@@ -59,6 +65,7 @@ function setup(game) {
 	sky = createAndPlaceBackground(game);
 	system = createAndPlacePlanets(game);
 	ship = createAndPlaceShip(game);
+	ring = createAndPlaceNavigationRing(game);
 	setUpKeyboardControls(game);
 
 	game.state = () => renderGame(game);
