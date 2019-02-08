@@ -1,14 +1,14 @@
 /* @format */
 /* globals hexi */
 
-import { adjustSpeed, adjustRotation } from './sprites';
+import { adjustSpeed, adjustRotation } from './math';
+import { createAndPlaceBackground, createAndPlacePlanets, createAndPlaceShip } from './sprites';
 
 const canvasWidth = 512;
 const canvasHeight = 512;
 const filesToLoad = ['assets/ship.png', 'assets/star-field.png'];
 
 let ship;
-const planets = [];
 let system;
 let sky;
 const pressing = { up: false, down: false, left: false, right: false };
@@ -22,36 +22,6 @@ function play(game) {
 	sky.tileX += speed.x;
 	sky.tileY += speed.y;
 	game.move([ship, system, sky]);
-}
-
-function createAndPlaceBackground(game) {
-	sky = game.tilingSprite('assets/star-field.png', game.canvas.width, game.canvas.height);
-	game.stage.addChild(sky);
-}
-
-function createAndPlacePlanets(game) {
-	system = game.group();
-
-	const planet = game.circle(50, 'blue');
-	planet.x = 20;
-	planet.y = 20;
-	planets.push(planet);
-	system.addChild(planet);
-
-	const planet2 = game.circle(30, 'green');
-	planet2.x = 90;
-	planet2.y = 170;
-	planets.push(planet2);
-	system.addChild(planet2);
-
-	game.stage.addChild(system);
-}
-
-function createAndPlaceShip(game) {
-	ship = game.sprite('assets/ship.png');
-	ship.rotation = Math.floor(Math.random() * Math.floor(360));
-	ship.setPivot(0.5, 0.5);
-	game.stage.putCenter(ship);
 }
 
 function setUpKeyboardControls(game) {
@@ -86,9 +56,9 @@ function setUpKeyboardControls(game) {
 }
 
 function setup(game) {
-	createAndPlaceBackground(game);
-	createAndPlacePlanets(game);
-	createAndPlaceShip(game);
+	sky = createAndPlaceBackground(game);
+	system = createAndPlacePlanets(game);
+	ship = createAndPlaceShip(game);
 	setUpKeyboardControls(game);
 
 	game.state = () => play(game);
