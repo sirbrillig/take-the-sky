@@ -1,6 +1,6 @@
 /* @format */
 const accelerationRate = 0.1;
-const maxAcceleration = 3;
+const maxSpeed = 3;
 const rotationRate = 0.1;
 
 export function adjustSpeed(pressing, rotation, speed) {
@@ -9,9 +9,10 @@ export function adjustSpeed(pressing, rotation, speed) {
 		y += accelerationRate * Math.sin(rotation);
 		x += accelerationRate * Math.cos(rotation);
 	}
-	y = y > maxAcceleration ? maxAcceleration : y;
-	x = x > maxAcceleration ? maxAcceleration : x;
-	// TODO: handle negative max speed
+	y = y > maxSpeed ? maxSpeed : y;
+	x = x > maxSpeed ? maxSpeed : x;
+	y = y < -maxSpeed ? -maxSpeed : y;
+	x = x < -maxSpeed ? -maxSpeed : x;
 	return { x, y };
 }
 
