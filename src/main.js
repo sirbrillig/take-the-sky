@@ -6,17 +6,25 @@ import {
 	createAndPlaceBackground,
 	createAndPlacePlanets,
 	createAndPlaceShip,
-	createAndPlaceNavigationRing
+	createAndPlaceNavigationRing,
+	createAndPlaceButton
 } from './sprites';
 
 const canvasWidth = 800;
 const canvasHeight = 600;
-const filesToLoad = ['assets/ship.png', 'assets/star-field.png', 'assets/nav-ring.png'];
+const filesToLoad = [
+	'assets/ship.png',
+	'assets/star-field.png',
+	'assets/nav-ring.png',
+	'assets/button-up.png',
+	'assets/button-down.png'
+];
 
 let ship;
 let system;
 let sky;
 let ring;
+let button;
 const pressing = { up: false, down: false, left: false, right: false };
 let speed = { x: 0, y: 0 };
 
@@ -28,7 +36,7 @@ function renderGame(game) {
 	system.vx = speed.x;
 	sky.tileX += speed.x;
 	sky.tileY += speed.y;
-	game.move([ship, system, sky, ring]);
+	game.move([ship, system, sky, ring, button]);
 }
 
 function setUpKeyboardControls(game) {
@@ -62,11 +70,22 @@ function setUpKeyboardControls(game) {
 	};
 }
 
+function setUpButtonControls(game, button) {
+	button.press = () => {
+		pressing.up = true;
+	};
+	button.release = () => {
+		pressing.up = false;
+	};
+}
+
 function setup(game) {
 	sky = createAndPlaceBackground(game);
 	system = createAndPlacePlanets(game);
 	ship = createAndPlaceShip(game);
 	ring = createAndPlaceNavigationRing(game);
+	button = createAndPlaceButton(game);
+	setUpButtonControls(game, button);
 	setUpKeyboardControls(game);
 
 	game.state = () => renderGame(game);

@@ -39,3 +39,14 @@ export function createAndPlaceNavigationRing(game) {
 	game.stage.putCenter(navRing);
 	return navRing;
 }
+
+export function createAndPlaceButton(game) {
+	const button = game.button([
+		'assets/button-up.png',
+		'assets/button-up.png',
+		'assets/button-down.png'
+	]);
+	game.stage.putCenter(button);
+	button.y += 200;
+	return button;
+}
