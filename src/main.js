@@ -9,8 +9,8 @@ import {
 	createAndPlaceNavigationRing
 } from './sprites';
 
-const canvasWidth = 512;
-const canvasHeight = 512;
+const canvasWidth = 800;
+const canvasHeight = 600;
 const filesToLoad = ['assets/ship.png', 'assets/star-field.png', 'assets/nav-ring.png'];
 
 let ship;
@@ -78,6 +78,7 @@ function load(game) {
 
 function initGame() {
 	const game = hexi(canvasWidth, canvasHeight, () => setup(game), filesToLoad, () => load(game));
+	game.scaleToWindow();
 	game.backgroundColor = 0x000000;
 	game.start();
 }
