@@ -11,7 +11,7 @@ import {
 
 const canvasWidth = 512;
 const canvasHeight = 512;
-const filesToLoad = ['assets/ship.png', 'assets/star-field.png'];
+const filesToLoad = ['assets/ship.png', 'assets/star-field.png', 'assets/nav-ring.png'];
 
 let ship;
 let system;
@@ -23,6 +23,7 @@ let speed = { x: 0, y: 0 };
 function renderGame(game) {
 	speed = adjustSpeed(pressing, ship.rotation, speed);
 	ship.rotation = adjustRotation(pressing, ship.rotation);
+	ring.rotation = ship.rotation;
 	system.vy = speed.y;
 	system.vx = speed.x;
 	sky.tileX += speed.x;
