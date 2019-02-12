@@ -2,6 +2,7 @@
 /* globals hexi */
 
 import { adjustSpeed, adjustRotation, getNewRingRotation } from './math';
+import makeState from './state';
 import {
 	setUpButtonControls,
 	setUpKeyboardControls,
@@ -31,14 +32,10 @@ let system;
 let sky;
 let ring;
 let button;
-let pressing = { up: false, down: false, left: false, right: false, ring: false };
 let speed = { x: 0, y: 0 };
 
-function changePressingState(newState) {
-	pressing = { ...pressing, ...newState };
-}
-
-function renderGame(game) {
+function renderGame(game, changePressingState, getPressingState) {
+	const pressing = getPressingState();
 	speed = adjustSpeed(pressing, ship.rotation, speed);
 	ship.rotation = adjustRotation(pressing, ship.rotation);
 	if (pressing.ring) {
@@ -55,7 +52,7 @@ function renderGame(game) {
 	game.move([ship, system, sky, ring, button]);
 }
 
-function setup(game) {
+function setup(game, changePressingState, getPressingState) {
 	sky = createAndPlaceBackground(game);
 	system = createAndPlacePlanets(game);
 	ship = createAndPlaceShip(game);
@@ -65,7 +62,7 @@ function setup(game) {
 	setUpKeyboardControls(game, changePressingState);
 	setUpNavigationRingControls(game, ring, changePressingState);
 
-	game.state = () => renderGame(game);
+	game.state = () => renderGame(game, changePressingState, getPressingState);
 }
 
 function load(game) {
@@ -73,7 +70,20 @@ function load(game) {
 }
 
 function initGame() {
-	const game = hexi(canvasWidth, canvasHeight, () => setup(game), filesToLoad, () => load(game));
+	const [getPressingState, changePressingState] = makeState({
+		up: false,
+		down: false,
+		left: false,
+		right: false,
+		ring: false
+	});
+	const game = hexi(
+		canvasWidth,
+		canvasHeight,
+		() => setup(game, changePressingState, getPressingState),
+		filesToLoad,
+		() => load(game)
+	);
 	game.scaleToWindow();
 	game.backgroundColor = 0x000000;
 	game.start();
