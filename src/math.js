@@ -25,3 +25,31 @@ export function adjustRotation(pressing, rotation) {
 	}
 	return rotation;
 }
+
+export function getNewRingRotation(ring, start, end) {
+	// From: https://gist.github.com/Samueleroux/f6854e8e443a210ff6958b23f2237097
+	const p1 = {
+		x: ring.x,
+		y: ring.y
+	};
+
+	const p2 = {
+		x: start.x,
+		y: start.y
+	};
+
+	const p3 = {
+		x: end.x,
+		y: end.y
+	};
+
+	const p12 = Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
+	const p13 = Math.sqrt(Math.pow(p1.x - p3.x, 2) + Math.pow(p1.y - p3.y, 2));
+	const p23 = Math.sqrt(Math.pow(p2.x - p3.x, 2) + Math.pow(p2.y - p3.y, 2));
+
+	const resultDegree =
+		(Math.acos((Math.pow(p12, 2) + Math.pow(p13, 2) - Math.pow(p23, 2)) / (2 * p12 * p13)) * 180) /
+		Math.PI;
+
+	return resultDegree;
+}

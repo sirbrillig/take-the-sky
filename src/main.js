@@ -1,7 +1,7 @@
 /* @format */
 /* globals hexi */
 
-import { adjustSpeed, adjustRotation } from './math';
+import { adjustSpeed, adjustRotation, getNewRingRotation } from './math';
 import {
 	createAndPlaceBackground,
 	createAndPlacePlanets,
@@ -25,12 +25,24 @@ let system;
 let sky;
 let ring;
 let button;
-const pressing = { up: false, down: false, left: false, right: false };
+const pressing = { up: false, down: false, left: false, right: false, ring: false };
+let ringClickCoodinates = { x: 0, y: 0 };
 let speed = { x: 0, y: 0 };
+
+function getCurrentCoordinates(game) {
+	return { x: game.pointer.x, y: game.pointer.y };
+}
 
 function renderGame(game) {
 	speed = adjustSpeed(pressing, ship.rotation, speed);
 	ship.rotation = adjustRotation(pressing, ship.rotation);
+	if (pressing.ring) {
+		const currentCoordinates = getCurrentCoordinates(game);
+		// TODO: this goes in reverse on the right side of the ring
+		// TODO: the rotation is way too fast
+		// TODO: the rotation always starts at 0 instead of the location clicked
+		ship.rotation = getNewRingRotation(ring, ringClickCoodinates, currentCoordinates);
+	}
 	ring.rotation = ship.rotation;
 	system.vy = speed.y;
 	system.vx = speed.x;
@@ -79,6 +91,17 @@ function setUpButtonControls(game, button) {
 	};
 }
 
+function setUpNavigationRingControls(game, ring) {
+	ring.interact = true;
+	ring.press = () => {
+		pressing.ring = true;
+		ringClickCoodinates = getCurrentCoordinates(game);
+	};
+	ring.release = () => {
+		pressing.ring = false;
+	};
+}
+
 function setup(game) {
 	sky = createAndPlaceBackground(game);
 	system = createAndPlacePlanets(game);
@@ -87,6 +110,7 @@ function setup(game) {
 	button = createAndPlaceButton(game);
 	setUpButtonControls(game, button);
 	setUpKeyboardControls(game);
+	setUpNavigationRingControls(game, ring);
 
 	game.state = () => renderGame(game);
 }
