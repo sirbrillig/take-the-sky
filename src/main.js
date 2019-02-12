@@ -32,11 +32,10 @@ let system;
 let sky;
 let ring;
 let button;
-let speed = { x: 0, y: 0 };
 
-function renderGame(game, changePressingState, getPressingState) {
+function renderGame(game, changePressingState, getPressingState, changeSpeed, getSpeed) {
 	const pressing = getPressingState();
-	speed = adjustSpeed(pressing, ship.rotation, speed);
+	changeSpeed(adjustSpeed(pressing, ship.rotation, getSpeed()));
 	ship.rotation = adjustRotation(pressing, ship.rotation);
 	if (pressing.ring) {
 		const currentCoordinates = getCurrentCoordinates(game);
@@ -45,6 +44,7 @@ function renderGame(game, changePressingState, getPressingState) {
 		changePressingState({ ring: currentCoordinates });
 	}
 	ring.rotation = ship.rotation;
+	const speed = getSpeed();
 	system.vy = speed.y;
 	system.vx = speed.x;
 	sky.tileX += speed.x;
@@ -52,7 +52,7 @@ function renderGame(game, changePressingState, getPressingState) {
 	game.move([ship, system, sky, ring, button]);
 }
 
-function setup(game, changePressingState, getPressingState) {
+function setup(game, changePressingState, getPressingState, changeSpeed, getSpeed) {
 	sky = createAndPlaceBackground(game);
 	system = createAndPlacePlanets(game);
 	ship = createAndPlaceShip(game);
@@ -62,7 +62,7 @@ function setup(game, changePressingState, getPressingState) {
 	setUpKeyboardControls(game, changePressingState);
 	setUpNavigationRingControls(game, ring, changePressingState);
 
-	game.state = () => renderGame(game, changePressingState, getPressingState);
+	game.state = () => renderGame(game, changePressingState, getPressingState, changeSpeed, getSpeed);
 }
 
 function load(game) {
@@ -70,6 +70,7 @@ function load(game) {
 }
 
 function initGame() {
+	const [getSpeed, changeSpeed] = makeState({ x: 0, y: 0 });
 	const [getPressingState, changePressingState] = makeState({
 		up: false,
 		down: false,
@@ -80,7 +81,7 @@ function initGame() {
 	const game = hexi(
 		canvasWidth,
 		canvasHeight,
-		() => setup(game, changePressingState, getPressingState),
+		() => setup(game, changePressingState, getPressingState, changeSpeed, getSpeed),
 		filesToLoad,
 		() => load(game)
 	);
