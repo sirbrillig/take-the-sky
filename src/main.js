@@ -44,7 +44,6 @@ function renderGame(game) {
 	if (pressing.ring) {
 		const currentCoordinates = getCurrentCoordinates(game);
 		// TODO: this goes in reverse on the right side of the ring
-		// TODO: the rotation is way too fast
 		ship.rotation += getNewRingRotation(ring, pressing.ring, currentCoordinates);
 		changePressingState({ ring: currentCoordinates });
 	}
