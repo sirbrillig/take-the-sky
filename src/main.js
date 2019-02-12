@@ -34,6 +34,10 @@ let button;
 let pressing = { up: false, down: false, left: false, right: false, ring: false };
 let speed = { x: 0, y: 0 };
 
+function changePressingState(newState) {
+	pressing = { ...pressing, ...newState };
+}
+
 function renderGame(game) {
 	speed = adjustSpeed(pressing, ship.rotation, speed);
 	ship.rotation = adjustRotation(pressing, ship.rotation);
@@ -41,8 +45,8 @@ function renderGame(game) {
 		const currentCoordinates = getCurrentCoordinates(game);
 		// TODO: this goes in reverse on the right side of the ring
 		// TODO: the rotation is way too fast
-		// TODO: the rotation always starts at 0 instead of the location clicked
-		ship.rotation = getNewRingRotation(ring, pressing.ring, currentCoordinates);
+		ship.rotation += getNewRingRotation(ring, pressing.ring, currentCoordinates);
+		changePressingState({ ring: currentCoordinates });
 	}
 	ring.rotation = ship.rotation;
 	system.vy = speed.y;
@@ -50,10 +54,6 @@ function renderGame(game) {
 	sky.tileX += speed.x;
 	sky.tileY += speed.y;
 	game.move([ship, system, sky, ring, button]);
-}
-
-function changePressingState(newState) {
-	pressing = { ...pressing, ...newState };
 }
 
 function setup(game) {
