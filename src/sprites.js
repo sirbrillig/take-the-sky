@@ -50,3 +50,7 @@ export function createAndPlaceButton(game) {
 	button.y += 200;
 	return button;
 }
+
+export function getCurrentCoordinates(game) {
+	return { x: game.pointer.x, y: game.pointer.y };
+}
