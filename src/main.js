@@ -58,9 +58,10 @@ function setup(game, state, actions) {
 		button: createAndPlaceButton(game)
 	};
 	const { changePressingState } = actions;
-	setUpButtonControls(game, sprites.button, changePressingState);
-	setUpKeyboardControls(game, changePressingState);
-	setUpNavigationRingControls(game, sprites.ring, changePressingState);
+	const { getControlMode } = state;
+	setUpButtonControls(game, sprites.button, getControlMode, changePressingState);
+	setUpKeyboardControls(game, getControlMode, changePressingState);
+	setUpNavigationRingControls(game, sprites.ring, getControlMode, changePressingState);
 
 	game.state = () => renderGame(game, sprites, state, actions);
 }
@@ -78,11 +79,14 @@ function initGame() {
 		right: false,
 		ring: false
 	});
+	const [getControlMode, changeControlMode] = makeState('pilot');
 	const state = {
+		getControlMode,
 		getPressingState,
 		getSpeed
 	};
 	const actions = {
+		changeControlMode,
 		changeSpeed,
 		changePressingState
 	};
