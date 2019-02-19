@@ -4,7 +4,7 @@ import { getCurrentCoordinates } from './sprites';
 
 export function setUpButtonControls(game, button, getControlMode, changePressingState) {
 	const pressPilotKey = data => {
-		if (getControlMode() === 'pilot') {
+		if (getControlMode().mode === 'pilot') {
 			changePressingState(data);
 		}
 	};
@@ -23,7 +23,7 @@ export function setUpKeyboardControls(
 	const rightArrow = game.keyboard(39);
 	const modeKey = game.keyboard(77);
 	const pressPilotKey = data => {
-		if (getControlMode() === 'pilot') {
+		if (getControlMode().mode === 'pilot') {
 			changePressingState(data);
 		}
 	};
@@ -33,13 +33,13 @@ export function setUpKeyboardControls(
 	leftArrow.release = () => pressPilotKey({ left: false });
 	rightArrow.press = () => pressPilotKey({ right: true });
 	rightArrow.release = () => pressPilotKey({ right: false });
-	modeKey.press = () => changeControlMode('landing');
+	modeKey.press = () => changeControlMode({ mode: 'land' });
 }
 
 export function setUpNavigationRingControls(game, ring, getControlMode, changePressingState) {
 	ring.interact = true;
 	const pressPilotKey = data => {
-		if (getControlMode() === 'pilot') {
+		if (getControlMode().mode === 'pilot') {
 			changePressingState(data);
 		}
 	};

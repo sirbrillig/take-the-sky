@@ -51,6 +51,31 @@ export function createAndPlaceButton(game) {
 	return button;
 }
 
+export function createAndPlaceModeButton(game, modeTitle, orderIndex) {
+	const title = game.text(modeTitle, '32px serif', 'white');
+	title.x = 40;
+	title.y = 10 * orderIndex * 5;
+	game.stage.addChild(title);
+	return title;
+}
+
+export function createAndPlaceModePointer(game) {
+	const pointer = game.sprite('assets/pointer.png');
+	pointer.x = 10;
+	pointer.y = 10 * 5 + 16; // modeButton position + a bit to vertically center it
+	game.stage.addChild(pointer);
+	return pointer;
+}
+
 export function getCurrentCoordinates(game) {
 	return { x: game.pointer.x, y: game.pointer.y };
+}
+
+export function getModePointerPositionForMode(modeName) {
+	switch (modeName) {
+		case 'land':
+			return 10 * 2 * 5 + 16;
+		default:
+			return 10 * 5 + 16; // modeButton position + a bit to vertically center it
+	}
 }

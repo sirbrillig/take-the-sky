@@ -10,6 +10,9 @@ import {
 } from './controls';
 import {
 	getCurrentCoordinates,
+	getModePointerPositionForMode,
+	createAndPlaceModeButton,
+	createAndPlaceModePointer,
 	createAndPlaceBackground,
 	createAndPlacePlanets,
 	createAndPlaceShip,
@@ -24,11 +27,12 @@ const filesToLoad = [
 	'assets/star-field.png',
 	'assets/nav-ring.png',
 	'assets/button-up.png',
-	'assets/button-down.png'
+	'assets/button-down.png',
+	'assets/pointer.png'
 ];
 
 function renderGame(game, sprites, state, actions) {
-	const { ship, system, ring, sky } = sprites;
+	const { ship, system, ring, sky, modePointer } = sprites;
 	const { getPressingState, getSpeed, getControlMode } = state;
 	const { changeSpeed, changePressingState } = actions;
 	const pressing = getPressingState();
@@ -46,18 +50,26 @@ function renderGame(game, sprites, state, actions) {
 	system.vx = speed.x;
 	sky.tileX += speed.x;
 	sky.tileY += speed.y;
-	ring.visible = getControlMode() === 'pilot';
+	ring.visible = getControlMode().mode === 'pilot';
+	modePointer.y = getModePointerPositionForMode(getControlMode().mode);
 	game.move(Object.values(sprites));
 }
 
-function setup(game, state, actions) {
-	const sprites = {
+function initSprites(game) {
+	return {
 		sky: createAndPlaceBackground(game),
 		system: createAndPlacePlanets(game),
 		ship: createAndPlaceShip(game),
 		ring: createAndPlaceNavigationRing(game),
-		button: createAndPlaceButton(game)
+		button: createAndPlaceButton(game),
+		pilotModeButton: createAndPlaceModeButton(game, 'pilot', 1),
+		landModeButton: createAndPlaceModeButton(game, 'land', 2),
+		modePointer: createAndPlaceModePointer(game)
 	};
+}
+
+function setup(game, state, actions) {
+	const sprites = initSprites(game);
 	const { changePressingState, changeControlMode } = actions;
 	const { getControlMode } = state;
 	setUpButtonControls(game, sprites.button, getControlMode, changePressingState);
@@ -80,7 +92,7 @@ function initGame() {
 		right: false,
 		ring: false
 	});
-	const [getControlMode, changeControlMode] = makeState('pilot');
+	const [getControlMode, changeControlMode] = makeState({ mode: 'pilot' });
 	const state = {
 		getControlMode,
 		getPressingState,
