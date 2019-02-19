@@ -12,10 +12,16 @@ export function setUpButtonControls(game, button, getControlMode, changePressing
 	button.release = () => pressPilotKey({ up: false });
 }
 
-export function setUpKeyboardControls(game, getControlMode, changePressingState) {
+export function setUpKeyboardControls(
+	game,
+	getControlMode,
+	changePressingState,
+	changeControlMode
+) {
 	const upArrow = game.keyboard(38);
 	const leftArrow = game.keyboard(37);
 	const rightArrow = game.keyboard(39);
+	const modeKey = game.keyboard(77);
 	const pressPilotKey = data => {
 		if (getControlMode() === 'pilot') {
 			changePressingState(data);
@@ -27,6 +33,7 @@ export function setUpKeyboardControls(game, getControlMode, changePressingState)
 	leftArrow.release = () => pressPilotKey({ left: false });
 	rightArrow.press = () => pressPilotKey({ right: true });
 	rightArrow.release = () => pressPilotKey({ right: false });
+	modeKey.press = () => changeControlMode('landing');
 }
 
 export function setUpNavigationRingControls(game, ring, getControlMode, changePressingState) {

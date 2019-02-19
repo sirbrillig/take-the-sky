@@ -29,7 +29,7 @@ const filesToLoad = [
 
 function renderGame(game, sprites, state, actions) {
 	const { ship, system, ring, sky } = sprites;
-	const { getPressingState, getSpeed } = state;
+	const { getPressingState, getSpeed, getControlMode } = state;
 	const { changeSpeed, changePressingState } = actions;
 	const pressing = getPressingState();
 	changeSpeed(adjustSpeed(pressing, ship.rotation, getSpeed()));
@@ -46,6 +46,7 @@ function renderGame(game, sprites, state, actions) {
 	system.vx = speed.x;
 	sky.tileX += speed.x;
 	sky.tileY += speed.y;
+	ring.visible = getControlMode() === 'pilot';
 	game.move(Object.values(sprites));
 }
 
@@ -57,10 +58,10 @@ function setup(game, state, actions) {
 		ring: createAndPlaceNavigationRing(game),
 		button: createAndPlaceButton(game)
 	};
-	const { changePressingState } = actions;
+	const { changePressingState, changeControlMode } = actions;
 	const { getControlMode } = state;
 	setUpButtonControls(game, sprites.button, getControlMode, changePressingState);
-	setUpKeyboardControls(game, getControlMode, changePressingState);
+	setUpKeyboardControls(game, getControlMode, changePressingState, changeControlMode);
 	setUpNavigationRingControls(game, sprites.ring, getControlMode, changePressingState);
 
 	game.state = () => renderGame(game, sprites, state, actions);
