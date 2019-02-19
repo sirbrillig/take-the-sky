@@ -27,13 +27,8 @@ const filesToLoad = [
 	'assets/button-down.png'
 ];
 
-let ship;
-let system;
-let sky;
-let ring;
-let button;
-
-function renderGame(game, changePressingState, getPressingState, changeSpeed, getSpeed) {
+function renderGame(game, changePressingState, getPressingState, changeSpeed, getSpeed, sprites) {
+	const { ship, system, ring, sky } = sprites;
 	const pressing = getPressingState();
 	changeSpeed(adjustSpeed(pressing, ship.rotation, getSpeed()));
 	ship.rotation = adjustRotation(pressing, ship.rotation);
@@ -49,20 +44,23 @@ function renderGame(game, changePressingState, getPressingState, changeSpeed, ge
 	system.vx = speed.x;
 	sky.tileX += speed.x;
 	sky.tileY += speed.y;
-	game.move([ship, system, sky, ring, button]);
+	game.move(Object.values(sprites));
 }
 
 function setup(game, changePressingState, getPressingState, changeSpeed, getSpeed) {
-	sky = createAndPlaceBackground(game);
-	system = createAndPlacePlanets(game);
-	ship = createAndPlaceShip(game);
-	ring = createAndPlaceNavigationRing(game);
-	button = createAndPlaceButton(game);
-	setUpButtonControls(game, button, changePressingState);
+	const sprites = {
+		sky: createAndPlaceBackground(game),
+		system: createAndPlacePlanets(game),
+		ship: createAndPlaceShip(game),
+		ring: createAndPlaceNavigationRing(game),
+		button: createAndPlaceButton(game)
+	};
+	setUpButtonControls(game, sprites.button, changePressingState);
 	setUpKeyboardControls(game, changePressingState);
-	setUpNavigationRingControls(game, ring, changePressingState);
+	setUpNavigationRingControls(game, sprites.ring, changePressingState);
 
-	game.state = () => renderGame(game, changePressingState, getPressingState, changeSpeed, getSpeed);
+	game.state = () =>
+		renderGame(game, changePressingState, getPressingState, changeSpeed, getSpeed, sprites);
 }
 
 function load(game) {
