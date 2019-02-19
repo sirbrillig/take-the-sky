@@ -27,8 +27,10 @@ const filesToLoad = [
 	'assets/button-down.png'
 ];
 
-function renderGame(game, changePressingState, getPressingState, changeSpeed, getSpeed, sprites) {
+function renderGame(game, sprites, state, actions) {
 	const { ship, system, ring, sky } = sprites;
+	const { getPressingState, getSpeed } = state;
+	const { changeSpeed, changePressingState } = actions;
 	const pressing = getPressingState();
 	changeSpeed(adjustSpeed(pressing, ship.rotation, getSpeed()));
 	ship.rotation = adjustRotation(pressing, ship.rotation);
@@ -47,7 +49,7 @@ function renderGame(game, changePressingState, getPressingState, changeSpeed, ge
 	game.move(Object.values(sprites));
 }
 
-function setup(game, changePressingState, getPressingState, changeSpeed, getSpeed) {
+function setup(game, state, actions) {
 	const sprites = {
 		sky: createAndPlaceBackground(game),
 		system: createAndPlacePlanets(game),
@@ -55,12 +57,12 @@ function setup(game, changePressingState, getPressingState, changeSpeed, getSpee
 		ring: createAndPlaceNavigationRing(game),
 		button: createAndPlaceButton(game)
 	};
+	const { changePressingState } = actions;
 	setUpButtonControls(game, sprites.button, changePressingState);
 	setUpKeyboardControls(game, changePressingState);
 	setUpNavigationRingControls(game, sprites.ring, changePressingState);
 
-	game.state = () =>
-		renderGame(game, changePressingState, getPressingState, changeSpeed, getSpeed, sprites);
+	game.state = () => renderGame(game, sprites, state, actions);
 }
 
 function load(game) {
@@ -76,12 +78,16 @@ function initGame() {
 		right: false,
 		ring: false
 	});
-	const game = hexi(
-		canvasWidth,
-		canvasHeight,
-		() => setup(game, changePressingState, getPressingState, changeSpeed, getSpeed),
-		filesToLoad,
-		() => load(game)
+	const state = {
+		getPressingState,
+		getSpeed
+	};
+	const actions = {
+		changeSpeed,
+		changePressingState
+	};
+	const game = hexi(canvasWidth, canvasHeight, () => setup(game, state, actions), filesToLoad, () =>
+		load(game)
 	);
 	game.scaleToWindow();
 	game.backgroundColor = 0x000000;
