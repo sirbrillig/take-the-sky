@@ -30,17 +30,17 @@ export function getNewRingRotation(ring, start, end) {
 	// From: https://gist.github.com/Samueleroux/f6854e8e443a210ff6958b23f2237097
 	const p1 = {
 		x: ring.x,
-		y: ring.y
+		y: ring.y,
 	};
 
 	const p2 = {
 		x: start.x,
-		y: start.y
+		y: start.y,
 	};
 
 	const p3 = {
 		x: end.x,
-		y: end.y
+		y: end.y,
 	};
 
 	const p12 = Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));

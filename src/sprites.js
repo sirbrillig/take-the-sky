@@ -44,7 +44,7 @@ export function createAndPlaceButton(game) {
 	const button = game.button([
 		'assets/button-up.png',
 		'assets/button-up.png',
-		'assets/button-down.png'
+		'assets/button-down.png',
 	]);
 	game.stage.putCenter(button);
 	button.y += 200;

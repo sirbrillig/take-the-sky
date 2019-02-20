@@ -6,7 +6,7 @@ import makeState from './state';
 import {
 	setUpButtonControls,
 	setUpKeyboardControls,
-	setUpNavigationRingControls
+	setUpNavigationRingControls,
 } from './controls';
 import {
 	getCurrentCoordinates,
@@ -17,7 +17,7 @@ import {
 	createAndPlacePlanets,
 	createAndPlaceShip,
 	createAndPlaceNavigationRing,
-	createAndPlaceButton
+	createAndPlaceButton,
 } from './sprites';
 
 const canvasWidth = 800;
@@ -28,7 +28,7 @@ const filesToLoad = [
 	'assets/nav-ring.png',
 	'assets/button-up.png',
 	'assets/button-down.png',
-	'assets/pointer.png'
+	'assets/pointer.png',
 ];
 
 function renderGame(game, sprites, state, actions) {
@@ -64,7 +64,7 @@ function initSprites(game) {
 		button: createAndPlaceButton(game),
 		pilotModeButton: createAndPlaceModeButton(game, 'pilot', 1),
 		landModeButton: createAndPlaceModeButton(game, 'land', 2),
-		modePointer: createAndPlaceModePointer(game)
+		modePointer: createAndPlaceModePointer(game),
 	};
 }
 
@@ -90,18 +90,18 @@ function initGame() {
 		down: false,
 		left: false,
 		right: false,
-		ring: false
+		ring: false,
 	});
 	const [getControlMode, changeControlMode] = makeState({ mode: 'pilot' });
 	const state = {
 		getControlMode,
 		getPressingState,
-		getSpeed
+		getSpeed,
 	};
 	const actions = {
 		changeControlMode,
 		changeSpeed,
-		changePressingState
+		changePressingState,
 	};
 	const game = hexi(canvasWidth, canvasHeight, () => setup(game, state, actions), filesToLoad, () =>
 		load(game)
