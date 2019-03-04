@@ -99,3 +99,7 @@ export function moveSprites(sprites, state) {
 	ring.visible = getControlMode() === 'pilot';
 	modePointer.y = getModePointerPositionForMode(getControlMode());
 }
+
+export function getSpriteRenderer(game) {
+	return sprites => game.move(sprites);
+}

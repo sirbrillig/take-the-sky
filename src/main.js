@@ -21,6 +21,7 @@ import {
 	setSpriteRotation,
 	getSpriteRotation,
 	moveSprites,
+	getSpriteRenderer,
 } from './sprites';
 
 const canvasWidth = 800;
@@ -34,7 +35,7 @@ const filesToLoad = [
 	'assets/pointer.png',
 ];
 
-function renderGame(game, sprites, state, actions) {
+function renderGame(game, sprites, state, actions, renderSprites) {
 	const { ship, ring } = sprites;
 	const { getPressingState, getSpeed } = state;
 	const { changeSpeed, changePressingState } = actions;
@@ -56,7 +57,7 @@ function renderGame(game, sprites, state, actions) {
 	setSpriteRotation(ring, getSpriteRotation(ship));
 
 	moveSprites(sprites, state);
-	game.move(Object.values(sprites));
+	renderSprites(Object.values(sprites));
 }
 
 function initSprites(game) {
@@ -91,8 +92,9 @@ function setup(game, state, actions) {
 		changePressingState,
 		getPressingState
 	);
+	const renderSprites = getSpriteRenderer(game);
 
-	game.state = () => renderGame(game, sprites, state, actions);
+	game.state = () => renderGame(game, sprites, state, actions, renderSprites);
 }
 
 function load(game) {
