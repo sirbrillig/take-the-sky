@@ -36,7 +36,7 @@ function renderGame(game, sprites, state, actions) {
 	const { getPressingState, getSpeed, getControlMode } = state;
 	const { changeSpeed, changePressingState } = actions;
 	const pressing = getPressingState();
-	changeSpeed(adjustSpeed(pressing, ship.rotation, getSpeed()));
+	changeSpeed(adjustSpeed(pressing.up, ship.rotation, getSpeed()));
 	ship.rotation = adjustRotation(pressing, ship.rotation);
 	if (pressing.ring) {
 		const currentCoordinates = getCurrentCoordinates(game);

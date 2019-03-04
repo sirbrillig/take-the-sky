@@ -3,9 +3,9 @@ const accelerationRate = 0.1;
 const maxSpeed = 3;
 const rotationRate = 0.1;
 
-export function adjustSpeed(pressing, rotation, speed) {
+export function adjustSpeed(isAccelerating, rotation, speed) {
 	let { x, y } = speed;
-	if (pressing.up) {
+	if (isAccelerating) {
 		y += accelerationRate * Math.sin(rotation);
 		x += accelerationRate * Math.cos(rotation);
 	}
