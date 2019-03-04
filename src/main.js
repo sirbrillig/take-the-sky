@@ -19,6 +19,8 @@ import {
 	createAndPlaceShip,
 	createAndPlaceNavigationRing,
 	createAndPlaceButton,
+	setSpriteRotation,
+	getSpriteRotation,
 } from './sprites';
 
 const canvasWidth = 800;
@@ -37,15 +39,21 @@ function renderGame(game, sprites, state, actions) {
 	const { getPressingState, getSpeed, getControlMode } = state;
 	const { changeSpeed, changePressingState } = actions;
 	const pressing = getPressingState();
-	changeSpeed(adjustSpeed(pressing.up, ship.rotation, getSpeed()));
-	ship.rotation = adjustRotation(getTurningDirectionFromPressingState(pressing), ship.rotation);
+	changeSpeed(adjustSpeed(pressing.up, getSpriteRotation(ship), getSpeed()));
+	setSpriteRotation(
+		ship,
+		adjustRotation(getTurningDirectionFromPressingState(pressing), getSpriteRotation(ship))
+	);
 	if (pressing.ring) {
 		const currentCoordinates = getCurrentCoordinates(game);
 		// TODO: this goes in reverse on the right side of the ring
-		ship.rotation += getNewRingRotation(ring, pressing.ring, currentCoordinates);
+		setSpriteRotation(
+			ship,
+			getSpriteRotation(ship) + getNewRingRotation(ring, pressing.ring, currentCoordinates)
+		);
 		changePressingState({ ring: currentCoordinates });
 	}
-	ring.rotation = ship.rotation;
+	setSpriteRotation(ring, getSpriteRotation(ship));
 	const speed = getSpeed();
 	system.vy = speed.y;
 	system.vx = speed.x;

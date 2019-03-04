@@ -79,3 +79,11 @@ export function getModePointerPositionForMode(modeName) {
 			return 10 * 5 + 16; // modeButton position + a bit to vertically center it
 	}
 }
+
+export function setSpriteRotation(sprite, rotation) {
+	sprite.rotation = rotation;
+}
+
+export function getSpriteRotation(sprite) {
+	return sprite.rotation;
+}
