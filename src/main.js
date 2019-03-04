@@ -7,6 +7,7 @@ import {
 	setUpButtonControls,
 	setUpKeyboardControls,
 	setUpNavigationRingControls,
+	getTurningDirectionFromPressingState,
 } from './controls';
 import {
 	getCurrentCoordinates,
@@ -37,7 +38,7 @@ function renderGame(game, sprites, state, actions) {
 	const { changeSpeed, changePressingState } = actions;
 	const pressing = getPressingState();
 	changeSpeed(adjustSpeed(pressing.up, ship.rotation, getSpeed()));
-	ship.rotation = adjustRotation(pressing, ship.rotation);
+	ship.rotation = adjustRotation(getTurningDirectionFromPressingState(pressing), ship.rotation);
 	if (pressing.ring) {
 		const currentCoordinates = getCurrentCoordinates(game);
 		// TODO: this goes in reverse on the right side of the ring

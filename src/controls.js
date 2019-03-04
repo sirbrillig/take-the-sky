@@ -46,3 +46,13 @@ export function setUpNavigationRingControls(game, ring, getControlMode, changePr
 	ring.press = () => pressPilotKey({ ring: getCurrentCoordinates(game) });
 	ring.release = () => pressPilotKey({ ring: false });
 }
+
+export function getTurningDirectionFromPressingState(pressing) {
+	if (pressing.left) {
+		return 'left';
+	}
+	if (pressing.right) {
+		return 'right';
+	}
+	return '';
+}

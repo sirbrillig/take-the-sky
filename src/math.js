@@ -16,14 +16,15 @@ export function adjustSpeed(isAccelerating, rotation, speed) {
 	return { x, y };
 }
 
-export function adjustRotation(pressing, rotation) {
-	if (pressing.left) {
-		rotation -= rotationRate;
+export function adjustRotation(direction, rotation) {
+	switch (direction) {
+		case 'left':
+			return rotation - rotationRate;
+		case 'right':
+			return rotation + rotationRate;
+		default:
+			return rotation;
 	}
-	if (pressing.right) {
-		rotation += rotationRate;
-	}
-	return rotation;
 }
 
 export function getNewRingRotation(ring, start, end) {
