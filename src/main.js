@@ -1,6 +1,6 @@
 /* @format */
-/* globals hexi */
 
+import { createGame, scaleGameToWindow, setBackgroundColor } from './hexi-wrapper';
 import { adjustSpeed, adjustRotation, getNewRingRotation } from './math';
 import makeState from './state';
 import {
@@ -73,7 +73,7 @@ function initSprites(game) {
 	};
 }
 
-function setup(game, state, actions) {
+function setUpGameObjects(game, state, actions) {
 	const sprites = initSprites(game);
 	const { changePressingState, changeControlMode } = actions;
 	const { getControlMode, getPressingState } = state;
@@ -97,10 +97,6 @@ function setup(game, state, actions) {
 	game.state = () => renderGame(game, sprites, state, actions, renderSprites);
 }
 
-function load(game) {
-	game.loadingBar();
-}
-
 function initGame() {
 	const [getSpeed, changeSpeed] = makeState({ x: 0, y: 0 });
 	const [getPressingState, changePressingState] = makeState({
@@ -121,11 +117,10 @@ function initGame() {
 		changeSpeed,
 		changePressingState,
 	};
-	const game = hexi(canvasWidth, canvasHeight, () => setup(game, state, actions), filesToLoad, () =>
-		load(game)
-	);
-	game.scaleToWindow();
-	game.backgroundColor = 0x000000;
+	const setupCallback = game => setUpGameObjects(game, state, actions);
+	const game = createGame({ canvasWidth, canvasHeight, filesToLoad, setupCallback });
+	scaleGameToWindow(game);
+	setBackgroundColor(game, 0x000000);
 	game.start();
 }
 
