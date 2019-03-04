@@ -87,3 +87,15 @@ export function setSpriteRotation(sprite, rotation) {
 export function getSpriteRotation(sprite) {
 	return sprite.rotation;
 }
+
+export function moveSprites(sprites, state) {
+	const { getSpeed, getControlMode } = state;
+	const { system, sky, ring, modePointer } = sprites;
+	const speed = getSpeed();
+	system.vy = speed.y;
+	system.vx = speed.x;
+	sky.tileX += speed.x;
+	sky.tileY += speed.y;
+	ring.visible = getControlMode().mode === 'pilot';
+	modePointer.y = getModePointerPositionForMode(getControlMode().mode);
+}

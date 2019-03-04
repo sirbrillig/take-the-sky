@@ -21,6 +21,7 @@ import {
 	createAndPlaceButton,
 	setSpriteRotation,
 	getSpriteRotation,
+	moveSprites,
 } from './sprites';
 
 const canvasWidth = 800;
@@ -35,8 +36,8 @@ const filesToLoad = [
 ];
 
 function renderGame(game, sprites, state, actions) {
-	const { ship, system, ring, sky, modePointer } = sprites;
-	const { getPressingState, getSpeed, getControlMode } = state;
+	const { ship, ring } = sprites;
+	const { getPressingState, getSpeed } = state;
 	const { changeSpeed, changePressingState } = actions;
 	const pressing = getPressingState();
 	changeSpeed(adjustSpeed(pressing.up, getSpriteRotation(ship), getSpeed()));
@@ -54,13 +55,8 @@ function renderGame(game, sprites, state, actions) {
 		changePressingState({ ring: currentCoordinates });
 	}
 	setSpriteRotation(ring, getSpriteRotation(ship));
-	const speed = getSpeed();
-	system.vy = speed.y;
-	system.vx = speed.x;
-	sky.tileX += speed.x;
-	sky.tileY += speed.y;
-	ring.visible = getControlMode().mode === 'pilot';
-	modePointer.y = getModePointerPositionForMode(getControlMode().mode);
+
+	moveSprites(sprites, state);
 	game.move(Object.values(sprites));
 }
 
