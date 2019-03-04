@@ -96,6 +96,6 @@ export function moveSprites(sprites, state) {
 	system.vx = speed.x;
 	sky.tileX += speed.x;
 	sky.tileY += speed.y;
-	ring.visible = getControlMode().mode === 'pilot';
-	modePointer.y = getModePointerPositionForMode(getControlMode().mode);
+	ring.visible = getControlMode() === 'pilot';
+	modePointer.y = getModePointerPositionForMode(getControlMode());
 }

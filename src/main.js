@@ -11,7 +11,6 @@ import {
 } from './controls';
 import {
 	getCurrentCoordinates,
-	getModePointerPositionForMode,
 	createAndPlaceModeButton,
 	createAndPlaceModePointer,
 	createAndPlaceBackground,
@@ -52,7 +51,7 @@ function renderGame(game, sprites, state, actions) {
 			ship,
 			getSpriteRotation(ship) + getNewRingRotation(ring, pressing.ring, currentCoordinates)
 		);
-		changePressingState({ ring: currentCoordinates });
+		changePressingState({ ...pressing, ring: currentCoordinates });
 	}
 	setSpriteRotation(ring, getSpriteRotation(ship));
 
@@ -76,10 +75,22 @@ function initSprites(game) {
 function setup(game, state, actions) {
 	const sprites = initSprites(game);
 	const { changePressingState, changeControlMode } = actions;
-	const { getControlMode } = state;
-	setUpButtonControls(game, sprites.button, getControlMode, changePressingState);
-	setUpKeyboardControls(game, getControlMode, changePressingState, changeControlMode);
-	setUpNavigationRingControls(game, sprites.ring, getControlMode, changePressingState);
+	const { getControlMode, getPressingState } = state;
+	setUpButtonControls(game, sprites.button, getControlMode, changePressingState, getPressingState);
+	setUpKeyboardControls(
+		game,
+		getControlMode,
+		changePressingState,
+		changeControlMode,
+		getPressingState
+	);
+	setUpNavigationRingControls(
+		game,
+		sprites.ring,
+		getControlMode,
+		changePressingState,
+		getPressingState
+	);
 
 	game.state = () => renderGame(game, sprites, state, actions);
 }
@@ -97,7 +108,7 @@ function initGame() {
 		right: false,
 		ring: false,
 	});
-	const [getControlMode, changeControlMode] = makeState({ mode: 'pilot' });
+	const [getControlMode, changeControlMode] = makeState('pilot');
 	const state = {
 		getControlMode,
 		getPressingState,

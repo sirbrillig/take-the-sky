@@ -13,6 +13,9 @@ export function adjustSpeed(isAccelerating, rotation, speed) {
 	x = x > maxSpeed ? maxSpeed : x;
 	y = y < -maxSpeed ? -maxSpeed : y;
 	x = x < -maxSpeed ? -maxSpeed : x;
+	if (x === speed.x && y === speed.y) {
+		return speed;
+	}
 	return { x, y };
 }
 
