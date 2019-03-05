@@ -14,10 +14,10 @@ function createAndPlacePlanet(game, planetData) {
 	return planetSprite;
 }
 
-export function createAndPlacePlanets(game) {
+export function createAndPlacePlanets(game, currentSystem) {
 	const system = game.group();
 
-	const planetSprites = getPlanetsInSystem().map(planetData =>
+	const planetSprites = getPlanetsInSystem(currentSystem).map(planetData =>
 		createAndPlacePlanet(game, planetData)
 	);
 	planetSprites.map(sprite => system.addChild(sprite));

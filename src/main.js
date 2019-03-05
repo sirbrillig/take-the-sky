@@ -63,7 +63,7 @@ function renderGame(game, sprites, state, actions, renderSprites) {
 function initSprites(game) {
 	return {
 		sky: createAndPlaceBackground(game),
-		system: createAndPlacePlanets(game),
+		system: createAndPlacePlanets(game, 'Algol'),
 		ship: createAndPlaceShip(game),
 		ring: createAndPlaceNavigationRing(game),
 		button: createAndPlaceButton(game),
@@ -99,6 +99,7 @@ function setUpGameObjects(game, state, actions) {
 }
 
 function initGame() {
+	const [getCurrentSystem, changeCurrentSystem] = makeState('Algol');
 	const [getSpeed, changeSpeed] = makeState({ x: 0, y: 0 });
 	const [getPressingState, changePressingState] = makeState({
 		up: false,
@@ -112,11 +113,13 @@ function initGame() {
 		getControlMode,
 		getPressingState,
 		getSpeed,
+		getCurrentSystem,
 	};
 	const actions = {
 		changeControlMode,
 		changeSpeed,
 		changePressingState,
+		changeCurrentSystem,
 	};
 	const setupCallback = game => setUpGameObjects(game, state, actions);
 	const game = createGame({ canvasWidth, canvasHeight, filesToLoad, setupCallback });
