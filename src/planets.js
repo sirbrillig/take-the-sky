@@ -13,6 +13,11 @@ export function makePlanet({ name, description, position, color, size }) {
 export function getAllSystems() {
 	return {
 		Algol: {
+			star: {
+				position: { x: 100, y: 300 },
+				size: 200,
+				color: 'yellow',
+			},
 			planets: [
 				{
 					name: 'Twist',
@@ -24,10 +29,32 @@ export function getAllSystems() {
 				},
 			],
 		},
+		Betan: {
+			star: {
+				position: { x: 100, y: 300 },
+				size: 200,
+				color: 'yellow',
+			},
+			planets: [
+				{
+					name: 'Beta',
+					description:
+						'Home to many researchers and medical professionals. Expensive tech. Folks are overworked, mostly.',
+					position: { x: 80, y: 200 },
+					color: 'red',
+					size: 40,
+				},
+			],
+		},
 	};
 }
 
 export function getPlanetsInSystem(systemName) {
 	const system = getAllSystems()[systemName];
 	return system ? system.planets : [];
+}
+
+export function getStarsInSystem(systemName) {
+	const system = getAllSystems()[systemName];
+	return system ? [system.star] : [];
 }

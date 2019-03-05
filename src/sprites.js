@@ -1,6 +1,6 @@
 /* @format */
 
-import { getPlanetsInSystem } from './planets';
+import { getPlanetsInSystem, getStarsInSystem } from './planets';
 
 export function createAndPlaceBackground(game) {
 	const sky = game.tilingSprite('assets/star-field.png', game.canvas.width, game.canvas.height);
@@ -21,6 +21,11 @@ export function createAndPlacePlanets(game, currentSystem) {
 		createAndPlacePlanet(game, planetData)
 	);
 	planetSprites.map(sprite => system.addChild(sprite));
+
+	const starSprites = getStarsInSystem(currentSystem).map(starData =>
+		createAndPlacePlanet(game, starData)
+	);
+	starSprites.map(sprite => system.addChild(sprite));
 
 	game.stage.addChild(system);
 	return system;
