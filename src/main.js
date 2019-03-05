@@ -1,7 +1,7 @@
 /* @format */
 
 import { createGame, scaleGameToWindow, setBackgroundColor } from './hexi-wrapper';
-import { adjustSpeed, adjustRotation, getNewRingRotation } from './math';
+import { adjustSpeed, adjustRotation, getNewRingRotation, isClockwise } from './math';
 import makeState from './state';
 import {
 	setUpButtonControls,
@@ -59,11 +59,14 @@ function renderGame(game, sprites, state, actions, renderSprites) {
 
 	if (getControlMode() === 'pilot' && pressing.ring) {
 		const currentCoordinates = getCurrentCoordinates(game);
-		// TODO: this goes in reverse on the right side of the ring
-		setSpriteRotation(
-			ship,
-			getSpriteRotation(ship) + getNewRingRotation(ring, pressing.ring, currentCoordinates)
-		);
+		const movingDirection = isClockwise(ring, pressing.ring, currentCoordinates)
+			? 'clockwise'
+			: 'counterclockwise';
+		const newRingRotation =
+			movingDirection === 'clockwise'
+				? getNewRingRotation(ring, pressing.ring, currentCoordinates)
+				: -getNewRingRotation(ring, pressing.ring, currentCoordinates);
+		setSpriteRotation(ship, getSpriteRotation(ship) + newRingRotation);
 		changePressingState({ ...pressing, ring: currentCoordinates });
 	}
 	setSpriteRotation(ring, getSpriteRotation(ship));

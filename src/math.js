@@ -55,3 +55,8 @@ export function getNewRingRotation(ring, start, end) {
 
 	return resultRadian;
 }
+
+export function isClockwise(center, start, end) {
+	// From: https://gamedev.stackexchange.com/questions/22133/how-to-detect-if-object-is-moving-in-clockwise-or-counterclockwise-direction
+	return (start.x - center.x) * (end.y - center.y) - (start.y - center.y) * (end.x - center.x) > 0;
+}
