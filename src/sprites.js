@@ -1,23 +1,26 @@
 /* @format */
 
+import { getPlanetsInSystem } from './planets';
+
 export function createAndPlaceBackground(game) {
 	const sky = game.tilingSprite('assets/star-field.png', game.canvas.width, game.canvas.height);
 	game.stage.addChild(sky);
 	return sky;
 }
 
+function createAndPlacePlanet(game, planetData) {
+	const planetSprite = game.circle(planetData.size, planetData.color);
+	planetSprite.setPosition(planetData.position.x, planetData.position.y);
+	return planetSprite;
+}
+
 export function createAndPlacePlanets(game) {
 	const system = game.group();
 
-	const planet = game.circle(50, 'blue');
-	planet.x = 20;
-	planet.y = 20;
-	system.addChild(planet);
-
-	const planet2 = game.circle(30, 'green');
-	planet2.x = 90;
-	planet2.y = 170;
-	system.addChild(planet2);
+	const planetSprites = getPlanetsInSystem().map(planetData =>
+		createAndPlacePlanet(game, planetData)
+	);
+	planetSprites.map(sprite => system.addChild(sprite));
 
 	game.stage.addChild(system);
 	return system;
