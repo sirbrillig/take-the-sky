@@ -3,20 +3,9 @@
 import { getCurrentCoordinates } from './sprites';
 import getNextMode from './control-modes';
 
-export function setUpButtonControls(
-	game,
-	button,
-	getControlMode,
-	changePressingState,
-	getPressingState
-) {
-	const pressPilotKey = data => {
-		if (getControlMode() === 'pilot') {
-			changePressingState({ ...getPressingState(), ...data });
-		}
-	};
-	button.press = () => pressPilotKey({ up: true });
-	button.release = () => pressPilotKey({ up: false });
+export function setUpButtonControls(game, button, changePressingState, getPressingState) {
+	button.press = () => changePressingState({ ...getPressingState(), up: true });
+	button.release = () => changePressingState({ ...getPressingState(), up: false });
 }
 
 export function setUpKeyboardControls(
@@ -30,17 +19,12 @@ export function setUpKeyboardControls(
 	const leftArrow = game.keyboard(37);
 	const rightArrow = game.keyboard(39);
 	const modeKey = game.keyboard(77); // 'm'
-	const pressPilotKey = data => {
-		if (getControlMode() === 'pilot') {
-			changePressingState({ ...getPressingState(), ...data });
-		}
-	};
-	upArrow.press = () => pressPilotKey({ up: true });
-	upArrow.release = () => pressPilotKey({ up: false });
-	leftArrow.press = () => pressPilotKey({ left: true });
-	leftArrow.release = () => pressPilotKey({ left: false });
-	rightArrow.press = () => pressPilotKey({ right: true });
-	rightArrow.release = () => pressPilotKey({ right: false });
+	upArrow.press = () => changePressingState({ ...getPressingState(), up: true });
+	upArrow.release = () => changePressingState({ ...getPressingState(), up: false });
+	leftArrow.press = () => changePressingState({ ...getPressingState(), left: true });
+	leftArrow.release = () => changePressingState({ ...getPressingState(), left: false });
+	rightArrow.press = () => changePressingState({ ...getPressingState(), right: true });
+	rightArrow.release = () => changePressingState({ ...getPressingState(), right: false });
 	modeKey.press = () => changeControlMode(getNextMode(getControlMode()));
 }
 
@@ -52,13 +36,9 @@ export function setUpNavigationRingControls(
 	getPressingState
 ) {
 	ring.interact = true;
-	const pressPilotKey = data => {
-		if (getControlMode() === 'pilot') {
-			changePressingState({ ...getPressingState(), ...data });
-		}
-	};
-	ring.press = () => pressPilotKey({ ring: getCurrentCoordinates(game) });
-	ring.release = () => pressPilotKey({ ring: false });
+	ring.press = () =>
+		changePressingState({ ...getPressingState(), ring: getCurrentCoordinates(game) });
+	ring.release = () => changePressingState({ ...getPressingState(), ring: false });
 }
 
 export function getTurningDirectionFromPressingState(pressing) {

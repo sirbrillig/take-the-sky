@@ -37,15 +37,27 @@ const filesToLoad = [
 
 function renderGame(game, sprites, state, actions, renderSprites) {
 	const { ship, ring } = sprites;
-	const { getPressingState, getSpeed } = state;
+	const { getPressingState, getSpeed, getControlMode } = state;
 	const { changeSpeed, changePressingState } = actions;
 	const pressing = getPressingState();
-	changeSpeed(adjustSpeed(pressing.up, getSpriteRotation(ship), getSpeed()));
-	setSpriteRotation(
-		ship,
-		adjustRotation(getTurningDirectionFromPressingState(pressing), getSpriteRotation(ship))
-	);
-	if (pressing.ring) {
+
+	if (pressing.up) {
+		switch (getControlMode()) {
+			case 'pilot':
+				changeSpeed(adjustSpeed(getSpriteRotation(ship), getSpeed()));
+				break;
+			default:
+			// noop
+		}
+	}
+	if (getControlMode() === 'pilot' && (pressing.left || pressing.right)) {
+		setSpriteRotation(
+			ship,
+			adjustRotation(getTurningDirectionFromPressingState(pressing), getSpriteRotation(ship))
+		);
+	}
+
+	if (getControlMode() === 'pilot' && pressing.ring) {
 		const currentCoordinates = getCurrentCoordinates(game);
 		// TODO: this goes in reverse on the right side of the ring
 		setSpriteRotation(
@@ -78,7 +90,7 @@ function setUpGameObjects(game, state, actions) {
 	const sprites = initSprites(game);
 	const { changePressingState, changeControlMode } = actions;
 	const { getControlMode, getPressingState } = state;
-	setUpButtonControls(game, sprites.button, getControlMode, changePressingState, getPressingState);
+	setUpButtonControls(game, sprites.button, changePressingState, getPressingState);
 	setUpKeyboardControls(
 		game,
 		getControlMode,

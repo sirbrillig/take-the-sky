@@ -3,12 +3,10 @@ const accelerationRate = 0.1;
 const maxSpeed = 3;
 const rotationRate = 0.1;
 
-export function adjustSpeed(isAccelerating, rotation, speed) {
+export function adjustSpeed(rotation, speed) {
 	let { x, y } = speed;
-	if (isAccelerating) {
-		y += accelerationRate * Math.sin(rotation);
-		x += accelerationRate * Math.cos(rotation);
-	}
+	y += accelerationRate * Math.sin(rotation);
+	x += accelerationRate * Math.cos(rotation);
 	y = y > maxSpeed ? maxSpeed : y;
 	x = x > maxSpeed ? maxSpeed : x;
 	y = y < -maxSpeed ? -maxSpeed : y;
