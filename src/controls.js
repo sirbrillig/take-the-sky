@@ -1,6 +1,7 @@
 /* @format */
 
 import { getCurrentCoordinates } from './sprites';
+import getNextMode from './control-modes';
 
 export function setUpButtonControls(
 	game,
@@ -40,7 +41,7 @@ export function setUpKeyboardControls(
 	leftArrow.release = () => pressPilotKey({ left: false });
 	rightArrow.press = () => pressPilotKey({ right: true });
 	rightArrow.release = () => pressPilotKey({ right: false });
-	modeKey.press = () => changeControlMode('land');
+	modeKey.press = () => changeControlMode(getNextMode(getControlMode()));
 }
 
 export function setUpNavigationRingControls(

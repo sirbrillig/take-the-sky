@@ -69,6 +69,7 @@ function initSprites(game) {
 		button: createAndPlaceButton(game),
 		pilotModeButton: createAndPlaceModeButton(game, 'pilot', 1),
 		landModeButton: createAndPlaceModeButton(game, 'land', 2),
+		jumpModeButton: createAndPlaceModeButton(game, 'jump', 3),
 		modePointer: createAndPlaceModePointer(game),
 	};
 }

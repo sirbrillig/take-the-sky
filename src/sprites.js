@@ -73,10 +73,14 @@ export function getCurrentCoordinates(game) {
 
 export function getModePointerPositionForMode(modeName) {
 	switch (modeName) {
+		case 'jump':
+			return 10 * 3 * 5 + 16;
 		case 'land':
 			return 10 * 2 * 5 + 16;
-		default:
+		case 'pilot':
 			return 10 * 5 + 16; // modeButton position + a bit to vertically center it
+		default:
+			throw new Error(`No mode named ${modeName}`);
 	}
 }
 
