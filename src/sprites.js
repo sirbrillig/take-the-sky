@@ -14,11 +14,6 @@ export function getSpriteRotation(sprite) {
 	return sprite.rotation;
 }
 
-export function setSpriteAcceleration(sprite, { x, y }) {
-	sprite.vy = y;
-	sprite.vx = x;
-}
-
 export function setTilePosition(sprite, { x, y }) {
 	sprite.tileX += x;
 	sprite.tileY += y;
@@ -118,7 +113,7 @@ export function moveSprites(sprites, state) {
 	const { getSpeed, getControlMode } = state;
 	const { system, sky, ring, modePointer } = sprites;
 	const speed = getSpeed();
-	setSpriteAcceleration(system, speed);
+	setSpritePosition(system, { x: system.x + speed.x, y: system.y + speed.y });
 	setTilePosition(sky, speed);
 	ring.visible = getControlMode() === 'pilot';
 	modePointer.y = getModePointerPositionForMode(getControlMode());
