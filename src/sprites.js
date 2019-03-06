@@ -15,8 +15,8 @@ export function getSpriteRotation(sprite) {
 }
 
 export function setTilePosition(sprite, { x, y }) {
-	sprite.tileX += x;
-	sprite.tileY += y;
+	sprite.tileX = x;
+	sprite.tileY = y;
 }
 
 export function createAndPlaceBackground(game) {
@@ -110,12 +110,11 @@ export function getModePointerPositionForMode(modeName) {
 }
 
 export function moveSprites(sprites, state) {
-	const { getSpeed, getControlMode, getSystemPosition } = state;
+	const { getControlMode, getSystemPosition } = state;
 	const { system, sky, ring, modePointer } = sprites;
-	const speed = getSpeed();
 	const systemPosition = getSystemPosition();
 	setSpritePosition(system, { x: systemPosition.x, y: systemPosition.y });
-	setTilePosition(sky, speed);
+	setTilePosition(sky, { x: systemPosition.x, y: systemPosition.y });
 	ring.visible = getControlMode() === 'pilot';
 	modePointer.y = getModePointerPositionForMode(getControlMode());
 }
