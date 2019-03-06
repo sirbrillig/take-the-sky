@@ -18,6 +18,11 @@ export function getAllSystems() {
 				size: 200,
 				color: 'yellow',
 			},
+			gates: [
+				{
+					position: { x: 600, y: 600 },
+				},
+			],
 			planets: [
 				{
 					name: 'Twist',
@@ -57,4 +62,9 @@ export function getPlanetsInSystem(systemName) {
 export function getStarsInSystem(systemName) {
 	const system = getAllSystems()[systemName];
 	return system ? [system.star] : [];
+}
+
+export function getGatesInSystem(systemName) {
+	const system = getAllSystems()[systemName];
+	return system ? system.gates : [];
 }

@@ -28,6 +28,7 @@ import {
 const canvasWidth = 800;
 const canvasHeight = 600;
 const filesToLoad = [
+	'assets/gate.png',
 	'assets/ship.png',
 	'assets/star-field.png',
 	'assets/nav-ring.png',

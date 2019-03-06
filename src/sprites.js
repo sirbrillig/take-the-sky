@@ -1,6 +1,6 @@
 /* @format */
 
-import { getPlanetsInSystem, getStarsInSystem } from './planets';
+import { getPlanetsInSystem, getStarsInSystem, getGatesInSystem } from './planets';
 
 export function setSpritePosition(sprite, { x, y }) {
 	sprite.setPosition(x, y);
@@ -31,6 +31,12 @@ function createAndPlacePlanet(game, planetData) {
 	return planetSprite;
 }
 
+function createAndPlaceGate(game, gateData) {
+	const gate = game.sprite('assets/gate.png');
+	setSpritePosition(gate, { x: gateData.position.x, y: gateData.position.y });
+	return gate;
+}
+
 export function createAndPlacePlanets(game, currentSystem) {
 	const system = game.group();
 
@@ -43,6 +49,11 @@ export function createAndPlacePlanets(game, currentSystem) {
 		createAndPlacePlanet(game, starData)
 	);
 	starSprites.map(sprite => system.addChild(sprite));
+
+	const gateSprites = getGatesInSystem(currentSystem).map(gateData =>
+		createAndPlaceGate(game, gateData)
+	);
+	gateSprites.map(sprite => system.addChild(sprite));
 
 	game.stage.addChild(system);
 	return system;
