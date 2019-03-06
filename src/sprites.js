@@ -129,7 +129,9 @@ export function getSpriteMover(game) {
 
 		// render planets
 		if (getCurrentSystem() !== lastRenderedSystem) {
-			// TODO: remove old planets
+			if (sprites.system) {
+				game.remove(sprites.system);
+			}
 			sprites.system = createAndPlacePlanets(game, getCurrentSystem());
 		}
 		lastRenderedSystem = getCurrentSystem();
