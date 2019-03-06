@@ -36,6 +36,14 @@ const filesToLoad = [
 	'assets/pointer.png',
 ];
 
+function updateStateFromPressingState(state, actions) {
+	const { getSpeed, getSystemPosition } = state;
+	const { changeSystemPosition } = actions;
+	const speed = getSpeed();
+	const system = getSystemPosition();
+	changeSystemPosition({ x: system.x + speed.x, y: system.y + speed.y });
+}
+
 function renderGame(game, sprites, state, actions, renderSprites) {
 	const { ship, ring } = sprites;
 	const { getPressingState, getSpeed, getControlMode } = state;
@@ -67,6 +75,8 @@ function renderGame(game, sprites, state, actions, renderSprites) {
 		changePressingState({ ...pressing, ring: currentCoordinates });
 	}
 	setSpriteRotation(ring, getSpriteRotation(ship));
+
+	updateStateFromPressingState(state, actions);
 
 	moveSprites(sprites, state);
 	renderSprites(Object.values(sprites));
@@ -120,6 +130,9 @@ function initGame() {
 	});
 	const getCurrentSystem = () => getState().currentSystem;
 	const changeCurrentSystem = system => handleAction({ type: 'CHANGE_SYSTEM', payload: system });
+	const getSystemPosition = () => getState().position;
+	const changeSystemPosition = ({ x, y }) =>
+		handleAction({ type: 'CHANGE_SYSTEM_POSITION', payload: { x, y } });
 	const [getSpeed, changeSpeed] = makeState({ x: 0, y: 0 });
 	const [getPressingState, changePressingState] = makeState({
 		up: false,
@@ -134,12 +147,14 @@ function initGame() {
 		getPressingState,
 		getSpeed,
 		getCurrentSystem,
+		getSystemPosition,
 	};
 	const actions = {
 		changeControlMode,
 		changeSpeed,
 		changePressingState,
 		changeCurrentSystem,
+		changeSystemPosition,
 	};
 	const setupCallback = game => setUpGameObjects(game, state, actions);
 	const game = createGame({ canvasWidth, canvasHeight, filesToLoad, setupCallback });

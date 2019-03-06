@@ -110,10 +110,11 @@ export function getModePointerPositionForMode(modeName) {
 }
 
 export function moveSprites(sprites, state) {
-	const { getSpeed, getControlMode } = state;
+	const { getSpeed, getControlMode, getSystemPosition } = state;
 	const { system, sky, ring, modePointer } = sprites;
 	const speed = getSpeed();
-	setSpritePosition(system, { x: system.x + speed.x, y: system.y + speed.y });
+	const systemPosition = getSystemPosition();
+	setSpritePosition(system, { x: systemPosition.x, y: systemPosition.y });
 	setTilePosition(sky, speed);
 	ring.visible = getControlMode() === 'pilot';
 	modePointer.y = getModePointerPositionForMode(getControlMode());
