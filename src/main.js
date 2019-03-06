@@ -15,13 +15,12 @@ import {
 	createAndPlaceModeButton,
 	createAndPlaceModePointer,
 	createAndPlaceBackground,
-	createAndPlacePlanets,
 	createAndPlaceShip,
 	createAndPlaceNavigationRing,
 	createAndPlaceButton,
 	setSpriteRotation,
 	getSpriteRotation,
-	moveSprites,
+	getSpriteMover,
 	getSpriteRenderer,
 } from './sprites';
 
@@ -45,16 +44,19 @@ function updateStateFromPressingState(state, actions) {
 	changeSystemPosition({ x: system.x + speed.x, y: system.y + speed.y });
 }
 
-function renderGame(game, sprites, state, actions, renderSprites) {
+function renderGame(game, sprites, state, actions, moveSprites, renderSprites) {
 	const { ship, ring } = sprites;
 	const { getPressingState, getSpeed, getControlMode } = state;
-	const { changeSpeed, changePressingState } = actions;
+	const { changeSpeed, changePressingState, changeCurrentSystem } = actions;
 	const pressing = getPressingState();
 
 	if (pressing.up) {
 		switch (getControlMode()) {
 			case 'pilot':
 				changeSpeed(adjustSpeed(getSpriteRotation(ship), getSpeed()));
+				break;
+			case 'jump':
+				changeCurrentSystem('Betan');
 				break;
 			default:
 			// noop
@@ -86,7 +88,6 @@ function renderGame(game, sprites, state, actions, renderSprites) {
 function initSprites(game) {
 	return {
 		sky: createAndPlaceBackground(game),
-		system: createAndPlacePlanets(game, 'Algol'),
 		ship: createAndPlaceShip(game),
 		ring: createAndPlaceNavigationRing(game),
 		button: createAndPlaceButton(game),
@@ -117,8 +118,9 @@ function setUpGameObjects(game, state, actions) {
 		getPressingState
 	);
 	const renderSprites = getSpriteRenderer(game);
+	const moveSprites = getSpriteMover(game);
 
-	game.state = () => renderGame(game, sprites, state, actions, renderSprites);
+	game.state = () => renderGame(game, sprites, state, actions, moveSprites, renderSprites);
 }
 
 function initGame() {

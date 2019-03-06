@@ -120,14 +120,30 @@ export function getModePointerPositionForMode(modeName) {
 	}
 }
 
-export function moveSprites(sprites, state) {
-	const { getControlMode, getSystemPosition } = state;
-	const { system, sky, ring, modePointer } = sprites;
-	const systemPosition = getSystemPosition();
-	setSpritePosition(system, { x: systemPosition.x, y: systemPosition.y });
-	setTilePosition(sky, { x: systemPosition.x, y: systemPosition.y });
-	ring.visible = getControlMode() === 'pilot';
-	modePointer.y = getModePointerPositionForMode(getControlMode());
+export function getSpriteMover(game) {
+	let lastRenderedSystem = '';
+	return (sprites, state) => {
+		const { getControlMode, getSystemPosition, getCurrentSystem } = state;
+		const { sky, ring, modePointer } = sprites;
+		const systemPosition = getSystemPosition();
+
+		// render planets
+		if (getCurrentSystem() !== lastRenderedSystem) {
+			// TODO: remove old planets
+			sprites.system = createAndPlacePlanets(game, getCurrentSystem());
+		}
+		lastRenderedSystem = getCurrentSystem();
+		setSpritePosition(sprites.system, { x: systemPosition.x, y: systemPosition.y });
+
+		// render background
+		setTilePosition(sky, { x: systemPosition.x, y: systemPosition.y });
+
+		// render ring
+		ring.visible = getControlMode() === 'pilot';
+
+		// render mode pointer
+		modePointer.y = getModePointerPositionForMode(getControlMode());
+	};
 }
 
 export function getSpriteRenderer(game) {
