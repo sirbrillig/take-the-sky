@@ -56,15 +56,15 @@ export function getAllSystems() {
 
 export function getPlanetsInSystem(systemName) {
 	const system = getAllSystems()[systemName];
-	return system ? system.planets : [];
+	return system && system.planets ? system.planets : [];
 }
 
 export function getStarsInSystem(systemName) {
 	const system = getAllSystems()[systemName];
-	return system ? [system.star] : [];
+	return system && system.star ? [system.star] : [];
 }
 
 export function getGatesInSystem(systemName) {
 	const system = getAllSystems()[systemName];
-	return system ? system.gates : [];
+	return system && system.gates ? system.gates : [];
 }
