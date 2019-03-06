@@ -2,6 +2,28 @@
 
 import { getPlanetsInSystem, getStarsInSystem } from './planets';
 
+export function setSpritePosition(sprite, { x, y }) {
+	sprite.setPosition(x, y);
+}
+
+export function setSpriteRotation(sprite, rotation) {
+	sprite.rotation = rotation;
+}
+
+export function getSpriteRotation(sprite) {
+	return sprite.rotation;
+}
+
+export function setSpriteAcceleration(sprite, { x, y }) {
+	sprite.vy = y;
+	sprite.vx = x;
+}
+
+export function setTilePosition(sprite, { x, y }) {
+	sprite.tileX += x;
+	sprite.tileY += y;
+}
+
 export function createAndPlaceBackground(game) {
 	const sky = game.tilingSprite('assets/star-field.png', game.canvas.width, game.canvas.height);
 	game.stage.addChild(sky);
@@ -10,7 +32,7 @@ export function createAndPlaceBackground(game) {
 
 function createAndPlacePlanet(game, planetData) {
 	const planetSprite = game.circle(planetData.size, planetData.color);
-	planetSprite.setPosition(planetData.position.x, planetData.position.y);
+	setSpritePosition(planetSprite, { x: planetData.position.x, y: planetData.position.y });
 	return planetSprite;
 }
 
@@ -90,24 +112,6 @@ export function getModePointerPositionForMode(modeName) {
 		default:
 			throw new Error(`No mode named ${modeName}`);
 	}
-}
-
-export function setSpriteRotation(sprite, rotation) {
-	sprite.rotation = rotation;
-}
-
-export function getSpriteRotation(sprite) {
-	return sprite.rotation;
-}
-
-export function setSpriteAcceleration(sprite, { x, y }) {
-	sprite.vy = y;
-	sprite.vx = x;
-}
-
-export function setTilePosition(sprite, { x, y }) {
-	sprite.tileX += x;
-	sprite.tileY += y;
 }
 
 export function moveSprites(sprites, state) {
