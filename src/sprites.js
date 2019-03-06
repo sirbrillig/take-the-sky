@@ -145,7 +145,3 @@ export function getSpriteMover(game) {
 		modePointer.y = getModePointerPositionForMode(getControlMode());
 	};
 }
-
-export function getSpriteRenderer(game) {
-	return sprites => game.move(sprites);
-}

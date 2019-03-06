@@ -21,7 +21,6 @@ import {
 	setSpriteRotation,
 	getSpriteRotation,
 	getSpriteMover,
-	getSpriteRenderer,
 } from './sprites';
 
 const canvasWidth = 800;
@@ -44,7 +43,7 @@ function updateStateFromPressingState(state, actions) {
 	changeSystemPosition({ x: system.x + speed.x, y: system.y + speed.y });
 }
 
-function renderGame(game, sprites, state, actions, moveSprites, renderSprites) {
+function renderGame(game, sprites, state, actions, moveSprites) {
 	const { ship, ring } = sprites;
 	const { getPressingState, getSpeed, getControlMode } = state;
 	const { changeSpeed, changePressingState, changeCurrentSystem } = actions;
@@ -82,7 +81,6 @@ function renderGame(game, sprites, state, actions, moveSprites, renderSprites) {
 	updateStateFromPressingState(state, actions);
 
 	moveSprites(sprites, state);
-	renderSprites(Object.values(sprites));
 }
 
 function initSprites(game) {
@@ -117,10 +115,9 @@ function setUpGameObjects(game, state, actions) {
 		changePressingState,
 		getPressingState
 	);
-	const renderSprites = getSpriteRenderer(game);
 	const moveSprites = getSpriteMover(game);
 
-	game.state = () => renderGame(game, sprites, state, actions, moveSprites, renderSprites);
+	game.state = () => renderGame(game, sprites, state, actions, moveSprites);
 }
 
 function initGame() {
