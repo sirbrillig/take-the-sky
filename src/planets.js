@@ -36,9 +36,9 @@ export function getAllSystems() {
 		},
 		Betan: {
 			star: {
-				position: { x: 100, y: 300 },
-				size: 200,
-				color: 'yellow',
+				position: { x: 100, y: 400 },
+				size: 150,
+				color: 'orange',
 			},
 			planets: [
 				{
@@ -46,7 +46,7 @@ export function getAllSystems() {
 					description:
 						'Home to many researchers and medical professionals. Expensive tech. Folks are overworked, mostly.',
 					position: { x: 80, y: 200 },
-					color: 'red',
+					color: 'blue',
 					size: 40,
 				},
 			],
