@@ -1,14 +1,21 @@
 /* @format */
 
-export default function makeState(initialState) {
+export function makeState(initialState) {
 	let state = initialState;
 	const changeState = newState => {
 		if (state !== newState) {
-			// console.log(state, '=>', newState);
 			state = newState;
 		}
 	};
 	const getCurrentState = () => state;
-	// console.log(state);
 	return [getCurrentState, changeState];
+}
+
+export function makeReducer(reducerFunction, initialState) {
+	let state = initialState;
+	const handleAction = ({ type, payload }) => {
+		state = reducerFunction(state, { type, payload });
+	};
+	const getState = () => state;
+	return [getState, handleAction];
 }

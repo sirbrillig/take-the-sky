@@ -2,7 +2,8 @@
 
 import { createGame, scaleGameToWindow, setBackgroundColor } from './hexi-wrapper';
 import { adjustSpeed, adjustRotation, getNewRingRotation, isClockwise } from './math';
-import makeState from './state';
+import { makeReducer, makeState } from './state';
+import reducer from './state-reducer';
 import {
 	setUpButtonControls,
 	setUpKeyboardControls,
@@ -114,7 +115,15 @@ function setUpGameObjects(game, state, actions) {
 }
 
 function initGame() {
-	const [getCurrentSystem, changeCurrentSystem] = makeState('Algol');
+	const [getState, handleAction] = makeReducer(reducer, {
+		currentSystem: 'Algol',
+		position: {
+			x: 100,
+			y: 100,
+		},
+	});
+	const getCurrentSystem = () => getState().currentSystem;
+	const changeCurrentSystem = system => handleAction({ type: 'CHANGE_SYSTEM', payload: system });
 	const [getSpeed, changeSpeed] = makeState({ x: 0, y: 0 });
 	const [getPressingState, changePressingState] = makeState({
 		up: false,
