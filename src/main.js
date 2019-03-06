@@ -60,13 +60,9 @@ function renderGame(game, sprites, state, actions, renderSprites) {
 
 	if (getControlMode() === 'pilot' && pressing.ring) {
 		const currentCoordinates = getCurrentCoordinates(game);
-		const movingDirection = isClockwise(ring, pressing.ring, currentCoordinates)
-			? 'clockwise'
-			: 'counterclockwise';
-		const newRingRotation =
-			movingDirection === 'clockwise'
-				? getNewRingRotation(ring, pressing.ring, currentCoordinates)
-				: -getNewRingRotation(ring, pressing.ring, currentCoordinates);
+		const newRingRotation = isClockwise(ring, pressing.ring, currentCoordinates)
+			? getNewRingRotation(ring, pressing.ring, currentCoordinates)
+			: -getNewRingRotation(ring, pressing.ring, currentCoordinates);
 		setSpriteRotation(ship, getSpriteRotation(ship) + newRingRotation);
 		changePressingState({ ...pressing, ring: currentCoordinates });
 	}
