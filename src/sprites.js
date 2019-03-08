@@ -38,9 +38,13 @@ function createAndPlaceGate(game, gateData) {
 }
 
 export function createAndPlaceOtherShips(game) {
+	const shipLayer = game.group();
 	const ship = game.sprite('assets/ship-2.png');
-	setSpritePosition(ship, { x: 200, y: 200 });
-	return ship;
+	setSpritePosition(ship, { x: 600, y: 20 });
+	ship.vx = -2;
+	shipLayer.addChild(ship);
+	game.stage.addChild(shipLayer);
+	return shipLayer;
 }
 
 export function createAndPlacePlanets(game, currentSystem) {
@@ -147,6 +151,9 @@ export function getSpriteMover(game) {
 		if (!sprites.ships) {
 			sprites.ships = createAndPlaceOtherShips(game);
 		}
+		sprites.ships.children.forEach(ship => {
+			setSpritePosition(ship, { x: ship.x + ship.vx, y: ship.y + ship.vy });
+		});
 		setSpritePosition(sprites.ships, { x: systemPosition.x, y: systemPosition.y });
 
 		// render background
