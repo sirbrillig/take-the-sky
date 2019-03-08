@@ -32,6 +32,13 @@ export function getAllSystems() {
 					color: 'red',
 					size: 40,
 				},
+				{
+					name: 'Bale',
+					description: 'A farming community',
+					position: { x: 450, y: 300 },
+					color: 'green',
+					size: 80,
+				},
 			],
 		},
 		Betan: {

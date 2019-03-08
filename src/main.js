@@ -28,6 +28,7 @@ const canvasHeight = 600;
 const filesToLoad = [
 	'assets/gate.png',
 	'assets/ship.png',
+	'assets/ship-2.png',
 	'assets/star-field.png',
 	'assets/nav-ring.png',
 	'assets/button-up.png',
