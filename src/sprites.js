@@ -1,4 +1,5 @@
 /* @format */
+/* globals GameUtilities */
 
 import { getPlanetsInSystem, getStarsInSystem, getGatesInSystem } from './planets';
 
@@ -41,9 +42,9 @@ export function createAndPlaceOtherShips(game) {
 	const shipLayer = game.group();
 	const ship = game.sprite('assets/ship-2.png');
 	setSpritePosition(ship, { x: 600, y: 20 });
-	ship.vx = -2;
 	shipLayer.addChild(ship);
 	game.stage.addChild(shipLayer);
+	setSpritePosition(shipLayer, { x: 0, y: 0 });
 	return shipLayer;
 }
 
@@ -133,8 +134,8 @@ export function getModePointerPositionForMode(modeName) {
 export function getSpriteMover(game) {
 	let lastRenderedSystem = '';
 	return (sprites, state) => {
-		const { getControlMode, getSystemPosition, getCurrentSystem } = state;
-		const { sky, ring, modePointer } = sprites;
+		const { getControlMode, getSpeed, getSystemPosition, getCurrentSystem } = state;
+		const { ship, sky, ring, modePointer } = sprites;
 		const systemPosition = getSystemPosition();
 
 		// render planets
@@ -151,10 +152,15 @@ export function getSpriteMover(game) {
 		if (!sprites.ships) {
 			sprites.ships = createAndPlaceOtherShips(game);
 		}
-		sprites.ships.children.forEach(ship => {
-			setSpritePosition(ship, { x: ship.x + ship.vx, y: ship.y + ship.vy });
+		const utilites = new GameUtilities();
+		sprites.ships.children.forEach(other => {
+			utilites.followConstant(other, ship, 2);
+			other.rotation = utilites.angle(ship, other);
+			setSpritePosition(other, {
+				x: other.x + other.vx + getSpeed().x,
+				y: other.y + other.vy + getSpeed().y,
+			});
 		});
-		setSpritePosition(sprites.ships, { x: systemPosition.x, y: systemPosition.y });
 
 		// render background
 		setTilePosition(sky, { x: systemPosition.x, y: systemPosition.y });
