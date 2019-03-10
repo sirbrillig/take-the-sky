@@ -2,6 +2,7 @@
 /* globals GameUtilities */
 
 import { getPlanetsInSystem, getStarsInSystem, getGatesInSystem } from './planets';
+import { adjustSpeedForOtherShip, adjustPositionToFollow } from './math';
 
 export function setSpritePosition(sprite, { x, y }) {
 	sprite.setPosition(x, y);
@@ -42,6 +43,8 @@ export function createAndPlaceOtherShips(game) {
 	const shipLayer = game.group();
 	const ship = game.sprite('assets/ship-2.png');
 	setSpritePosition(ship, { x: 600, y: 20 });
+	ship.setPivot(0.5, 0.5);
+	ship.speed = { x: 1, y: 1 };
 	shipLayer.addChild(ship);
 	game.stage.addChild(shipLayer);
 	setSpritePosition(shipLayer, { x: 0, y: 0 });
@@ -154,11 +157,15 @@ export function getSpriteMover(game) {
 		}
 		const utilites = new GameUtilities();
 		sprites.ships.children.forEach(other => {
-			utilites.followConstant(other, ship, 2);
 			other.rotation = utilites.angle(ship, other);
+			// adjust the ship's speed to accelerate
+			other.speed = adjustSpeedForOtherShip(other.rotation, other.speed);
+			// adjust the position to follow the player
+			adjustPositionToFollow(other, ship, other.speed);
+			// adjust the position for the system position
 			setSpritePosition(other, {
-				x: other.x + other.vx + getSpeed().x,
-				y: other.y + other.vy + getSpeed().y,
+				x: other.x + getSpeed().x,
+				y: other.y + getSpeed().y,
 			});
 		});
 

@@ -1,23 +1,70 @@
 /* @format */
-const accelerationRate = 0.1;
-const maxSpeed = 3;
-const rotationRate = 0.1;
+
+function adjustNumberBetween(num, min, max) {
+	num = num > max ? max : num;
+	num = num < min ? min : num;
+	return num;
+}
+
+function areVectorsSame(first, second) {
+	return first.x === second.x && first.y === second.y;
+}
 
 export function adjustSpeed(rotation, speed) {
+	const accelerationRate = 0.04;
+	const maxSpeed = 3;
 	let { x, y } = speed;
 	y += accelerationRate * Math.sin(rotation);
 	x += accelerationRate * Math.cos(rotation);
-	y = y > maxSpeed ? maxSpeed : y;
-	x = x > maxSpeed ? maxSpeed : x;
-	y = y < -maxSpeed ? -maxSpeed : y;
-	x = x < -maxSpeed ? -maxSpeed : x;
-	if (x === speed.x && y === speed.y) {
-		return speed;
+	y = adjustNumberBetween(y, -maxSpeed, maxSpeed);
+	x = adjustNumberBetween(x, -maxSpeed, maxSpeed);
+	return areVectorsSame({ x, y }, speed) ? speed : { x, y };
+}
+
+export function adjustSpeedForOtherShip(rotation, speed) {
+	const accelerationRate = 0.04;
+	const maxSpeed = 4;
+	let { x, y } = speed;
+	y += accelerationRate * Math.cos(rotation);
+	x += accelerationRate * Math.sin(rotation);
+	y = adjustNumberBetween(y, -maxSpeed, maxSpeed);
+	x = adjustNumberBetween(x, -maxSpeed, maxSpeed);
+	return areVectorsSame({ x, y }, speed) ? speed : { x, y };
+}
+
+// From: https://github.com/kittykatattack/gameUtilities/blob/4b496be24b656c36b8932d9ee44146cd92e612e9/src/gameUtilities.js#L126
+export function getCenter(o, dimension, axis) {
+	if (o.anchor !== undefined) {
+		if (o.anchor[axis] !== 0) {
+			return 0;
+		}
+		return dimension / 2;
 	}
-	return { x, y };
+	return dimension;
+}
+
+// From: https://github.com/kittykatattack/gameUtilities/blob/4b496be24b656c36b8932d9ee44146cd92e612e9/src/gameUtilities.js#L74
+// Adapted for x and y speeds.
+export function adjustPositionToFollow(follower, leader, speed) {
+	// Figure out the distance between the sprites
+	const vx =
+		leader.x +
+		getCenter(leader, leader.width, 'x') -
+		(follower.x + getCenter(follower, follower.width, 'x'));
+	const vy =
+		leader.y +
+		getCenter(leader, leader.height, 'y') -
+		(follower.y + getCenter(follower, follower.height, 'y'));
+	const distance = Math.sqrt(vx * vx + vy * vy);
+
+	if (distance >= speed.x + speed.y) {
+		follower.x += (vx / distance) * Math.abs(speed.x);
+		follower.y += (vy / distance) * Math.abs(speed.y);
+	}
 }
 
 export function adjustRotation(direction, rotation) {
+	const rotationRate = 0.1;
 	switch (direction) {
 		case 'left':
 			return rotation - rotationRate;
