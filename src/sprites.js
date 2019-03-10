@@ -153,7 +153,8 @@ export function getSpriteMover(game) {
 
 		// render other ships
 		if (!sprites.ships) {
-			sprites.ships = createAndPlaceOtherShips(game);
+			// sprites.ships = createAndPlaceOtherShips(game);
+			sprites.ships = game.group();
 		}
 		const utilites = new GameUtilities();
 		sprites.ships.children.forEach(other => {
