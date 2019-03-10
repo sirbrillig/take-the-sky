@@ -86,7 +86,17 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 				}
 				break;
 			case 'jump':
-				changeCurrentSystem('Betan');
+				if (getChargeMeterAmount() < 100) {
+					setChargeMeterAmount(getChargeMeterAmount() + 1.0);
+				}
+				// 66% of the full bar width (164px) is approximately 108px, where the limitLine is.
+				if (getChargeMeterAmount() > 66) {
+					const isShipTouchingGate =
+						sprites.gates && sprites.gates.find(gate => game.hitTestRectangle(ship, gate));
+					if (isShipTouchingGate) {
+						changeCurrentSystem('Betan');
+					}
+				}
 				break;
 			default:
 			// noop
