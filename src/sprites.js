@@ -90,17 +90,6 @@ export function createAndPlaceNavigationRing(game) {
 	return navRing;
 }
 
-export function createAndPlaceButton(game) {
-	const button = game.button([
-		'assets/button-up.png',
-		'assets/button-up.png',
-		'assets/button-down.png',
-	]);
-	game.stage.putCenter(button);
-	button.y += 200;
-	return button;
-}
-
 export function createAndPlaceModeButton(game, modeTitle, orderIndex) {
 	const title = game.text(modeTitle, '32px serif', 'white');
 	title.x = 40;

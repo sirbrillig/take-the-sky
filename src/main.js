@@ -5,7 +5,6 @@ import { adjustSpeed, adjustRotation, getNewRingRotation, isClockwise } from './
 import { makeReducer, makeState } from './state';
 import reducer from './state-reducer';
 import {
-	setUpButtonControls,
 	setUpKeyboardControls,
 	setUpNavigationRingControls,
 	getTurningDirectionFromPressingState,
@@ -17,7 +16,6 @@ import {
 	createAndPlaceBackground,
 	createAndPlaceShip,
 	createAndPlaceNavigationRing,
-	createAndPlaceButton,
 	setSpriteRotation,
 	getSpriteRotation,
 	getSpriteMover,
@@ -31,8 +29,6 @@ const filesToLoad = [
 	'assets/ship-2.png',
 	'assets/star-field.png',
 	'assets/nav-ring.png',
-	'assets/button-up.png',
-	'assets/button-down.png',
 	'assets/pointer.png',
 ];
 
@@ -89,7 +85,6 @@ function initSprites(game) {
 		sky: createAndPlaceBackground(game),
 		ship: createAndPlaceShip(game),
 		ring: createAndPlaceNavigationRing(game),
-		button: createAndPlaceButton(game),
 		pilotModeButton: createAndPlaceModeButton(game, 'pilot', 1),
 		landModeButton: createAndPlaceModeButton(game, 'land', 2),
 		jumpModeButton: createAndPlaceModeButton(game, 'jump', 3),
@@ -101,7 +96,6 @@ function setUpGameObjects(game, state, actions) {
 	const sprites = initSprites(game);
 	const { changePressingState, changeControlMode } = actions;
 	const { getControlMode, getPressingState } = state;
-	setUpButtonControls(game, sprites.button, changePressingState, getPressingState);
 	setUpKeyboardControls(
 		game,
 		getControlMode,

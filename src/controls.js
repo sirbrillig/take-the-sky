@@ -3,11 +3,6 @@
 import { getCurrentCoordinates } from './sprites';
 import getNextMode from './control-modes';
 
-export function setUpButtonControls(game, button, changePressingState, getPressingState) {
-	button.press = () => changePressingState({ ...getPressingState(), up: true });
-	button.release = () => changePressingState({ ...getPressingState(), up: false });
-}
-
 export function setUpKeyboardControls(
 	game,
 	getControlMode,
