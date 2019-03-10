@@ -14,30 +14,23 @@ export function getAllSystems() {
 	return {
 		Algol: {
 			star: {
-				position: { x: 100, y: 300 },
+				position: { x: 800, y: 300 },
 				size: 200,
 				color: 'yellow',
 			},
 			gates: [
 				{
-					position: { x: 600, y: 600 },
+					position: { x: 2000, y: 2000 },
 				},
 			],
 			planets: [
 				{
 					name: 'Twist',
 					description:
-						'A trading post set up on a small moon. Plenty of bars on Twist. Bit of a rough crowd.',
+						"Not much of a tourist destination. Or any kind of destination at all, really. The Empire tout it as a settler's paradise. Mostly it's just a lot of mud.",
 					position: { x: 25, y: 75 },
 					color: 'red',
 					size: 40,
-				},
-				{
-					name: 'Bale',
-					description: 'A farming community',
-					position: { x: 450, y: 300 },
-					color: 'green',
-					size: 80,
 				},
 			],
 		},
