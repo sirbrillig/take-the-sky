@@ -42,14 +42,28 @@ function updateStateFromPressingState(state, actions) {
 
 function renderGame(game, sprites, state, actions, moveSprites) {
 	const { ship, ring } = sprites;
-	const { getPressingState, getSpeed, getControlMode } = state;
-	const { changeSpeed, changePressingState, changeCurrentSystem } = actions;
+	const { getPressingState, getSpeed, getControlMode, getChargeMeterAmount } = state;
+	const {
+		changeSpeed,
+		changePressingState,
+		changeCurrentSystem,
+		setChargeMeterVisible,
+		setChargeMeterAmount,
+	} = actions;
 	const pressing = getPressingState();
+
+	setChargeMeterVisible(getControlMode() === 'land' || getChargeMeterAmount() > 1);
 
 	if (pressing.up) {
 		switch (getControlMode()) {
 			case 'pilot':
 				changeSpeed(adjustSpeed(getSpriteRotation(ship), getSpeed()));
+				break;
+			case 'land':
+				if (getChargeMeterAmount() < 100) {
+					setChargeMeterAmount(getChargeMeterAmount() + 1.0);
+				}
+				// changeSpeed({ x: 0, y: 0 });
 				break;
 			case 'jump':
 				changeCurrentSystem('Betan');
@@ -58,6 +72,11 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 			// noop
 		}
 	}
+
+	if (!pressing.up && getChargeMeterAmount() > 1) {
+		setChargeMeterAmount(getChargeMeterAmount() - 0.5);
+	}
+
 	if (getControlMode() === 'pilot' && (pressing.left || pressing.right)) {
 		setSpriteRotation(
 			ship,
@@ -128,6 +147,8 @@ function initGame() {
 	const getSystemPosition = () => getState().position;
 	const changeSystemPosition = ({ x, y }) =>
 		handleAction({ type: 'CHANGE_SYSTEM_POSITION', payload: { x, y } });
+	const [isChargeMeterVisible, setChargeMeterVisible] = makeState(false);
+	const [getChargeMeterAmount, setChargeMeterAmount] = makeState(0);
 	const [getSpeed, changeSpeed] = makeState({ x: 0, y: 0 });
 	const [getPressingState, changePressingState] = makeState({
 		up: false,
@@ -143,6 +164,8 @@ function initGame() {
 		getSpeed,
 		getCurrentSystem,
 		getSystemPosition,
+		isChargeMeterVisible,
+		getChargeMeterAmount,
 	};
 	const actions = {
 		changeControlMode,
@@ -150,6 +173,8 @@ function initGame() {
 		changePressingState,
 		changeCurrentSystem,
 		changeSystemPosition,
+		setChargeMeterVisible,
+		setChargeMeterAmount,
 	};
 	const setupCallback = game => setUpGameObjects(game, state, actions);
 	const game = createGame({ canvasWidth, canvasHeight, filesToLoad, setupCallback });

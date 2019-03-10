@@ -106,6 +106,19 @@ export function createAndPlaceModePointer(game) {
 	return pointer;
 }
 
+export function createAndPlaceChargeMeter(game) {
+	const outerBar = game.rectangle(164, 16, 'black', 'blue', 2);
+	const innerBar = game.rectangle(6, 16, 'blue');
+	const limitLine = game.rectangle(2, 14, 'red');
+	setSpritePosition(limitLine, { x: 108, y: 2 });
+	const meter = game.group(outerBar, innerBar, limitLine);
+	meter.innerBar = innerBar;
+	meter.outerBar = outerBar;
+	setSpritePosition(meter, { x: 30, y: 16 });
+	game.stage.addChild(meter);
+	return meter;
+}
+
 export function getCurrentCoordinates(game) {
 	return { x: game.pointer.x, y: game.pointer.y };
 }
@@ -126,7 +139,14 @@ export function getModePointerPositionForMode(modeName) {
 export function getSpriteMover(game) {
 	let lastRenderedSystem = '';
 	return (sprites, state) => {
-		const { getControlMode, getSpeed, getSystemPosition, getCurrentSystem } = state;
+		const {
+			getControlMode,
+			getSpeed,
+			getSystemPosition,
+			getCurrentSystem,
+			isChargeMeterVisible,
+			getChargeMeterAmount,
+		} = state;
 		const { ship, sky, ring, modePointer } = sprites;
 		const systemPosition = getSystemPosition();
 
@@ -167,5 +187,18 @@ export function getSpriteMover(game) {
 
 		// render mode pointer
 		modePointer.y = getModePointerPositionForMode(getControlMode());
+
+		// render charge meter
+		if (!sprites.chargeMeter) {
+			sprites.chargeMeter = createAndPlaceChargeMeter(game);
+		}
+		if (!isChargeMeterVisible()) {
+			sprites.chargeMeter.visible = false;
+		}
+		if (isChargeMeterVisible()) {
+			sprites.chargeMeter.visible = true;
+			const amount = getChargeMeterAmount();
+			sprites.chargeMeter.innerBar.width = (sprites.chargeMeter.outerBar.width / 100) * amount;
+		}
 	};
 }
