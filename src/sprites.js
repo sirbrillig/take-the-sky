@@ -29,12 +29,14 @@ export function createAndPlaceBackground(game) {
 
 function createAndPlacePlanet(game, planetData) {
 	const planetSprite = game.circle(planetData.size, planetData.color);
+	planetSprite.positionInSpace = planetData.position;
 	setSpritePosition(planetSprite, { x: planetData.position.x, y: planetData.position.y });
 	return planetSprite;
 }
 
 function createAndPlaceGate(game, gateData) {
 	const gate = game.sprite('assets/gate.png');
+	gate.positionInSpace = gateData.position;
 	setSpritePosition(gate, { x: gateData.position.x, y: gateData.position.y });
 	return gate;
 }
@@ -49,28 +51,6 @@ export function createAndPlaceOtherShips(game) {
 	game.stage.addChild(shipLayer);
 	setSpritePosition(shipLayer, { x: 0, y: 0 });
 	return shipLayer;
-}
-
-export function createAndPlacePlanets(game, currentSystem) {
-	const system = game.group();
-
-	const planetSprites = getPlanetsInSystem(currentSystem).map(planetData =>
-		createAndPlacePlanet(game, planetData)
-	);
-	planetSprites.map(sprite => system.addChild(sprite));
-
-	const starSprites = getStarsInSystem(currentSystem).map(starData =>
-		createAndPlacePlanet(game, starData)
-	);
-	starSprites.map(sprite => system.addChild(sprite));
-
-	const gateSprites = getGatesInSystem(currentSystem).map(gateData =>
-		createAndPlaceGate(game, gateData)
-	);
-	gateSprites.map(sprite => system.addChild(sprite));
-
-	game.stage.addChild(system);
-	return system;
 }
 
 export function createAndPlaceShip(game) {
@@ -152,13 +132,44 @@ export function getSpriteMover(game) {
 
 		// render planets
 		if (getCurrentSystem() !== lastRenderedSystem) {
-			if (sprites.system) {
-				game.remove(sprites.system);
-			}
-			sprites.system = createAndPlacePlanets(game, getCurrentSystem());
+			game.remove(sprites.planets || []);
+			const currentSystem = getCurrentSystem();
+			sprites.planets = getPlanetsInSystem(currentSystem).map(planetData =>
+				createAndPlacePlanet(game, planetData)
+			);
+			sprites.planets.map(sprite => game.stage.addChild(sprite));
+
+			game.remove(sprites.stars || []);
+			sprites.stars = getStarsInSystem(currentSystem).map(starData =>
+				createAndPlacePlanet(game, starData)
+			);
+			sprites.stars.map(sprite => game.stage.addChild(sprite));
+
+			game.remove(sprites.gates || []);
+			sprites.gates = getGatesInSystem(currentSystem).map(gateData =>
+				createAndPlaceGate(game, gateData)
+			);
+			sprites.gates.map(sprite => game.stage.addChild(sprite));
 		}
 		lastRenderedSystem = getCurrentSystem();
-		setSpritePosition(sprites.system, { x: systemPosition.x, y: systemPosition.y });
+		sprites.planets.map(sprite =>
+			setSpritePosition(sprite, {
+				x: sprite.positionInSpace.x + systemPosition.x,
+				y: sprite.positionInSpace.y + systemPosition.y,
+			})
+		);
+		sprites.stars.map(sprite =>
+			setSpritePosition(sprite, {
+				x: sprite.positionInSpace.x + systemPosition.x,
+				y: sprite.positionInSpace.y + systemPosition.y,
+			})
+		);
+		sprites.gates.map(sprite =>
+			setSpritePosition(sprite, {
+				x: sprite.positionInSpace.x + systemPosition.x,
+				y: sprite.positionInSpace.y + systemPosition.y,
+			})
+		);
 
 		// render other ships
 		if (!sprites.ships) {

@@ -65,8 +65,7 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 				}
 				// 66% of the full bar width (164px) is approximately 108px, where the limitLine is.
 				if (getChargeMeterAmount() > 66) {
-					const isShipTouchingPlanet = sprites.system.children.find(planet =>
-						// FIXME: this does not work, probably because the planets have their own group coordinates
+					const isShipTouchingPlanet = sprites.planets.find(planet =>
 						game.hitTestRectangle(ship, planet)
 					);
 					if (isShipTouchingPlanet) {
