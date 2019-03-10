@@ -63,7 +63,16 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 				if (getChargeMeterAmount() < 100) {
 					setChargeMeterAmount(getChargeMeterAmount() + 1.0);
 				}
-				// changeSpeed({ x: 0, y: 0 });
+				// 66% of the full bar width (164px) is approximately 108px, where the limitLine is.
+				if (getChargeMeterAmount() > 66) {
+					const isShipTouchingPlanet = sprites.system.children.find(planet =>
+						// FIXME: this does not work, probably because the planets have their own group coordinates
+						game.hitTestRectangle(ship, planet)
+					);
+					if (isShipTouchingPlanet) {
+						changeSpeed({ x: 0, y: 0 });
+					}
+				}
 				break;
 			case 'jump':
 				changeCurrentSystem('Betan');
