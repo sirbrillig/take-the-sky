@@ -86,6 +86,17 @@ export function createAndPlaceModePointer(game) {
 	return pointer;
 }
 
+export function createAndPlaceHealthMeter(game) {
+	const outerBar = game.rectangle(128, 16, 'black', 'green', 2);
+	const innerBar = game.rectangle(6, 16, 'green');
+	const meter = game.group(outerBar, innerBar);
+	meter.innerBar = innerBar;
+	meter.outerBar = outerBar;
+	setSpritePosition(meter, { x: game.canvas.width - 148, y: 16 });
+	game.stage.addChild(meter);
+	return meter;
+}
+
 export function createAndPlaceChargeMeter(game) {
 	const outerBar = game.rectangle(164, 16, 'black', 'blue', 2);
 	const innerBar = game.rectangle(6, 16, 'blue');
@@ -126,6 +137,7 @@ export function getSpriteMover(game) {
 			getCurrentSystem,
 			isChargeMeterVisible,
 			getChargeMeterAmount,
+			getHealthAmount,
 		} = state;
 		const { ship, sky, ring, modePointer } = sprites;
 		const systemPosition = getSystemPosition();
@@ -198,6 +210,14 @@ export function getSpriteMover(game) {
 
 		// render mode pointer
 		modePointer.y = getModePointerPositionForMode(getControlMode());
+
+		// render health bar
+		if (!sprites.healthMeter) {
+			sprites.healthMeter = createAndPlaceHealthMeter(game);
+		}
+		sprites.healthMeter.visible = true;
+		sprites.healthMeter.innerBar.width =
+			(sprites.healthMeter.outerBar.width / 100) * getHealthAmount();
 
 		// render charge meter
 		if (!sprites.chargeMeter) {

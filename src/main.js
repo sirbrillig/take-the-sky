@@ -42,17 +42,30 @@ function updateStateFromPressingState(state, actions) {
 
 function renderGame(game, sprites, state, actions, moveSprites) {
 	const { ship, ring } = sprites;
-	const { getPressingState, getSpeed, getControlMode, getChargeMeterAmount } = state;
+	const {
+		getPressingState,
+		getSpeed,
+		getControlMode,
+		getChargeMeterAmount,
+		getHealthAmount,
+	} = state;
 	const {
 		changeSpeed,
 		changePressingState,
 		changeCurrentSystem,
 		setChargeMeterVisible,
 		setChargeMeterAmount,
+		setHealthAmount,
 	} = actions;
 	const pressing = getPressingState();
 
 	setChargeMeterVisible(getControlMode() === 'land' || getChargeMeterAmount() > 1);
+
+	const isShipTouchingStar =
+		sprites.stars && sprites.stars.find(star => game.hitTestRectangle(ship, star));
+	if (isShipTouchingStar && getHealthAmount() > 1) {
+		setHealthAmount(getHealthAmount() - 1);
+	}
 
 	if (pressing.up) {
 		switch (getControlMode()) {
@@ -65,9 +78,8 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 				}
 				// 66% of the full bar width (164px) is approximately 108px, where the limitLine is.
 				if (getChargeMeterAmount() > 66) {
-					const isShipTouchingPlanet = sprites.planets.find(planet =>
-						game.hitTestRectangle(ship, planet)
-					);
+					const isShipTouchingPlanet =
+						sprites.planets && sprites.planets.find(planet => game.hitTestRectangle(ship, planet));
 					if (isShipTouchingPlanet) {
 						changeSpeed({ x: 0, y: 0 });
 					}
@@ -157,6 +169,7 @@ function initGame() {
 		handleAction({ type: 'CHANGE_SYSTEM_POSITION', payload: { x, y } });
 	const [isChargeMeterVisible, setChargeMeterVisible] = makeState(false);
 	const [getChargeMeterAmount, setChargeMeterAmount] = makeState(0);
+	const [getHealthAmount, setHealthAmount] = makeState(100);
 	const [getSpeed, changeSpeed] = makeState({ x: 0, y: 0 });
 	const [getPressingState, changePressingState] = makeState({
 		up: false,
@@ -174,6 +187,7 @@ function initGame() {
 		getSystemPosition,
 		isChargeMeterVisible,
 		getChargeMeterAmount,
+		getHealthAmount,
 	};
 	const actions = {
 		changeControlMode,
@@ -183,6 +197,7 @@ function initGame() {
 		changeSystemPosition,
 		setChargeMeterVisible,
 		setChargeMeterAmount,
+		setHealthAmount,
 	};
 	const setupCallback = game => setUpGameObjects(game, state, actions);
 	const game = createGame({ canvasWidth, canvasHeight, filesToLoad, setupCallback });
