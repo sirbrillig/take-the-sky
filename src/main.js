@@ -106,6 +106,14 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 	if (!pressing.up && getChargeMeterAmount() > 1) {
 		setChargeMeterAmount(getChargeMeterAmount() - 0.5);
 	}
+	if (
+		pressing.up &&
+		getControlMode() !== 'land' &&
+		getControlMode() !== 'jump' &&
+		getChargeMeterAmount() > 1
+	) {
+		setChargeMeterAmount(getChargeMeterAmount() - 0.5);
+	}
 
 	if (getControlMode() === 'pilot' && (pressing.left || pressing.right)) {
 		setSpriteRotation(
