@@ -6,6 +6,8 @@ export default function reducer(state, { type, payload }) {
 			return { ...state, position: payload };
 		case 'CHANGE_SYSTEM':
 			return { ...state, currentSystem: payload };
+		case 'EVENT_FIRST_LANDING':
+			return { ...state, events: { ...state.events, firstLanding: true } };
 		default:
 			return state;
 	}
