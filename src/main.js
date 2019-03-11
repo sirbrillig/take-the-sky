@@ -19,6 +19,7 @@ import {
 	setSpriteRotation,
 	getSpriteRotation,
 	getSpriteMover,
+	showDialog,
 } from './sprites';
 
 const canvasWidth = 800;
@@ -100,8 +101,10 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 						if (getEvent('firstLanding')) {
 							changeCurrentSystem('Betan');
 						} else {
-							console.log('sorry, not yet');
-							// TODO: open dialog
+							showDialog(
+								game,
+								"Engineer: Captain, we came to this backwater planet because there's a job to be had. Let's not leave before we at least hear them out."
+							);
 						}
 					}
 				}

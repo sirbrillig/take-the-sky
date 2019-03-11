@@ -76,6 +76,13 @@ export function createAndPlaceNavigationRing(game) {
 	return navRing;
 }
 
+export function showDialog(game, text) {
+	const dialogText = game.text(text, '28px serif', 'white');
+	dialogText.zIndex = 15;
+	setSpritePosition(dialogText, { y: game.canvas.height - 50, x: 0 });
+	game.stage.addChild(dialogText);
+}
+
 export function createAndPlaceModeButton(game, modeTitle, orderIndex) {
 	const title = game.text(modeTitle, '32px serif', 'white');
 	title.zIndex = 15;
