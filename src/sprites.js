@@ -23,6 +23,7 @@ export function setTilePosition(sprite, { x, y }) {
 
 export function createAndPlaceBackground(game) {
 	const sky = game.tilingSprite('assets/star-field.png', game.canvas.width, game.canvas.height);
+	sky.zIndex = 0;
 	game.stage.addChild(sky);
 	return sky;
 }
@@ -30,12 +31,14 @@ export function createAndPlaceBackground(game) {
 function createAndPlacePlanet(game, planetData) {
 	const planetSprite = game.circle(planetData.size, planetData.color);
 	planetSprite.positionInSpace = planetData.position;
+	planetSprite.zIndex = 5;
 	setSpritePosition(planetSprite, { x: planetData.position.x, y: planetData.position.y });
 	return planetSprite;
 }
 
 function createAndPlaceGate(game, gateData) {
 	const gate = game.sprite('assets/gate.png');
+	gate.zIndex = 5;
 	gate.positionInSpace = gateData.position;
 	setSpritePosition(gate, { x: gateData.position.x, y: gateData.position.y });
 	return gate;
@@ -46,6 +49,7 @@ export function createAndPlaceOtherShips(game) {
 	const ship = game.sprite('assets/ship-2.png');
 	setSpritePosition(ship, { x: 600, y: 20 });
 	ship.setPivot(0.5, 0.5);
+	ship.zIndex = 10;
 	ship.speed = { x: 1, y: 1 };
 	shipLayer.addChild(ship);
 	game.stage.addChild(shipLayer);
@@ -57,12 +61,14 @@ export function createAndPlaceShip(game) {
 	const ship = game.sprite('assets/ship.png');
 	ship.rotation = Math.floor(Math.random() * Math.floor(360));
 	ship.setPivot(0.5, 0.5);
+	ship.zIndex = 10;
 	game.stage.putCenter(ship);
 	return ship;
 }
 
 export function createAndPlaceNavigationRing(game) {
 	const navRing = game.sprite('assets/nav-ring.png');
+	navRing.zIndex = 15;
 	navRing.rotation = 0;
 	navRing.setPivot(0.5, 0.5);
 	navRing.alpha = 0.6;
@@ -72,6 +78,7 @@ export function createAndPlaceNavigationRing(game) {
 
 export function createAndPlaceModeButton(game, modeTitle, orderIndex) {
 	const title = game.text(modeTitle, '32px serif', 'white');
+	title.zIndex = 15;
 	title.x = 40;
 	title.y = 10 * orderIndex * 5;
 	game.stage.addChild(title);
@@ -80,6 +87,7 @@ export function createAndPlaceModeButton(game, modeTitle, orderIndex) {
 
 export function createAndPlaceModePointer(game) {
 	const pointer = game.sprite('assets/pointer.png');
+	pointer.zIndex = 15;
 	pointer.x = 10;
 	pointer.y = 10 * 5 + 16; // modeButton position + a bit to vertically center it
 	game.stage.addChild(pointer);
@@ -93,6 +101,7 @@ export function createAndPlaceHealthMeter(game) {
 	meter.innerBar = innerBar;
 	meter.outerBar = outerBar;
 	setSpritePosition(meter, { x: game.canvas.width - 148, y: 16 });
+	meter.zIndex = 15;
 	game.stage.addChild(meter);
 	return meter;
 }
@@ -106,6 +115,7 @@ export function createAndPlaceChargeMeter(game) {
 	meter.innerBar = innerBar;
 	meter.outerBar = outerBar;
 	setSpritePosition(meter, { x: 30, y: 16 });
+	meter.zIndex = 15;
 	game.stage.addChild(meter);
 	return meter;
 }
@@ -127,6 +137,15 @@ export function getModePointerPositionForMode(modeName) {
 	}
 }
 
+function sortSpritesByZIndex(game) {
+	// sort sprites by zorder
+	game.stage.children.sort((a, b) => {
+		a.zIndex = a.zIndex || 0;
+		b.zIndex = b.zIndex || 0;
+		return a.zIndex > b.zIndex ? 1 : -1;
+	});
+}
+
 export function getSpriteMover(game) {
 	let lastRenderedSystem = '';
 	return (sprites, state) => {
@@ -142,7 +161,7 @@ export function getSpriteMover(game) {
 		const { ship, sky, ring, modePointer } = sprites;
 		const systemPosition = getSystemPosition();
 
-		// render planets
+		// render planets, stars, and gates
 		if (getCurrentSystem() !== lastRenderedSystem) {
 			game.remove(sprites.planets || []);
 			const currentSystem = getCurrentSystem();
@@ -162,6 +181,8 @@ export function getSpriteMover(game) {
 				createAndPlaceGate(game, gateData)
 			);
 			sprites.gates.map(sprite => game.stage.addChild(sprite));
+
+			sortSpritesByZIndex(game);
 		}
 		lastRenderedSystem = getCurrentSystem();
 		sprites.planets.map(sprite =>
@@ -214,6 +235,7 @@ export function getSpriteMover(game) {
 		// render health bar
 		if (!sprites.healthMeter) {
 			sprites.healthMeter = createAndPlaceHealthMeter(game);
+			sortSpritesByZIndex(game);
 		}
 		sprites.healthMeter.visible = true;
 		sprites.healthMeter.innerBar.width =
@@ -222,6 +244,7 @@ export function getSpriteMover(game) {
 		// render charge meter
 		if (!sprites.chargeMeter) {
 			sprites.chargeMeter = createAndPlaceChargeMeter(game);
+			sortSpritesByZIndex(game);
 		}
 		if (!isChargeMeterVisible()) {
 			sprites.chargeMeter.visible = false;
