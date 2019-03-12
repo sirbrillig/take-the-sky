@@ -1,6 +1,6 @@
 /* @format */
 
-import createGame from './hexi-wrapper';
+import createGame from './pixi-wrapper';
 import { adjustSpeed, adjustRotation, getNewRingRotation, isClockwise } from './math';
 import { makeReducer, makeState } from './state';
 import reducer from './state-reducer';
