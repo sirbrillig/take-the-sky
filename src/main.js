@@ -80,6 +80,34 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 		setHealthAmount(getHealthAmount() - 1);
 	}
 
+	if (getControlMode() === 'land' && isChargeMeterFull(getChargeMeterAmount())) {
+		const isShipTouchingPlanet =
+			sprites.planets && sprites.planets.find(planet => doSpritesOverlap(ship, planet));
+		if (isShipTouchingPlanet) {
+			setChargeMeterAmount(0);
+			changeSpeed({ x: 0, y: 0 });
+			markFirstLanding();
+			showDialog(
+				"In the dingy space port, you are approached by a teenage girl. She's very confident, but always looking over her shoulder. You don't see anyone other than a drunk and a traffic controller nearby, but on this tiny planet you wouldn't be surprised if someone meant this woman harm."
+			);
+		}
+	}
+
+	if (getControlMode() === 'jump' && isChargeMeterFull(getChargeMeterAmount())) {
+		const isShipTouchingGate =
+			sprites.gates && sprites.gates.find(gate => doSpritesOverlap(ship, gate));
+		if (isShipTouchingGate) {
+			setChargeMeterAmount(0);
+			if (getEvent('firstLanding')) {
+				changeCurrentSystem('Betan');
+			} else {
+				showDialog(
+					"Engineer: Captain, we came to this backwater planet because there's a job to be had. Let's not leave before we at least hear them out."
+				);
+			}
+		}
+	}
+
 	if (pressing.up) {
 		switch (getControlMode()) {
 			case 'pilot':
@@ -89,36 +117,10 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 				if (getChargeMeterAmount() < 100) {
 					setChargeMeterAmount(getChargeMeterAmount() + 1.0);
 				}
-				if (isChargeMeterFull(getChargeMeterAmount())) {
-					const isShipTouchingPlanet =
-						sprites.planets && sprites.planets.find(planet => doSpritesOverlap(ship, planet));
-					if (isShipTouchingPlanet) {
-						setChargeMeterAmount(0);
-						changeSpeed({ x: 0, y: 0 });
-						markFirstLanding();
-						showDialog(
-							"In the dingy space port, you are approached by a teenage girl. She's very confident, but always looking over her shoulder. You don't see anyone other than a drunk and a traffic controller nearby, but on this tiny planet you wouldn't be surprised if someone meant this woman harm."
-						);
-					}
-				}
 				break;
 			case 'jump':
 				if (getChargeMeterAmount() < 100) {
 					setChargeMeterAmount(getChargeMeterAmount() + 1.0);
-				}
-				if (isChargeMeterFull(getChargeMeterAmount())) {
-					const isShipTouchingGate =
-						sprites.gates && sprites.gates.find(gate => doSpritesOverlap(ship, gate));
-					if (isShipTouchingGate) {
-						setChargeMeterAmount(0);
-						if (getEvent('firstLanding')) {
-							changeCurrentSystem('Betan');
-						} else {
-							showDialog(
-								"Engineer: Captain, we came to this backwater planet because there's a job to be had. Let's not leave before we at least hear them out."
-							);
-						}
-					}
 				}
 				break;
 			default:
@@ -127,7 +129,7 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 	}
 
 	if (!pressing.up && getChargeMeterAmount() > 1) {
-		setChargeMeterAmount(getChargeMeterAmount() - 0.5);
+		setChargeMeterAmount(getChargeMeterAmount() - 0.2);
 	}
 	if (
 		pressing.up &&
@@ -135,7 +137,7 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 		getControlMode() !== 'jump' &&
 		getChargeMeterAmount() > 1
 	) {
-		setChargeMeterAmount(getChargeMeterAmount() - 0.5);
+		setChargeMeterAmount(getChargeMeterAmount() - 0.2);
 	}
 
 	if (getControlMode() === 'pilot' && (pressing.left || pressing.right)) {
