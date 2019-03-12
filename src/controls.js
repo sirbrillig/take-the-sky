@@ -8,35 +8,37 @@ export function setUpKeyboardControls(game, state, actions) {
 	const { getControlMode, getPressingState } = state;
 	const { changePressingState, changeControlMode, hideDialog } = actions;
 	const onKeyDown = event => {
-		// number is JS key code: https://keycode.info/
-		// TODO: change these to use `key` property
-		switch (event.keyCode) {
-			case 38: // up
-			case 32: // space
+		switch (event.code) {
+			case 'ArrowUp':
+			case 'Space':
+			case 'KeyW':
 				if (!event.repeat) {
 					hideDialog();
 				}
 				return changePressingState({ ...getPressingState(), up: true });
-			case 37: // left
+			case 'ArrowLeft':
+			case 'KeyA':
 				return changePressingState({ ...getPressingState(), left: true });
-			case 39: // right
+			case 'ArrowRight':
+			case 'KeyD':
 				return changePressingState({ ...getPressingState(), right: true });
-			case 77: // m
+			case 'KeyM':
 				return changeControlMode(getNextMode(getControlMode()));
 			default:
 				return '';
 		}
 	};
 	const onKeyUp = event => {
-		// number is JS key code: https://keycode.info/
-		// TODO: change these to use `key` property
-		switch (event.keyCode) {
-			case 38: // up
-			case 32: // space
+		switch (event.code) {
+			case 'ArrowUp':
+			case 'Space':
+			case 'KeyW':
 				return changePressingState({ ...getPressingState(), up: false });
-			case 37: // left
+			case 'ArrowLeft':
+			case 'KeyA':
 				return changePressingState({ ...getPressingState(), left: false });
-			case 39: // right
+			case 'ArrowRight':
+			case 'KeyD':
 				return changePressingState({ ...getPressingState(), right: false });
 			default:
 				return '';
