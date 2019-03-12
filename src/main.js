@@ -16,10 +16,10 @@ import {
 	createAndPlaceBackground,
 	createAndPlaceShip,
 	createAndPlaceNavigationRing,
+	createAndPlaceDialog,
 	setSpriteRotation,
 	getSpriteRotation,
 	getSpriteMover,
-	showDialog,
 	doSpritesOverlap,
 } from './sprites';
 
@@ -61,11 +61,14 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 		setChargeMeterAmount,
 		setHealthAmount,
 		markFirstLanding,
+		showDialog,
 	} = actions;
 	const pressing = getPressingState();
 
 	if (isDialogVisible()) {
-		return;
+		setChargeMeterAmount(0);
+		moveSprites(sprites, state);
+		return; // freeze the game if the dialog is showing
 	}
 
 	setChargeMeterVisible(getControlMode() === 'land' || getChargeMeterAmount() > 1);
@@ -90,6 +93,7 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 					const isShipTouchingPlanet =
 						sprites.planets && sprites.planets.find(planet => doSpritesOverlap(ship, planet));
 					if (isShipTouchingPlanet) {
+						setChargeMeterAmount(0);
 						changeSpeed({ x: 0, y: 0 });
 						markFirstLanding();
 					}
@@ -104,12 +108,11 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 					const isShipTouchingGate =
 						sprites.gates && sprites.gates.find(gate => doSpritesOverlap(ship, gate));
 					if (isShipTouchingGate) {
+						setChargeMeterAmount(0);
 						if (getEvent('firstLanding')) {
 							changeCurrentSystem('Betan');
 						} else {
 							showDialog(
-								game,
-								actions,
 								"Engineer: Captain, we came to this backwater planet because there's a job to be had. Let's not leave before we at least hear them out."
 							);
 						}
@@ -158,6 +161,7 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 function initSprites(game) {
 	return {
 		sky: createAndPlaceBackground(game),
+		dialog: createAndPlaceDialog(game),
 		ship: createAndPlaceShip(game),
 		ring: createAndPlaceNavigationRing(game),
 		pilotModeButton: createAndPlaceModeButton(game, 'pilot', 1),
@@ -169,15 +173,9 @@ function initSprites(game) {
 
 function setUpGameObjects(game, state, actions) {
 	const sprites = initSprites(game);
-	const { changePressingState, changeControlMode } = actions;
+	const { changePressingState } = actions;
 	const { getControlMode, getPressingState } = state;
-	setUpKeyboardControls(
-		game,
-		getControlMode,
-		changePressingState,
-		changeControlMode,
-		getPressingState
-	);
+	setUpKeyboardControls(game, state, actions);
 	setUpNavigationRingControls(
 		game,
 		sprites.ring,
@@ -207,6 +205,12 @@ function initGame() {
 	const markFirstLanding = () => handleAction({ type: 'EVENT_FIRST_LANDING' });
 	const getEvent = key => getState().events[key];
 	const [isDialogVisible, setDialogVisible] = makeState(false);
+	const [getDialogText, setDialogText] = makeState('');
+	const showDialog = text => {
+		setDialogVisible(true);
+		setDialogText(text);
+	};
+	const hideDialog = () => setDialogVisible(false);
 	const [isChargeMeterVisible, setChargeMeterVisible] = makeState(false);
 	const [getChargeMeterAmount, setChargeMeterAmount] = makeState(0);
 	const [getHealthAmount, setHealthAmount] = makeState(100);
@@ -230,6 +234,7 @@ function initGame() {
 		getHealthAmount,
 		getEvent,
 		isDialogVisible,
+		getDialogText,
 	};
 	const actions = {
 		changeControlMode,
@@ -241,7 +246,8 @@ function initGame() {
 		setChargeMeterAmount,
 		setHealthAmount,
 		markFirstLanding,
-		setDialogVisible,
+		showDialog,
+		hideDialog,
 	};
 	const setupCallback = game => {
 		const sprites = setUpGameObjects(game, state, actions);

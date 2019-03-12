@@ -87,10 +87,11 @@ export function createAndPlaceNavigationRing(game) {
 	return navRing;
 }
 
-export function showDialog(game, actions, text) {
+export function createAndPlaceDialog(game) {
 	const boxPadding = 10;
 	const box = game.rectangle(game.renderer.width - 40, 200, 0x00335a, 0x0f95ff, 2);
-	const dialogText = game.text(text, {
+	// See formatting options: https://pixijs.io/pixi-text-style/#
+	const dialogText = game.text('', {
 		fontFamily: 'Arial',
 		fontSize: 28,
 		fill: 'white',
@@ -117,10 +118,10 @@ export function showDialog(game, actions, text) {
 	box.addChild(continueButton);
 	box.zIndex = 15;
 	setSpritePosition(box, { x: 20, y: game.renderer.height - 210 });
+	box.visible = false;
+	box.textArea = dialogText;
 	game.stage.addChild(box);
-	actions.setDialogVisible(true);
 	return box;
-	// TODO: hide dialog when "continue" button is pressed and there are no more messages
 	// TODO: allow an array of messages
 }
 
@@ -209,9 +210,15 @@ export function getSpriteMover(game) {
 			isChargeMeterVisible,
 			getChargeMeterAmount,
 			getHealthAmount,
+			isDialogVisible,
+			getDialogText,
 		} = state;
 		const { ship, sky, ring, modePointer } = sprites;
 		const systemPosition = getSystemPosition();
+
+		// render dialog
+		sprites.dialog.visible = isDialogVisible();
+		sprites.dialog.textArea.text = getDialogText();
 
 		// render planets, stars, and gates
 		if (getCurrentSystem() !== lastRenderedSystem) {

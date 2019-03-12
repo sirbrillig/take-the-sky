@@ -4,20 +4,18 @@
 import { getCurrentCoordinates } from './sprites';
 import getNextMode from './control-modes';
 
-export function setUpKeyboardControls(
-	game,
-	getControlMode,
-	changePressingState,
-	changeControlMode,
-	getPressingState
-) {
+export function setUpKeyboardControls(game, state, actions) {
+	const { getControlMode, getPressingState } = state;
+	const { changePressingState, changeControlMode, hideDialog } = actions;
 	const onKeyDown = event => {
 		// number is JS key code: https://keycode.info/
 		// TODO: change these to use `key` property
 		switch (event.keyCode) {
 			case 38: // up
-				return changePressingState({ ...getPressingState(), up: true });
 			case 32: // space
+				if (!event.repeat) {
+					hideDialog();
+				}
 				return changePressingState({ ...getPressingState(), up: true });
 			case 37: // left
 				return changePressingState({ ...getPressingState(), left: true });
@@ -34,7 +32,6 @@ export function setUpKeyboardControls(
 		// TODO: change these to use `key` property
 		switch (event.keyCode) {
 			case 38: // up
-				return changePressingState({ ...getPressingState(), up: false });
 			case 32: // space
 				return changePressingState({ ...getPressingState(), up: false });
 			case 37: // left
