@@ -87,7 +87,7 @@ export function createAndPlaceNavigationRing(game) {
 	return navRing;
 }
 
-export function showDialog(game, text) {
+export function showDialog(game, actions, text) {
 	const boxPadding = 10;
 	const box = game.rectangle(game.renderer.width - 40, 200, 0x00335a, 0x0f95ff, 2);
 	const dialogText = game.text(text, {
@@ -118,10 +118,10 @@ export function showDialog(game, text) {
 	box.zIndex = 15;
 	setSpritePosition(box, { x: 20, y: game.renderer.height - 210 });
 	game.stage.addChild(box);
+	actions.setDialogVisible(true);
 	return box;
 	// TODO: hide dialog when "continue" button is pressed and there are no more messages
 	// TODO: allow an array of messages
-	// TODO: freeze the game until the dialog is hidden
 }
 
 export function createAndPlaceModeButton(game, modeTitle, orderIndex) {

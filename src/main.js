@@ -51,6 +51,7 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 		getChargeMeterAmount,
 		getHealthAmount,
 		getEvent,
+		isDialogVisible,
 	} = state;
 	const {
 		changeSpeed,
@@ -62,6 +63,10 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 		markFirstLanding,
 	} = actions;
 	const pressing = getPressingState();
+
+	if (isDialogVisible()) {
+		return;
+	}
 
 	setChargeMeterVisible(getControlMode() === 'land' || getChargeMeterAmount() > 1);
 
@@ -104,6 +109,7 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 						} else {
 							showDialog(
 								game,
+								actions,
 								"Engineer: Captain, we came to this backwater planet because there's a job to be had. Let's not leave before we at least hear them out."
 							);
 						}
@@ -152,10 +158,6 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 function initSprites(game) {
 	return {
 		sky: createAndPlaceBackground(game),
-		dialog: showDialog(
-			game,
-			"Engineer: Captain, we came to this backwater planet because there's a job to be had. Let's not leave before we at least hear them out."
-		),
 		ship: createAndPlaceShip(game),
 		ring: createAndPlaceNavigationRing(game),
 		pilotModeButton: createAndPlaceModeButton(game, 'pilot', 1),
@@ -204,6 +206,7 @@ function initGame() {
 		handleAction({ type: 'CHANGE_SYSTEM_POSITION', payload: { x, y } });
 	const markFirstLanding = () => handleAction({ type: 'EVENT_FIRST_LANDING' });
 	const getEvent = key => getState().events[key];
+	const [isDialogVisible, setDialogVisible] = makeState(false);
 	const [isChargeMeterVisible, setChargeMeterVisible] = makeState(false);
 	const [getChargeMeterAmount, setChargeMeterAmount] = makeState(0);
 	const [getHealthAmount, setHealthAmount] = makeState(100);
@@ -226,6 +229,7 @@ function initGame() {
 		getChargeMeterAmount,
 		getHealthAmount,
 		getEvent,
+		isDialogVisible,
 	};
 	const actions = {
 		changeControlMode,
@@ -237,6 +241,7 @@ function initGame() {
 		setChargeMeterAmount,
 		setHealthAmount,
 		markFirstLanding,
+		setDialogVisible,
 	};
 	const setupCallback = game => {
 		const sprites = setUpGameObjects(game, state, actions);
