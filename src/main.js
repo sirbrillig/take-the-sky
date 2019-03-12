@@ -96,6 +96,9 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 						setChargeMeterAmount(0);
 						changeSpeed({ x: 0, y: 0 });
 						markFirstLanding();
+						showDialog(
+							"In the dingy space port, you are approached by a teenage girl. She's very confident, but always looking over her shoulder. You don't see anyone other than a drunk and a traffic controller nearby, but on this tiny planet you wouldn't be surprised if someone meant this woman harm."
+						);
 					}
 				}
 				break;

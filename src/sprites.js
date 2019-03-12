@@ -122,7 +122,6 @@ export function createAndPlaceDialog(game) {
 	box.textArea = dialogText;
 	game.stage.addChild(box);
 	return box;
-	// TODO: allow an array of messages
 }
 
 export function createAndPlaceModeButton(game, modeTitle, orderIndex) {
