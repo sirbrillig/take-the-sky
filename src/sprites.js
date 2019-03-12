@@ -120,6 +120,7 @@ export function createAndPlaceDialog(game) {
 	setSpritePosition(box, { x: 20, y: game.renderer.height - 210 });
 	box.visible = false;
 	box.textArea = dialogText;
+	box.continueButton = continueButton;
 	game.stage.addChild(box);
 	return box;
 }
@@ -223,6 +224,7 @@ export function getSpriteMover(game) {
 		// render dialog
 		sprites.dialog.visible = isDialogVisible();
 		sprites.dialog.textArea.text = getDialogText().length ? getDialogText()[0] : '';
+		sprites.dialog.removeChild(sprites.dialog.continueButton); // TODO: is there a way to do this non-destructively?
 
 		// render planets, stars, and gates
 		if (getCurrentSystem() !== lastRenderedSystem) {

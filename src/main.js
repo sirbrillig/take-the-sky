@@ -63,6 +63,7 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 		setHealthAmount,
 		markFirstLanding,
 		setDialogArray,
+		markGameOver,
 	} = actions;
 	const pressing = getPressingState();
 
@@ -76,8 +77,16 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 
 	const isShipTouchingStar =
 		sprites.stars && sprites.stars.find(star => doSpritesOverlap(ship, star));
-	if (isShipTouchingStar && getHealthAmount() > 1) {
+	if (isShipTouchingStar && getHealthAmount() > 0) {
 		setHealthAmount(getHealthAmount() - 1);
+	}
+
+	if (getHealthAmount() < 1) {
+		setDialogArray([
+			"As the ship's hull tears apart and the coldness of space covers your skin, you reflect that at least you were free.",
+		]);
+		markGameOver();
+		return;
 	}
 
 	if (getControlMode() === 'land' && isChargeMeterFull(getChargeMeterAmount())) {
@@ -200,6 +209,7 @@ function initGame() {
 		},
 		events: {
 			firstLanding: false,
+			gameOver: false,
 		},
 	});
 	const getCurrentSystem = () => getState().currentSystem;
@@ -208,6 +218,7 @@ function initGame() {
 	const changeSystemPosition = ({ x, y }) =>
 		handleAction({ type: 'CHANGE_SYSTEM_POSITION', payload: { x, y } });
 	const markFirstLanding = () => handleAction({ type: 'EVENT_FIRST_LANDING' });
+	const markGameOver = () => handleAction({ type: 'EVENT_GAME_OVER' });
 	const getEvent = key => getState().events[key];
 	const [getDialogText, setDialogArray] = makeState([]);
 	const isDialogVisible = () => !!getDialogText().length;
@@ -247,6 +258,7 @@ function initGame() {
 		setChargeMeterAmount,
 		setHealthAmount,
 		markFirstLanding,
+		markGameOver,
 		setDialogArray,
 		hideDialog,
 	};
