@@ -21,6 +21,7 @@ import {
 	getSpriteRotation,
 	getSpriteMover,
 	doSpritesOverlap,
+	isChargeMeterFull,
 } from './sprites';
 
 const canvasWidth = 800;
@@ -88,8 +89,7 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 				if (getChargeMeterAmount() < 100) {
 					setChargeMeterAmount(getChargeMeterAmount() + 1.0);
 				}
-				// 66% of the full bar width (164px) is approximately 108px, where the limitLine is.
-				if (getChargeMeterAmount() > 66) {
+				if (isChargeMeterFull(getChargeMeterAmount())) {
 					const isShipTouchingPlanet =
 						sprites.planets && sprites.planets.find(planet => doSpritesOverlap(ship, planet));
 					if (isShipTouchingPlanet) {
@@ -106,8 +106,7 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 				if (getChargeMeterAmount() < 100) {
 					setChargeMeterAmount(getChargeMeterAmount() + 1.0);
 				}
-				// 66% of the full bar width (164px) is approximately 108px, where the limitLine is.
-				if (getChargeMeterAmount() > 66) {
+				if (isChargeMeterFull(getChargeMeterAmount())) {
 					const isShipTouchingGate =
 						sprites.gates && sprites.gates.find(gate => doSpritesOverlap(ship, gate));
 					if (isShipTouchingGate) {

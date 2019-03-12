@@ -172,6 +172,11 @@ export function createAndPlaceChargeMeter(game) {
 	return meter;
 }
 
+export function isChargeMeterFull(amount) {
+	// 66% of the full bar width (164px) is approximately 108px, where the limitLine is.
+	return amount > 66;
+}
+
 export function getCurrentCoordinates(game) {
 	return { x: game.pointer.x, y: game.pointer.y };
 }
