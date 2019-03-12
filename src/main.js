@@ -62,7 +62,7 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 		setChargeMeterAmount,
 		setHealthAmount,
 		markFirstLanding,
-		showDialog,
+		setDialogArray,
 	} = actions;
 	const pressing = getPressingState();
 
@@ -87,9 +87,10 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 			setChargeMeterAmount(0);
 			changeSpeed({ x: 0, y: 0 });
 			markFirstLanding();
-			showDialog(
-				"In the dingy space port, you are approached by a teenage girl. She's very confident, but always looking over her shoulder. You don't see anyone other than a drunk and a traffic controller nearby, but on this tiny planet you wouldn't be surprised if someone meant this woman harm."
-			);
+			setDialogArray([
+				"In the dingy space port, you are approached by a teenage girl. She's very confident, but always looking over her shoulder. You don't see anyone other than a drunk and a traffic controller nearby, but on this tiny planet you wouldn't be surprised if someone meant this woman harm.",
+				"Girl: You're a captain, right? I'm the one who sent the message. I... I want to buy passage. Passage ... just passage out of here. Please?",
+			]);
 		}
 	}
 
@@ -101,9 +102,9 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 			if (getEvent('firstLanding')) {
 				changeCurrentSystem('Betan');
 			} else {
-				showDialog(
-					"Engineer: Captain, we came to this backwater planet because there's a job to be had. Let's not leave before we at least hear them out."
-				);
+				setDialogArray([
+					"Engineer: Captain, we came to this backwater planet because there's a job to be had. Let's not leave before we at least hear them out.",
+				]);
 			}
 		}
 	}
@@ -208,13 +209,9 @@ function initGame() {
 		handleAction({ type: 'CHANGE_SYSTEM_POSITION', payload: { x, y } });
 	const markFirstLanding = () => handleAction({ type: 'EVENT_FIRST_LANDING' });
 	const getEvent = key => getState().events[key];
-	const [isDialogVisible, setDialogVisible] = makeState(false);
-	const [getDialogText, setDialogText] = makeState('');
-	const showDialog = text => {
-		setDialogVisible(true);
-		setDialogText(text);
-	};
-	const hideDialog = () => setDialogVisible(false);
+	const [getDialogText, setDialogArray] = makeState([]);
+	const isDialogVisible = () => !!getDialogText().length;
+	const hideDialog = () => setDialogArray(getDialogText().slice(1));
 	const [isChargeMeterVisible, setChargeMeterVisible] = makeState(false);
 	const [getChargeMeterAmount, setChargeMeterAmount] = makeState(0);
 	const [getHealthAmount, setHealthAmount] = makeState(100);
@@ -250,7 +247,7 @@ function initGame() {
 		setChargeMeterAmount,
 		setHealthAmount,
 		markFirstLanding,
-		showDialog,
+		setDialogArray,
 		hideDialog,
 	};
 	const setupCallback = game => {

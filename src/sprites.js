@@ -222,7 +222,7 @@ export function getSpriteMover(game) {
 
 		// render dialog
 		sprites.dialog.visible = isDialogVisible();
-		sprites.dialog.textArea.text = getDialogText();
+		sprites.dialog.textArea.text = getDialogText().length ? getDialogText()[0] : '';
 
 		// render planets, stars, and gates
 		if (getCurrentSystem() !== lastRenderedSystem) {
