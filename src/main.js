@@ -152,6 +152,10 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 function initSprites(game) {
 	return {
 		sky: createAndPlaceBackground(game),
+		dialog: showDialog(
+			game,
+			"Engineer: Captain, we came to this backwater planet because there's a job to be had. Let's not leave before we at least hear them out."
+		),
 		ship: createAndPlaceShip(game),
 		ring: createAndPlaceNavigationRing(game),
 		pilotModeButton: createAndPlaceModeButton(game, 'pilot', 1),

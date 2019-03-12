@@ -88,16 +88,40 @@ export function createAndPlaceNavigationRing(game) {
 }
 
 export function showDialog(game, text) {
+	const boxPadding = 10;
+	const box = game.rectangle(game.renderer.width - 40, 200, 0x00335a, 0x0f95ff, 2);
 	const dialogText = game.text(text, {
 		fontFamily: 'Arial',
 		fontSize: 28,
 		fill: 'white',
 		wordWrap: true,
-		wordWrapWidth: game.renderer.width - 100,
+		wordWrapWidth: box.width - boxPadding * 2,
 	});
-	dialogText.zIndex = 15;
-	setSpritePosition(dialogText, { y: game.renderer.height - 150, x: 50 });
-	game.stage.addChild(dialogText);
+	setSpritePosition(dialogText, { x: boxPadding, y: boxPadding });
+	box.addChild(dialogText);
+	const continueButton = game.rectangle(110, 35, 0x000000, 0x0f95ff, 1);
+	setSpritePosition(continueButton, {
+		x: box.width - continueButton.width - boxPadding * 2,
+		y: box.height - boxPadding * 2 - continueButton.height,
+	});
+	const continueButtonText = game.text('Continue', {
+		fontFamily: 'Arial',
+		fontSize: 20,
+		fill: 0xffffff,
+	});
+	setSpritePosition(continueButtonText, {
+		x: continueButton.width / 2 - continueButtonText.width / 2,
+		y: continueButton.height / 2 - continueButtonText.height / 2,
+	});
+	continueButton.addChild(continueButtonText);
+	box.addChild(continueButton);
+	box.zIndex = 15;
+	setSpritePosition(box, { x: 20, y: game.renderer.height - 210 });
+	game.stage.addChild(box);
+	return box;
+	// TODO: hide dialog when "continue" button is pressed and there are no more messages
+	// TODO: allow an array of messages
+	// TODO: freeze the game until the dialog is hidden
 }
 
 export function createAndPlaceModeButton(game, modeTitle, orderIndex) {
