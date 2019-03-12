@@ -1,11 +1,10 @@
 /* @format */
-/* globals GameUtilities */
 
 import { getPlanetsInSystem, getStarsInSystem, getGatesInSystem } from './planets';
-import { adjustSpeedForOtherShip, adjustPositionToFollow } from './math';
+import { adjustSpeedForOtherShip, adjustPositionToFollow, getAngleBetweenSprites } from './math';
 
 export function setSpritePosition(sprite, { x, y }) {
-	sprite.setPosition(x, y);
+	sprite.position.set(x, y);
 }
 
 export function setSpriteRotation(sprite, rotation) {
@@ -17,12 +16,20 @@ export function getSpriteRotation(sprite) {
 }
 
 export function setTilePosition(sprite, { x, y }) {
-	sprite.tileX = x;
-	sprite.tileY = y;
+	sprite.tilePosition.x = x;
+	sprite.tilePosition.y = y;
+}
+
+function setSpritePositionToCenter(game, sprite) {
+	sprite.anchor.set(0.5, 0.5);
+	setSpritePosition(sprite, {
+		x: game.renderer.width / 2,
+		y: game.renderer.height / 2,
+	});
 }
 
 export function createAndPlaceBackground(game) {
-	const sky = game.tilingSprite('assets/star-field.png', game.canvas.width, game.canvas.height);
+	const sky = game.tilingSprite('assets/star-field.png', game.renderer.width, game.renderer.height);
 	sky.zIndex = 0;
 	game.stage.addChild(sky);
 	return sky;
@@ -39,6 +46,7 @@ function createAndPlacePlanet(game, planetData) {
 function createAndPlaceGate(game, gateData) {
 	const gate = game.sprite('assets/gate.png');
 	gate.zIndex = 5;
+	gate.anchor.set(0.5, 0.5);
 	gate.positionInSpace = gateData.position;
 	setSpritePosition(gate, { x: gateData.position.x, y: gateData.position.y });
 	return gate;
@@ -48,9 +56,10 @@ export function createAndPlaceOtherShips(game) {
 	const shipLayer = game.group();
 	const ship = game.sprite('assets/ship-2.png');
 	setSpritePosition(ship, { x: 600, y: 20 });
-	ship.setPivot(0.5, 0.5);
+	ship.pivot.set(0.5, 0.5);
 	ship.zIndex = 10;
 	ship.speed = { x: 1, y: 1 };
+	// TODO: set the anchor
 	shipLayer.addChild(ship);
 	game.stage.addChild(shipLayer);
 	setSpritePosition(shipLayer, { x: 0, y: 0 });
@@ -60,9 +69,10 @@ export function createAndPlaceOtherShips(game) {
 export function createAndPlaceShip(game) {
 	const ship = game.sprite('assets/ship.png');
 	ship.rotation = Math.floor(Math.random() * Math.floor(360));
-	ship.setPivot(0.5, 0.5);
+	ship.pivot.set(0.5, 0.5);
+	setSpritePositionToCenter(game, ship);
 	ship.zIndex = 10;
-	game.stage.putCenter(ship);
+	game.stage.addChild(ship);
 	return ship;
 }
 
@@ -70,26 +80,32 @@ export function createAndPlaceNavigationRing(game) {
 	const navRing = game.sprite('assets/nav-ring.png');
 	navRing.zIndex = 15;
 	navRing.rotation = 0;
-	navRing.setPivot(0.5, 0.5);
+	navRing.pivot.set(0.5, 0.5);
 	navRing.alpha = 0.6;
-	game.stage.putCenter(navRing);
+	setSpritePositionToCenter(game, navRing);
+	game.stage.addChild(navRing);
 	return navRing;
 }
 
 export function showDialog(game, text) {
-	const dialogText = game.text(text, '28px serif', 'white');
+	const dialogText = game.text(text, {
+		fontFamily: 'Arial',
+		fontSize: 28,
+		fill: 'white',
+		wordWrap: true,
+		wordWrapWidth: game.renderer.width - 100,
+	});
 	dialogText.zIndex = 15;
-	setSpritePosition(dialogText, { y: game.canvas.height - 50, x: 0 });
+	setSpritePosition(dialogText, { y: game.renderer.height - 150, x: 50 });
 	game.stage.addChild(dialogText);
 }
 
 export function createAndPlaceModeButton(game, modeTitle, orderIndex) {
-	const title = game.text(modeTitle, '32px serif', 'white');
-	title.zIndex = 15;
-	title.x = 40;
-	title.y = 10 * orderIndex * 5;
-	game.stage.addChild(title);
-	return title;
+	const buttonLabel = game.text(modeTitle, { fontFamily: 'Arial', fontSize: 36, fill: 'white' });
+	buttonLabel.zIndex = 15;
+	setSpritePosition(buttonLabel, { x: 40, y: 10 * orderIndex * 5 });
+	game.stage.addChild(buttonLabel);
+	return buttonLabel;
 }
 
 export function createAndPlaceModePointer(game) {
@@ -102,23 +118,28 @@ export function createAndPlaceModePointer(game) {
 }
 
 export function createAndPlaceHealthMeter(game) {
-	const outerBar = game.rectangle(128, 16, 'black', 'green', 2);
-	const innerBar = game.rectangle(6, 16, 'green');
-	const meter = game.group(outerBar, innerBar);
+	const outerBar = game.rectangle(128, 16, 0x000000, 0x008000, 2);
+	const innerBar = game.rectangle(6, 16, 0x008000);
+	const meter = game.group();
+	meter.addChild(outerBar);
+	meter.addChild(innerBar);
 	meter.innerBar = innerBar;
 	meter.outerBar = outerBar;
-	setSpritePosition(meter, { x: game.canvas.width - 148, y: 16 });
+	setSpritePosition(meter, { x: game.renderer.width - 148, y: 16 });
 	meter.zIndex = 15;
 	game.stage.addChild(meter);
 	return meter;
 }
 
 export function createAndPlaceChargeMeter(game) {
-	const outerBar = game.rectangle(164, 16, 'black', 'blue', 2);
-	const innerBar = game.rectangle(6, 16, 'blue');
-	const limitLine = game.rectangle(2, 14, 'red');
+	const outerBar = game.rectangle(164, 16, 0x000000, 0x0000ff, 2);
+	const innerBar = game.rectangle(6, 16, 0x0000ff);
+	const limitLine = game.rectangle(2, 14, 0xff0000);
 	setSpritePosition(limitLine, { x: 108, y: 2 });
-	const meter = game.group(outerBar, innerBar, limitLine);
+	const meter = game.group();
+	meter.addChild(outerBar);
+	meter.addChild(innerBar);
+	meter.addChild(limitLine);
 	meter.innerBar = innerBar;
 	meter.outerBar = outerBar;
 	setSpritePosition(meter, { x: 30, y: 16 });
@@ -170,20 +191,26 @@ export function getSpriteMover(game) {
 
 		// render planets, stars, and gates
 		if (getCurrentSystem() !== lastRenderedSystem) {
-			game.remove(sprites.planets || []);
+			if (sprites.planets) {
+				sprites.planets.map(sprite => game.stage.removeChild(sprite));
+			}
 			const currentSystem = getCurrentSystem();
 			sprites.planets = getPlanetsInSystem(currentSystem).map(planetData =>
 				createAndPlacePlanet(game, planetData)
 			);
 			sprites.planets.map(sprite => game.stage.addChild(sprite));
 
-			game.remove(sprites.stars || []);
+			if (sprites.stars) {
+				sprites.stars.map(sprite => game.stage.removeChild(sprite));
+			}
 			sprites.stars = getStarsInSystem(currentSystem).map(starData =>
 				createAndPlacePlanet(game, starData)
 			);
 			sprites.stars.map(sprite => game.stage.addChild(sprite));
 
-			game.remove(sprites.gates || []);
+			if (sprites.gates) {
+				sprites.gates.map(gate => game.stage.removeChild(gate));
+			}
 			sprites.gates = getGatesInSystem(currentSystem).map(gateData =>
 				createAndPlaceGate(game, gateData)
 			);
@@ -214,11 +241,10 @@ export function getSpriteMover(game) {
 		// render other ships
 		if (!sprites.ships) {
 			// sprites.ships = createAndPlaceOtherShips(game);
-			sprites.ships = game.group();
+			sprites.ships = { children: [] };
 		}
-		const utilites = new GameUtilities();
 		sprites.ships.children.forEach(other => {
-			other.rotation = utilites.angle(ship, other);
+			other.rotation = getAngleBetweenSprites(ship, other);
 			// adjust the ship's speed to accelerate
 			other.speed = adjustSpeedForOtherShip(other.rotation, other.speed);
 			// adjust the position to follow the player
@@ -262,4 +288,44 @@ export function getSpriteMover(game) {
 			sprites.chargeMeter.innerBar.width = (sprites.chargeMeter.outerBar.width / 100) * amount;
 		}
 	};
+}
+
+/**
+ * Determine if two sprites overlap
+ *
+ * Each sprite object must have a width and a height property, as well as an x
+ * and a y property. The x and y properties MUST be the center of each sprite.
+ */
+export function doSpritesOverlap(r1, r2) {
+	// Find the center points of each sprite
+	const r1CenterX = r1.x;
+	const r1CenterY = r1.y;
+	const r2CenterX = r2.x;
+	const r2CenterY = r2.y;
+
+	// Find the half-widths and half-heights of each sprite
+	const r1HalfWidth = r1.width / 2;
+	const r1HalfHeight = r1.height / 2;
+	const r2HalfWidth = r2.width / 2;
+	const r2HalfHeight = r2.height / 2;
+
+	// Calculate the distance vector between the sprites
+	const vx = r1CenterX - r2CenterX;
+	const vy = r1CenterY - r2CenterY;
+
+	// Figure out the combined half-widths and half-heights
+	const combinedHalfWidths = r1HalfWidth + r2HalfWidth;
+	const combinedHalfHeights = r1HalfHeight + r2HalfHeight;
+
+	// Check for a collision on the x axis
+	if (Math.abs(vx) < combinedHalfWidths) {
+		// A collision might be occurring. Check for a collision on the y axis
+		if (Math.abs(vy) < combinedHalfHeights) {
+			// There's definitely a collision happening
+			return true;
+		}
+		// There's no collision on the y axis
+		return false;
+	}
+	return false;
 }

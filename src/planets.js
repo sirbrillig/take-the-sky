@@ -16,7 +16,7 @@ export function getAllSystems() {
 			star: {
 				position: { x: 800, y: 300 },
 				size: 200,
-				color: 'yellow',
+				color: 0xffff00,
 			},
 			gates: [
 				{
@@ -29,7 +29,7 @@ export function getAllSystems() {
 					description:
 						"Not much of a tourist destination. Or any kind of destination at all, really. The Empire tout it as a settler's paradise. Mostly it's just a lot of mud.",
 					position: { x: 25, y: 75 },
-					color: 'red',
+					color: 0xff0000,
 					size: 40,
 				},
 			],
@@ -38,7 +38,7 @@ export function getAllSystems() {
 			star: {
 				position: { x: 100, y: 400 },
 				size: 150,
-				color: 'orange',
+				color: 0xffa500,
 			},
 			planets: [
 				{
@@ -46,7 +46,7 @@ export function getAllSystems() {
 					description:
 						'Home to many researchers and medical professionals. Expensive tech. Folks are overworked, mostly.',
 					position: { x: 80, y: 200 },
-					color: 'blue',
+					color: 0x0000ff,
 					size: 40,
 				},
 			],

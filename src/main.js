@@ -1,6 +1,6 @@
 /* @format */
 
-import { createGame, scaleGameToWindow, setBackgroundColor } from './hexi-wrapper';
+import createGame from './hexi-wrapper';
 import { adjustSpeed, adjustRotation, getNewRingRotation, isClockwise } from './math';
 import { makeReducer, makeState } from './state';
 import reducer from './state-reducer';
@@ -20,6 +20,7 @@ import {
 	getSpriteRotation,
 	getSpriteMover,
 	showDialog,
+	doSpritesOverlap,
 } from './sprites';
 
 const canvasWidth = 800;
@@ -65,7 +66,7 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 	setChargeMeterVisible(getControlMode() === 'land' || getChargeMeterAmount() > 1);
 
 	const isShipTouchingStar =
-		sprites.stars && sprites.stars.find(star => game.hitTestRectangle(ship, star));
+		sprites.stars && sprites.stars.find(star => doSpritesOverlap(ship, star));
 	if (isShipTouchingStar && getHealthAmount() > 1) {
 		setHealthAmount(getHealthAmount() - 1);
 	}
@@ -82,7 +83,7 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 				// 66% of the full bar width (164px) is approximately 108px, where the limitLine is.
 				if (getChargeMeterAmount() > 66) {
 					const isShipTouchingPlanet =
-						sprites.planets && sprites.planets.find(planet => game.hitTestRectangle(ship, planet));
+						sprites.planets && sprites.planets.find(planet => doSpritesOverlap(ship, planet));
 					if (isShipTouchingPlanet) {
 						changeSpeed({ x: 0, y: 0 });
 						markFirstLanding();
@@ -96,7 +97,7 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 				// 66% of the full bar width (164px) is approximately 108px, where the limitLine is.
 				if (getChargeMeterAmount() > 66) {
 					const isShipTouchingGate =
-						sprites.gates && sprites.gates.find(gate => game.hitTestRectangle(ship, gate));
+						sprites.gates && sprites.gates.find(gate => doSpritesOverlap(ship, gate));
 					if (isShipTouchingGate) {
 						if (getEvent('firstLanding')) {
 							changeCurrentSystem('Betan');
@@ -178,9 +179,7 @@ function setUpGameObjects(game, state, actions) {
 		changePressingState,
 		getPressingState
 	);
-	const moveSprites = getSpriteMover(game);
-
-	game.state = () => renderGame(game, sprites, state, actions, moveSprites);
+	return sprites;
 }
 
 function initGame() {
@@ -235,11 +234,12 @@ function initGame() {
 		setHealthAmount,
 		markFirstLanding,
 	};
-	const setupCallback = game => setUpGameObjects(game, state, actions);
-	const game = createGame({ canvasWidth, canvasHeight, filesToLoad, setupCallback });
-	scaleGameToWindow(game);
-	setBackgroundColor(game, 0x000000);
-	game.start();
+	const setupCallback = game => {
+		const sprites = setUpGameObjects(game, state, actions);
+		const moveSprites = getSpriteMover(game);
+		game.ticker.add(() => renderGame(game, sprites, state, actions, moveSprites));
+	};
+	createGame({ canvasWidth, canvasHeight, filesToLoad, setupCallback });
 }
 
 initGame();
