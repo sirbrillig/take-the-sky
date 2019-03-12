@@ -217,6 +217,7 @@ export function getSpriteMover(game) {
 			getHealthAmount,
 			isDialogVisible,
 			getDialogText,
+			getEvent,
 		} = state;
 		const { ship, sky, ring, modePointer } = sprites;
 		const systemPosition = getSystemPosition();
@@ -224,7 +225,9 @@ export function getSpriteMover(game) {
 		// render dialog
 		sprites.dialog.visible = isDialogVisible();
 		sprites.dialog.textArea.text = getDialogText().length ? getDialogText()[0] : '';
-		sprites.dialog.removeChild(sprites.dialog.continueButton); // TODO: is there a way to do this non-destructively?
+		if (getEvent('gameOver')) {
+			sprites.dialog.removeChild(sprites.dialog.continueButton); // TODO: is there a way to do this non-destructively?
+		}
 
 		// render planets, stars, and gates
 		if (getCurrentSystem() !== lastRenderedSystem) {
