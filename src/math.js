@@ -1,6 +1,6 @@
 /* @format */
 
-function adjustNumberBetween(num, min, max) {
+export function adjustNumberBetween(num, min, max) {
 	num = num > max ? max : num;
 	num = num < min ? min : num;
 	return num;

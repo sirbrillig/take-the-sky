@@ -1,7 +1,7 @@
 /* @format */
 
 import createGame from './pixi-wrapper';
-import { adjustSpeedForRotation, adjustRotation } from './math';
+import { adjustSpeedForRotation, adjustRotation, adjustNumberBetween } from './math';
 import { makeReducer, makeState } from './state';
 import reducer from './state-reducer';
 import { setUpKeyboardControls, getTurningDirectionFromPressingState } from './controls';
@@ -41,6 +41,13 @@ function updateSystemPositionFromSpeed(state, actions) {
 	const speed = getSpeed();
 	const system = getSystemPosition();
 	changeSystemPosition({ x: system.x + speed.x, y: system.y + speed.y });
+}
+
+function shouldIncreaseChargeMeter({ getPressingState, getControlMode }) {
+	if (getPressingState().up && ['land', 'jump'].includes(getControlMode())) {
+		return true;
+	}
+	return false;
 }
 
 function renderGame(game, sprites, state, actions, moveSprites) {
@@ -114,37 +121,19 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 		}
 	}
 
-	if (pressing.up) {
-		switch (getControlMode()) {
-			case 'pilot':
-				changeSpeed(adjustSpeedForRotation(getSpriteRotation(ship), getSpeed()));
-				break;
-			case 'land':
-				if (getChargeMeterAmount() < 100) {
-					setChargeMeterAmount(getChargeMeterAmount() + 1.0);
-				}
-				break;
-			case 'jump':
-				if (getChargeMeterAmount() < 100) {
-					setChargeMeterAmount(getChargeMeterAmount() + 1.0);
-				}
-				break;
-			default:
-			// noop
-		}
+	if (pressing.up && getControlMode() === 'pilot') {
+		changeSpeed(adjustSpeedForRotation(getSpriteRotation(ship), getSpeed()));
 	}
 
-	if (!pressing.up && getChargeMeterAmount() > 1) {
-		setChargeMeterAmount(getChargeMeterAmount() - 0.2);
-	}
-	if (
-		pressing.up &&
-		getControlMode() !== 'land' &&
-		getControlMode() !== 'jump' &&
-		getChargeMeterAmount() > 1
-	) {
-		setChargeMeterAmount(getChargeMeterAmount() - 0.2);
-	}
+	setChargeMeterAmount(
+		adjustNumberBetween(
+			shouldIncreaseChargeMeter(state)
+				? getChargeMeterAmount() + 1.0
+				: getChargeMeterAmount() - 0.2,
+			0,
+			100
+		)
+	);
 
 	if (getControlMode() === 'pilot' && (pressing.left || pressing.right)) {
 		setSpriteRotation(
