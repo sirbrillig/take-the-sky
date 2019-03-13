@@ -10,7 +10,7 @@ function areVectorsSame(first, second) {
 	return first.x === second.x && first.y === second.y;
 }
 
-export function adjustSpeed(rotation, speed) {
+export function adjustSpeedForRotation(rotation, speed) {
 	const accelerationRate = 0.04;
 	const maxSpeed = 3;
 	let { x, y } = speed;

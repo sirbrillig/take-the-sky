@@ -1,7 +1,7 @@
 /* @format */
 
 import createGame from './pixi-wrapper';
-import { adjustSpeed, adjustRotation } from './math';
+import { adjustSpeedForRotation, adjustRotation } from './math';
 import { makeReducer, makeState } from './state';
 import reducer from './state-reducer';
 import { setUpKeyboardControls, getTurningDirectionFromPressingState } from './controls';
@@ -117,7 +117,7 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 	if (pressing.up) {
 		switch (getControlMode()) {
 			case 'pilot':
-				changeSpeed(adjustSpeed(getSpriteRotation(ship), getSpeed()));
+				changeSpeed(adjustSpeedForRotation(getSpriteRotation(ship), getSpeed()));
 				break;
 			case 'land':
 				if (getChargeMeterAmount() < 100) {
