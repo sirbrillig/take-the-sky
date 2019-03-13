@@ -75,6 +75,11 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 
 	const isShipTouchingStar =
 		sprites.stars && sprites.stars.find(star => doSpritesOverlap(ship, star));
+	if (isShipTouchingStar && !getEvent('starsAreHot')) {
+		changeSpeed({ x: 0, y: 0 });
+		showDialog('starsAreHot');
+		return;
+	}
 	if (isShipTouchingStar && getHealthAmount() > 0) {
 		setHealthAmount(getHealthAmount() - 1);
 	}

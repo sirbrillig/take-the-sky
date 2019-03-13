@@ -6,6 +6,11 @@ export function getDialogTree() {
 			text: "As the ship's hull tears apart, you reflect that at least, at the end, you were free.",
 			action: { type: 'EVENT_GAME_OVER' },
 		},
+		starsAreHot: {
+			text: "Engineer: Captain, that star is millions of degrees. Let's try to avoid it, ok?",
+			action: { type: 'EVENT_STAR_WARNING' },
+			options: [{ text: 'Continue' }],
+		},
 		firstLandingNotDone: {
 			text:
 				"Engineer: Captain, we came to this backwater planet because there's a job to be had. Let's not leave before we at least hear them out.",

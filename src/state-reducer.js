@@ -8,6 +8,8 @@ export default function reducer(state, { type, payload }) {
 			return { ...state, currentSystem: payload };
 		case 'EVENT_FIRST_LANDING':
 			return { ...state, events: { ...state.events, firstLanding: true } };
+		case 'EVENT_STAR_WARNING':
+			return { ...state, events: { ...state.events, starsAreHot: true } };
 		case 'EVENT_GAME_OVER':
 			return { ...state, events: { ...state.events, gameOver: true } };
 		default:
