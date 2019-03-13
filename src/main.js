@@ -36,7 +36,7 @@ const filesToLoad = [
 	'assets/pointer.png',
 ];
 
-function updateStateFromPressingState(state, actions) {
+function updateSystemPositionFromSpeed(state, actions) {
 	const { getSpeed, getSystemPosition } = state;
 	const { changeSystemPosition } = actions;
 	const speed = getSpeed();
@@ -170,7 +170,7 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 	}
 	setSpriteRotation(ring, getSpriteRotation(ship));
 
-	updateStateFromPressingState(state, actions);
+	updateSystemPositionFromSpeed(state, actions);
 
 	moveSprites(sprites, state, actions);
 }
