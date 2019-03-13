@@ -281,7 +281,6 @@ export function getSpriteMover(game) {
 			getEvent,
 		} = state;
 		const { handleAction } = actions;
-		const { ship, sky, ring, modePointer } = sprites;
 		const systemPosition = getSystemPosition();
 
 		// render dialog
@@ -357,11 +356,11 @@ export function getSpriteMover(game) {
 			sprites.ships = { children: [] };
 		}
 		sprites.ships.children.forEach(other => {
-			other.rotation = getAngleBetweenSprites(ship, other);
+			other.rotation = getAngleBetweenSprites(sprites.ship, other);
 			// adjust the ship's speed to accelerate
 			other.speed = adjustSpeedForOtherShip(other.rotation, other.speed);
 			// adjust the position to follow the player
-			adjustPositionToFollow(other, ship, other.speed);
+			adjustPositionToFollow(other, sprites.ship, other.speed);
 			// adjust the position for the system position
 			setSpritePosition(other, {
 				x: other.x + getSpeed().x,
@@ -370,13 +369,13 @@ export function getSpriteMover(game) {
 		});
 
 		// render background
-		setTilePosition(sky, { x: systemPosition.x, y: systemPosition.y });
+		setTilePosition(sprites.sky, { x: systemPosition.x, y: systemPosition.y });
 
 		// render ring
-		ring.visible = !getEvent('gameOver') && getControlMode() === 'pilot';
+		sprites.ring.visible = !getEvent('gameOver') && getControlMode() === 'pilot';
 
 		// render mode pointer
-		modePointer.y = getModePointerPositionForMode(getControlMode());
+		sprites.modePointer.y = getModePointerPositionForMode(getControlMode());
 
 		// render health bar
 		sprites.healthMeter.innerBar.width =
