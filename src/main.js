@@ -22,6 +22,7 @@ import {
 	getSpriteMover,
 	doSpritesOverlap,
 	isChargeMeterFull,
+	explodeShip,
 } from './sprites';
 
 const canvasWidth = 800;
@@ -71,6 +72,12 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 		return; // freeze the game if the dialog is showing
 	}
 
+	if (getEvent('gameOver')) {
+		setChargeMeterAmount(0);
+		moveSprites(sprites, state, actions);
+		return;
+	}
+
 	setChargeMeterVisible(getControlMode() === 'land' || getChargeMeterAmount() > 1);
 
 	const isShipTouchingStar =
@@ -85,6 +92,8 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 	}
 
 	if (getHealthAmount() < 1) {
+		ship.visible = false;
+		explodeShip(game);
 		showDialog('explodedShip');
 		return;
 	}

@@ -213,6 +213,25 @@ export function createAndPlaceChargeMeter(game) {
 	return meter;
 }
 
+export function explodeShip(game) {
+	const images = [
+		'assets/explosion_01.png',
+		'assets/explosion_02.png',
+		'assets/explosion_03.png',
+		'assets/explosion_04.png',
+		'assets/explosion_05.png',
+		'assets/explosion_06.png',
+		'assets/explosion_07.png',
+	];
+	const animatedSprite = game.animatedSpriteFromImages(images);
+	setSpritePositionToCenter(game, animatedSprite);
+	animatedSprite.animationSpeed = 0.2;
+	animatedSprite.loop = false;
+	animatedSprite.onComplete = () => animatedSprite.destroy();
+	game.stage.addChild(animatedSprite);
+	animatedSprite.play();
+}
+
 export function isChargeMeterFull(amount) {
 	// 66% of the full bar width (164px) is approximately 108px, where the limitLine is.
 	return amount > 66;
@@ -259,6 +278,7 @@ export function getSpriteMover(game) {
 			isDialogVisible,
 			getDialogKey,
 			getDialogSelection,
+			getEvent,
 		} = state;
 		const { handleAction } = actions;
 		const { ship, sky, ring, modePointer } = sprites;
@@ -353,7 +373,7 @@ export function getSpriteMover(game) {
 		setTilePosition(sky, { x: systemPosition.x, y: systemPosition.y });
 
 		// render ring
-		ring.visible = getControlMode() === 'pilot';
+		ring.visible = !getEvent('gameOver') && getControlMode() === 'pilot';
 
 		// render mode pointer
 		modePointer.y = getModePointerPositionForMode(getControlMode());

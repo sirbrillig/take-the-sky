@@ -35,6 +35,13 @@ export default function createGame({ canvasWidth, canvasHeight, setupCallback, f
 		app.group = () => new PIXI.Container();
 		app.tilingSprite = (key, width, height) =>
 			new PIXI.extras.TilingSprite(resources[key].texture, width, height);
+		app.animatedSpriteFromImages = images => {
+			return new PIXI.extras.AnimatedSprite(
+				images.map(image => {
+					return PIXI.Texture.fromImage(image);
+				})
+			);
+		};
 		setupCallback(app, loader, resources);
 	});
 	return app;
