@@ -1,7 +1,7 @@
 /* @format */
 
 import createGame from './pixi-wrapper';
-import { adjustSpeed, adjustRotation, getNewRingRotation, isClockwise } from './math';
+import { adjustSpeed, adjustRotation } from './math';
 import { makeReducer, makeState } from './state';
 import reducer from './state-reducer';
 import {
@@ -10,7 +10,6 @@ import {
 	getTurningDirectionFromPressingState,
 } from './controls';
 import {
-	getCurrentCoordinates,
 	createAndPlaceModeButton,
 	createAndPlaceModePointer,
 	createAndPlaceBackground,
@@ -57,7 +56,6 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 	} = state;
 	const {
 		changeSpeed,
-		changePressingState,
 		changeCurrentSystem,
 		setChargeMeterVisible,
 		setChargeMeterAmount,
@@ -160,14 +158,6 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 		);
 	}
 
-	if (getControlMode() === 'pilot' && pressing.ring) {
-		const currentCoordinates = getCurrentCoordinates(game);
-		const newRingRotation = isClockwise(ring, pressing.ring, currentCoordinates)
-			? getNewRingRotation(ring, pressing.ring, currentCoordinates)
-			: -getNewRingRotation(ring, pressing.ring, currentCoordinates);
-		setSpriteRotation(ship, getSpriteRotation(ship) + newRingRotation);
-		changePressingState({ ...pressing, ring: currentCoordinates });
-	}
 	setSpriteRotation(ring, getSpriteRotation(ship));
 
 	updateSystemPositionFromSpeed(state, actions);
@@ -190,16 +180,7 @@ function initSprites(game) {
 
 function setUpGameObjects(game, state, actions) {
 	const sprites = initSprites(game);
-	const { changePressingState } = actions;
-	const { getControlMode, getPressingState } = state;
 	setUpKeyboardControls(game, state, actions);
-	setUpNavigationRingControls(
-		game,
-		sprites.ring,
-		getControlMode,
-		changePressingState,
-		getPressingState
-	);
 	return sprites;
 }
 
