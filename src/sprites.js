@@ -379,19 +379,10 @@ export function getSpriteMover(game) {
 		modePointer.y = getModePointerPositionForMode(getControlMode());
 
 		// render health bar
-		if (!sprites.healthMeter) {
-			sprites.healthMeter = createAndPlaceHealthMeter(game);
-			sortSpritesByZIndex(game);
-		}
-		sprites.healthMeter.visible = true;
 		sprites.healthMeter.innerBar.width =
 			(sprites.healthMeter.outerBar.width / 100) * getHealthAmount();
 
 		// render charge meter
-		if (!sprites.chargeMeter) {
-			sprites.chargeMeter = createAndPlaceChargeMeter(game);
-			sortSpritesByZIndex(game);
-		}
 		if (!isChargeMeterVisible()) {
 			sprites.chargeMeter.visible = false;
 		}

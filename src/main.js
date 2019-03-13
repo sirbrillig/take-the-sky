@@ -4,17 +4,15 @@ import createGame from './pixi-wrapper';
 import { adjustSpeed, adjustRotation } from './math';
 import { makeReducer, makeState } from './state';
 import reducer from './state-reducer';
-import {
-	setUpKeyboardControls,
-	setUpNavigationRingControls,
-	getTurningDirectionFromPressingState,
-} from './controls';
+import { setUpKeyboardControls, getTurningDirectionFromPressingState } from './controls';
 import {
 	createAndPlaceModeButton,
 	createAndPlaceModePointer,
 	createAndPlaceBackground,
 	createAndPlaceShip,
 	createAndPlaceNavigationRing,
+	createAndPlaceHealthMeter,
+	createAndPlaceChargeMeter,
 	createAndPlaceDialog,
 	setSpriteRotation,
 	getSpriteRotation,
@@ -171,6 +169,8 @@ function initSprites(game) {
 		dialog: createAndPlaceDialog(game),
 		ship: createAndPlaceShip(game),
 		ring: createAndPlaceNavigationRing(game),
+		healthMeter: createAndPlaceHealthMeter(game),
+		chargeMeter: createAndPlaceChargeMeter(game),
 		pilotModeButton: createAndPlaceModeButton(game, 'pilot', 1),
 		landModeButton: createAndPlaceModeButton(game, 'land', 2),
 		jumpModeButton: createAndPlaceModeButton(game, 'jump', 3),
