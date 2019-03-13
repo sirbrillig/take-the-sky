@@ -263,8 +263,60 @@ function sortSpritesByZIndex(game) {
 	});
 }
 
+/**
+ * Determine if two sprites overlap
+ *
+ * Each sprite object must have a width and a height property, as well as an x
+ * and a y property. The x and y properties MUST be the center of each sprite.
+ */
+export function doSpritesOverlap(r1, r2) {
+	// Find the center points of each sprite
+	const r1CenterX = r1.x;
+	const r1CenterY = r1.y;
+	const r2CenterX = r2.x;
+	const r2CenterY = r2.y;
+
+	// Find the half-widths and half-heights of each sprite
+	const r1HalfWidth = r1.width / 2;
+	const r1HalfHeight = r1.height / 2;
+	const r2HalfWidth = r2.width / 2;
+	const r2HalfHeight = r2.height / 2;
+
+	// Calculate the distance vector between the sprites
+	const vx = r1CenterX - r2CenterX;
+	const vy = r1CenterY - r2CenterY;
+
+	// Figure out the combined half-widths and half-heights
+	const combinedHalfWidths = r1HalfWidth + r2HalfWidth;
+	const combinedHalfHeights = r1HalfHeight + r2HalfHeight;
+
+	// Check for a collision on the x axis
+	if (Math.abs(vx) < combinedHalfWidths) {
+		// A collision might be occurring. Check for a collision on the y axis
+		if (Math.abs(vy) < combinedHalfHeights) {
+			// There's definitely a collision happening
+			return true;
+		}
+		// There's no collision on the y axis
+		return false;
+	}
+	return false;
+}
+
 function isChargeMeterVisible({ getControlMode, getChargeMeterAmount }) {
 	return ['land', 'jump'].includes(getControlMode()) || getChargeMeterAmount() > 1;
+}
+
+export function isShipTouchingStar({ stars, ship }) {
+	return stars && stars.find(star => doSpritesOverlap(ship, star));
+}
+
+export function isShipTouchingPlanet({ planets, ship }) {
+	return planets && planets.find(planet => doSpritesOverlap(ship, planet));
+}
+
+export function isShipTouchingGate({ gates, ship }) {
+	return gates && gates.find(gate => doSpritesOverlap(ship, gate));
 }
 
 export function getSpriteMover(game) {
@@ -394,44 +446,4 @@ export function getSpriteMover(game) {
 			sprites.chargeMeter.innerBar.width = (sprites.chargeMeter.outerBar.width / 100) * amount;
 		}
 	};
-}
-
-/**
- * Determine if two sprites overlap
- *
- * Each sprite object must have a width and a height property, as well as an x
- * and a y property. The x and y properties MUST be the center of each sprite.
- */
-export function doSpritesOverlap(r1, r2) {
-	// Find the center points of each sprite
-	const r1CenterX = r1.x;
-	const r1CenterY = r1.y;
-	const r2CenterX = r2.x;
-	const r2CenterY = r2.y;
-
-	// Find the half-widths and half-heights of each sprite
-	const r1HalfWidth = r1.width / 2;
-	const r1HalfHeight = r1.height / 2;
-	const r2HalfWidth = r2.width / 2;
-	const r2HalfHeight = r2.height / 2;
-
-	// Calculate the distance vector between the sprites
-	const vx = r1CenterX - r2CenterX;
-	const vy = r1CenterY - r2CenterY;
-
-	// Figure out the combined half-widths and half-heights
-	const combinedHalfWidths = r1HalfWidth + r2HalfWidth;
-	const combinedHalfHeights = r1HalfHeight + r2HalfHeight;
-
-	// Check for a collision on the x axis
-	if (Math.abs(vx) < combinedHalfWidths) {
-		// A collision might be occurring. Check for a collision on the y axis
-		if (Math.abs(vy) < combinedHalfHeights) {
-			// There's definitely a collision happening
-			return true;
-		}
-		// There's no collision on the y axis
-		return false;
-	}
-	return false;
 }

@@ -17,7 +17,9 @@ import {
 	setSpriteRotation,
 	getSpriteRotation,
 	getSpriteMover,
-	doSpritesOverlap,
+	isShipTouchingStar,
+	isShipTouchingPlanet,
+	isShipTouchingGate,
 	isChargeMeterFull,
 	explodeShip,
 } from './sprites';
@@ -73,14 +75,12 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 		return;
 	}
 
-	const isShipTouchingStar =
-		sprites.stars && sprites.stars.find(star => doSpritesOverlap(ship, star));
-	if (isShipTouchingStar && !getEvent('starsAreHot')) {
+	if (isShipTouchingStar(sprites) && !getEvent('starsAreHot')) {
 		changeSpeed({ x: 0, y: 0 });
 		showDialog('starsAreHot');
 		return;
 	}
-	if (isShipTouchingStar && getHealthAmount() > 0) {
+	if (isShipTouchingStar(sprites) && getHealthAmount() > 0) {
 		setHealthAmount(getHealthAmount() - 1);
 	}
 
@@ -91,26 +91,26 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 		return;
 	}
 
-	if (getControlMode() === 'land' && isChargeMeterFull(getChargeMeterAmount())) {
-		const isShipTouchingPlanet =
-			sprites.planets && sprites.planets.find(planet => doSpritesOverlap(ship, planet));
-		if (isShipTouchingPlanet) {
-			setChargeMeterAmount(0);
-			changeSpeed({ x: 0, y: 0 });
-			showDialog('firstLanding1');
-		}
+	if (
+		getControlMode() === 'land' &&
+		isChargeMeterFull(getChargeMeterAmount()) &&
+		isShipTouchingPlanet(sprites)
+	) {
+		setChargeMeterAmount(0);
+		changeSpeed({ x: 0, y: 0 });
+		showDialog('firstLanding1');
 	}
 
-	if (getControlMode() === 'jump' && isChargeMeterFull(getChargeMeterAmount())) {
-		const isShipTouchingGate =
-			sprites.gates && sprites.gates.find(gate => doSpritesOverlap(ship, gate));
-		if (isShipTouchingGate) {
-			setChargeMeterAmount(0);
-			if (getEvent('firstLanding')) {
-				changeCurrentSystem('Betan');
-			} else {
-				showDialog('firstLandingNotDone');
-			}
+	if (
+		getControlMode() === 'jump' &&
+		isChargeMeterFull(getChargeMeterAmount()) &&
+		isShipTouchingGate(sprites)
+	) {
+		setChargeMeterAmount(0);
+		if (getEvent('firstLanding')) {
+			changeCurrentSystem('Betan');
+		} else {
+			showDialog('firstLandingNotDone');
 		}
 	}
 
