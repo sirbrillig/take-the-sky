@@ -1,7 +1,6 @@
 /* @format */
 /* globals window */
 
-import { getCurrentCoordinates } from './sprites';
 import getNextMode from './control-modes';
 import { getDialogObjectForKey } from './dialog-tree';
 
@@ -71,19 +70,6 @@ export function setUpKeyboardControls(game, state, actions) {
 	};
 	window.document.addEventListener('keydown', onKeyDown);
 	window.document.addEventListener('keyup', onKeyUp);
-}
-
-export function setUpNavigationRingControls(
-	game,
-	ring,
-	getControlMode,
-	changePressingState,
-	getPressingState
-) {
-	ring.interact = true;
-	ring.press = () =>
-		changePressingState({ ...getPressingState(), ring: getCurrentCoordinates(game) });
-	ring.release = () => changePressingState({ ...getPressingState(), ring: false });
 }
 
 export function getTurningDirectionFromPressingState(pressing) {
