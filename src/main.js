@@ -61,17 +61,17 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 		setChargeMeterVisible,
 		setChargeMeterAmount,
 		setHealthAmount,
-		markFirstLanding,
-		setDialogArray,
-		markGameOver,
+		showDialog,
 	} = actions;
 	const pressing = getPressingState();
 
 	if (isDialogVisible()) {
 		setChargeMeterAmount(0);
-		moveSprites(sprites, state);
+		moveSprites(sprites, state, actions);
 		return; // freeze the game if the dialog is showing
 	}
+	showDialog('firstLanding1'); // FIXME: just for testing
+	return; // FIXME: just for testing
 
 	setChargeMeterVisible(getControlMode() === 'land' || getChargeMeterAmount() > 1);
 
@@ -82,13 +82,7 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 	}
 
 	if (getHealthAmount() < 1) {
-		setDialogArray([
-			{
-				text:
-					"As the ship's hull tears apart and the coldness of space covers your skin, you reflect that at least you were free.",
-			},
-		]);
-		markGameOver();
+		showDialog('explodedShip');
 		return;
 	}
 
@@ -98,21 +92,7 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 		if (isShipTouchingPlanet) {
 			setChargeMeterAmount(0);
 			changeSpeed({ x: 0, y: 0 });
-			markFirstLanding();
-			setDialogArray([
-				{
-					text:
-						"In the dingy space port, you are approached by a teenage girl. She's very confident, but always looking over her shoulder. You don't see anyone other than a drunk and a traffic controller nearby, but on this tiny planet you wouldn't be surprised if someone meant this woman harm.",
-				},
-				{
-					text:
-						"Girl: You're a captain, right? I'm the one who sent the message. I... I want to buy passage. Passage ... just passage out of here. Please?",
-					options: [
-						'Not a problem, miss. So long as you can pay.',
-						"There wouldn't be any trouble following you that might rub off on my ship, would there?",
-					],
-				},
-			]);
+			showDialog('firstLanding1');
 		}
 	}
 
@@ -124,12 +104,7 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 			if (getEvent('firstLanding')) {
 				changeCurrentSystem('Betan');
 			} else {
-				setDialogArray([
-					{
-						text:
-							"Engineer: Captain, we came to this backwater planet because there's a job to be had. Let's not leave before we at least hear them out.",
-					},
-				]);
+				showDialog('firstLandingNotDone');
 			}
 		}
 	}
@@ -185,7 +160,7 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 
 	updateStateFromPressingState(state, actions);
 
-	moveSprites(sprites, state);
+	moveSprites(sprites, state, actions);
 }
 
 function initSprites(game) {
@@ -233,12 +208,11 @@ function initGame() {
 	const getSystemPosition = () => getState().position;
 	const changeSystemPosition = ({ x, y }) =>
 		handleAction({ type: 'CHANGE_SYSTEM_POSITION', payload: { x, y } });
-	const markFirstLanding = () => handleAction({ type: 'EVENT_FIRST_LANDING' });
-	const markGameOver = () => handleAction({ type: 'EVENT_GAME_OVER' });
 	const getEvent = key => getState().events[key];
-	const [getDialogText, setDialogArray] = makeState([]);
-	const isDialogVisible = () => !!getDialogText().length;
-	const hideDialog = () => setDialogArray(getDialogText().slice(1));
+	const [getDialog, showDialog] = makeState(null);
+	const [getDialogSelection, changeDialogSelection] = makeState(0);
+	const isDialogVisible = () => !!getDialog();
+	const dialogSelect = () => showDialog(null); // TODO: set dialog to link of current selection or hide dialog if no link
 	const [isChargeMeterVisible, setChargeMeterVisible] = makeState(false);
 	const [getChargeMeterAmount, setChargeMeterAmount] = makeState(0);
 	const [getHealthAmount, setHealthAmount] = makeState(100);
@@ -262,7 +236,8 @@ function initGame() {
 		getHealthAmount,
 		getEvent,
 		isDialogVisible,
-		getDialogText,
+		getDialog,
+		getDialogSelection,
 	};
 	const actions = {
 		changeControlMode,
@@ -273,10 +248,10 @@ function initGame() {
 		setChargeMeterVisible,
 		setChargeMeterAmount,
 		setHealthAmount,
-		markFirstLanding,
-		markGameOver,
-		setDialogArray,
-		hideDialog,
+		handleAction,
+		showDialog,
+		dialogSelect,
+		changeDialogSelection,
 	};
 	const setupCallback = game => {
 		const sprites = setUpGameObjects(game, state, actions);

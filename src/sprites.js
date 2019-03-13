@@ -2,6 +2,7 @@
 
 import { getPlanetsInSystem, getStarsInSystem, getGatesInSystem } from './planets';
 import { adjustSpeedForOtherShip, adjustPositionToFollow, getAngleBetweenSprites } from './math';
+import { getDialogObjectForKey } from './dialog-tree';
 
 export function setSpritePosition(sprite, { x, y }) {
 	sprite.position.set(x, y);
@@ -87,36 +88,52 @@ export function createAndPlaceNavigationRing(game) {
 	return navRing;
 }
 
-function createContinueButtonForDialog(game, box, boxPadding) {
-	const continueButton = game.rectangle(110, 35, 0x000000, 0x0f95ff, 1);
-	setSpritePosition(continueButton, {
-		x: box.width - continueButton.width - boxPadding * 2,
-		y: box.height - boxPadding * 2 - continueButton.height,
-	});
-	const continueButtonText = game.text('Continue', {
-		fontFamily: 'Arial',
-		fontSize: 20,
-		fill: 0xffffff,
-	});
-	setSpritePosition(continueButtonText, {
-		x: continueButton.width / 2 - continueButtonText.width / 2,
-		y: continueButton.height / 2 - continueButtonText.height / 2,
-	});
-	continueButton.addChild(continueButtonText);
-	return continueButton;
-}
-
 function createTextAreaForDialog(game, box, boxPadding) {
 	// See formatting options: https://pixijs.io/pixi-text-style/#
 	const dialogText = game.text('', {
 		fontFamily: 'Arial',
-		fontSize: 28,
+		fontSize: 24,
 		fill: 'white',
 		wordWrap: true,
 		wordWrapWidth: box.width - boxPadding * 2,
 	});
+	dialogText.zIndex = 16;
 	setSpritePosition(dialogText, { x: boxPadding, y: boxPadding });
 	return dialogText;
+}
+
+function createDialogOption(game, option, index) {
+	const dialogText = game.text(option.text, {
+		fontFamily: 'Arial',
+		fontSize: 24,
+		fill: 'white',
+	});
+	const paddingForArrow = 28;
+	setSpritePosition(dialogText, {
+		x: paddingForArrow,
+		y: index * 35,
+	});
+	return dialogText;
+}
+
+function createDialogOptions(game, dialog, currentDialogObject) {
+	dialog.optionArea.removeChildren();
+
+	currentDialogObject.options.map((option, index) => {
+		const optionTextArea = createDialogOption(game, option, index);
+		dialog.optionArea.addChild(optionTextArea);
+		return optionTextArea;
+	});
+
+	const arrow = game.sprite('assets/pointer.png');
+	arrow.anchor.set(0.5, 0.5);
+	arrow.x = 10;
+	arrow.y = arrow.height;
+	dialog.optionArea.addChild(arrow);
+
+	dialog.changeSelectedOption = index => {
+		arrow.y = arrow.height + index * 32;
+	};
 }
 
 export function createAndPlaceDialog(game) {
@@ -126,14 +143,15 @@ export function createAndPlaceDialog(game) {
 	const dialogText = createTextAreaForDialog(game, box, boxPadding);
 	box.addChild(dialogText);
 
-	const continueButton = createContinueButtonForDialog(game, box, boxPadding);
-	box.addChild(continueButton);
+	box.optionArea = game.group();
+	setSpritePosition(box.optionArea, { x: boxPadding, y: box.height - 110 });
+	box.addChild(box.optionArea);
 
 	box.zIndex = 15;
 	setSpritePosition(box, { x: 20, y: game.renderer.height - 260 });
 	box.visible = false;
 	box.textArea = dialogText;
-	box.continueButton = continueButton;
+	box.boxPadding = boxPadding;
 	game.stage.addChild(box);
 	return box;
 }
@@ -219,7 +237,7 @@ function sortSpritesByZIndex(game) {
 
 export function getSpriteMover(game) {
 	let lastRenderedSystem = '';
-	return (sprites, state) => {
+	return (sprites, state, actions) => {
 		const {
 			getControlMode,
 			getSpeed,
@@ -229,23 +247,30 @@ export function getSpriteMover(game) {
 			getChargeMeterAmount,
 			getHealthAmount,
 			isDialogVisible,
-			getDialogText,
-			getEvent,
+			getDialog,
+			getDialogSelection,
 		} = state;
+		const { handleAction } = actions;
 		const { ship, sky, ring, modePointer } = sprites;
 		const systemPosition = getSystemPosition();
 
 		// render dialog
-		sprites.dialog.visible = isDialogVisible();
-		if (isDialogVisible()) {
-			const currentDialogObject = getDialogText()[0];
+		if (sprites.dialog.visible === false && isDialogVisible()) {
+			sprites.dialog.visible = true;
+			const currentDialogObject = getDialogObjectForKey(getDialog());
 			sprites.dialog.textArea.text = currentDialogObject.text;
-			if (getEvent('gameOver')) {
-				sprites.dialog.removeChild(sprites.dialog.continueButton); // TODO: is there a way to do this non-destructively?
+			if (currentDialogObject.action) {
+				handleAction(currentDialogObject.action);
 			}
 			if (currentDialogObject.options) {
-				// TODO: show options somehow
+				createDialogOptions(game, sprites.dialog, currentDialogObject);
 			}
+		}
+		if (sprites.dialog.visible && !isDialogVisible()) {
+			sprites.dialog.visible = false;
+		}
+		if (isDialogVisible()) {
+			sprites.dialog.changeSelectedOption(getDialogSelection());
 		}
 
 		// render planets, stars, and gates
