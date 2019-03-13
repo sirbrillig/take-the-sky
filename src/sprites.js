@@ -87,19 +87,7 @@ export function createAndPlaceNavigationRing(game) {
 	return navRing;
 }
 
-export function createAndPlaceDialog(game) {
-	const boxPadding = 10;
-	const box = game.rectangle(game.renderer.width - 40, 200, 0x00335a, 0x0f95ff, 2);
-	// See formatting options: https://pixijs.io/pixi-text-style/#
-	const dialogText = game.text('', {
-		fontFamily: 'Arial',
-		fontSize: 28,
-		fill: 'white',
-		wordWrap: true,
-		wordWrapWidth: box.width - boxPadding * 2,
-	});
-	setSpritePosition(dialogText, { x: boxPadding, y: boxPadding });
-	box.addChild(dialogText);
+function createContinueButtonForDialog(game, box, boxPadding) {
 	const continueButton = game.rectangle(110, 35, 0x000000, 0x0f95ff, 1);
 	setSpritePosition(continueButton, {
 		x: box.width - continueButton.width - boxPadding * 2,
@@ -115,9 +103,34 @@ export function createAndPlaceDialog(game) {
 		y: continueButton.height / 2 - continueButtonText.height / 2,
 	});
 	continueButton.addChild(continueButtonText);
+	return continueButton;
+}
+
+function createTextAreaForDialog(game, box, boxPadding) {
+	// See formatting options: https://pixijs.io/pixi-text-style/#
+	const dialogText = game.text('', {
+		fontFamily: 'Arial',
+		fontSize: 28,
+		fill: 'white',
+		wordWrap: true,
+		wordWrapWidth: box.width - boxPadding * 2,
+	});
+	setSpritePosition(dialogText, { x: boxPadding, y: boxPadding });
+	return dialogText;
+}
+
+export function createAndPlaceDialog(game) {
+	const boxPadding = 10;
+	const box = game.rectangle(game.renderer.width - 40, 250, 0x00335a, 0x0f95ff, 2);
+
+	const dialogText = createTextAreaForDialog(game, box, boxPadding);
+	box.addChild(dialogText);
+
+	const continueButton = createContinueButtonForDialog(game, box, boxPadding);
 	box.addChild(continueButton);
+
 	box.zIndex = 15;
-	setSpritePosition(box, { x: 20, y: game.renderer.height - 210 });
+	setSpritePosition(box, { x: 20, y: game.renderer.height - 260 });
 	box.visible = false;
 	box.textArea = dialogText;
 	box.continueButton = continueButton;
@@ -224,9 +237,15 @@ export function getSpriteMover(game) {
 
 		// render dialog
 		sprites.dialog.visible = isDialogVisible();
-		sprites.dialog.textArea.text = getDialogText().length ? getDialogText()[0] : '';
-		if (getEvent('gameOver')) {
-			sprites.dialog.removeChild(sprites.dialog.continueButton); // TODO: is there a way to do this non-destructively?
+		if (isDialogVisible()) {
+			const currentDialogObject = getDialogText()[0];
+			sprites.dialog.textArea.text = currentDialogObject.text;
+			if (getEvent('gameOver')) {
+				sprites.dialog.removeChild(sprites.dialog.continueButton); // TODO: is there a way to do this non-destructively?
+			}
+			if (currentDialogObject.options) {
+				// TODO: show options somehow
+			}
 		}
 
 		// render planets, stars, and gates

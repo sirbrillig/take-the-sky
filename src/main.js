@@ -83,7 +83,10 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 
 	if (getHealthAmount() < 1) {
 		setDialogArray([
-			"As the ship's hull tears apart and the coldness of space covers your skin, you reflect that at least you were free.",
+			{
+				text:
+					"As the ship's hull tears apart and the coldness of space covers your skin, you reflect that at least you were free.",
+			},
 		]);
 		markGameOver();
 		return;
@@ -97,8 +100,18 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 			changeSpeed({ x: 0, y: 0 });
 			markFirstLanding();
 			setDialogArray([
-				"In the dingy space port, you are approached by a teenage girl. She's very confident, but always looking over her shoulder. You don't see anyone other than a drunk and a traffic controller nearby, but on this tiny planet you wouldn't be surprised if someone meant this woman harm.",
-				"Girl: You're a captain, right? I'm the one who sent the message. I... I want to buy passage. Passage ... just passage out of here. Please?",
+				{
+					text:
+						"In the dingy space port, you are approached by a teenage girl. She's very confident, but always looking over her shoulder. You don't see anyone other than a drunk and a traffic controller nearby, but on this tiny planet you wouldn't be surprised if someone meant this woman harm.",
+				},
+				{
+					text:
+						"Girl: You're a captain, right? I'm the one who sent the message. I... I want to buy passage. Passage ... just passage out of here. Please?",
+					options: [
+						'Not a problem, miss. So long as you can pay.',
+						"There wouldn't be any trouble following you that might rub off on my ship, would there?",
+					],
+				},
 			]);
 		}
 	}
@@ -112,7 +125,10 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 				changeCurrentSystem('Betan');
 			} else {
 				setDialogArray([
-					"Engineer: Captain, we came to this backwater planet because there's a job to be had. Let's not leave before we at least hear them out.",
+					{
+						text:
+							"Engineer: Captain, we came to this backwater planet because there's a job to be had. Let's not leave before we at least hear them out.",
+					},
 				]);
 			}
 		}
