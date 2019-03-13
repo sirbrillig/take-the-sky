@@ -263,6 +263,10 @@ function sortSpritesByZIndex(game) {
 	});
 }
 
+function isChargeMeterVisible({ getControlMode, getChargeMeterAmount }) {
+	return ['land', 'jump'].includes(getControlMode()) || getChargeMeterAmount() > 1;
+}
+
 export function getSpriteMover(game) {
 	let lastRenderedSystem = '';
 	let lastShownDialog = '';
@@ -272,7 +276,6 @@ export function getSpriteMover(game) {
 			getSpeed,
 			getSystemPosition,
 			getCurrentSystem,
-			isChargeMeterVisible,
 			getChargeMeterAmount,
 			getHealthAmount,
 			isDialogVisible,
@@ -382,10 +385,10 @@ export function getSpriteMover(game) {
 			(sprites.healthMeter.outerBar.width / 100) * getHealthAmount();
 
 		// render charge meter
-		if (!isChargeMeterVisible()) {
+		if (!isChargeMeterVisible(state)) {
 			sprites.chargeMeter.visible = false;
 		}
-		if (isChargeMeterVisible()) {
+		if (isChargeMeterVisible(state)) {
 			sprites.chargeMeter.visible = true;
 			const amount = getChargeMeterAmount();
 			sprites.chargeMeter.innerBar.width = (sprites.chargeMeter.outerBar.width / 100) * amount;

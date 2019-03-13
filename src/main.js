@@ -55,7 +55,6 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 	const {
 		changeSpeed,
 		changeCurrentSystem,
-		setChargeMeterVisible,
 		setChargeMeterAmount,
 		setHealthAmount,
 		showDialog,
@@ -73,8 +72,6 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 		moveSprites(sprites, state, actions);
 		return;
 	}
-
-	setChargeMeterVisible(getControlMode() === 'land' || getChargeMeterAmount() > 1);
 
 	const isShipTouchingStar =
 		sprites.stars && sprites.stars.find(star => doSpritesOverlap(ship, star));
@@ -205,7 +202,6 @@ function initGame() {
 	const [getDialogKey, showDialog] = makeState(null);
 	const [getDialogSelection, changeDialogSelection] = makeState(0);
 	const isDialogVisible = () => !!getDialogKey();
-	const [isChargeMeterVisible, setChargeMeterVisible] = makeState(false);
 	const [getChargeMeterAmount, setChargeMeterAmount] = makeState(0);
 	const [getHealthAmount, setHealthAmount] = makeState(100);
 	const [getSpeed, changeSpeed] = makeState({ x: 0, y: 0 });
@@ -223,7 +219,6 @@ function initGame() {
 		getSpeed,
 		getCurrentSystem,
 		getSystemPosition,
-		isChargeMeterVisible,
 		getChargeMeterAmount,
 		getHealthAmount,
 		getEvent,
@@ -237,7 +232,6 @@ function initGame() {
 		changePressingState,
 		changeCurrentSystem,
 		changeSystemPosition,
-		setChargeMeterVisible,
 		setChargeMeterAmount,
 		setHealthAmount,
 		handleAction,
