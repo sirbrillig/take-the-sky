@@ -70,8 +70,6 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 		moveSprites(sprites, state, actions);
 		return; // freeze the game if the dialog is showing
 	}
-	showDialog('firstLanding1'); // FIXME: just for testing
-	return; // FIXME: just for testing
 
 	setChargeMeterVisible(getControlMode() === 'land' || getChargeMeterAmount() > 1);
 
@@ -209,10 +207,9 @@ function initGame() {
 	const changeSystemPosition = ({ x, y }) =>
 		handleAction({ type: 'CHANGE_SYSTEM_POSITION', payload: { x, y } });
 	const getEvent = key => getState().events[key];
-	const [getDialog, showDialog] = makeState(null);
+	const [getDialogKey, showDialog] = makeState(null);
 	const [getDialogSelection, changeDialogSelection] = makeState(0);
-	const isDialogVisible = () => !!getDialog();
-	const dialogSelect = () => showDialog(null); // TODO: set dialog to link of current selection or hide dialog if no link
+	const isDialogVisible = () => !!getDialogKey();
 	const [isChargeMeterVisible, setChargeMeterVisible] = makeState(false);
 	const [getChargeMeterAmount, setChargeMeterAmount] = makeState(0);
 	const [getHealthAmount, setHealthAmount] = makeState(100);
@@ -236,7 +233,7 @@ function initGame() {
 		getHealthAmount,
 		getEvent,
 		isDialogVisible,
-		getDialog,
+		getDialogKey,
 		getDialogSelection,
 	};
 	const actions = {
@@ -250,7 +247,6 @@ function initGame() {
 		setHealthAmount,
 		handleAction,
 		showDialog,
-		dialogSelect,
 		changeDialogSelection,
 	};
 	const setupCallback = game => {

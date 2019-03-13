@@ -43,7 +43,7 @@ export function getDialogTree() {
 				'Some people are trying to... they want to bring me somewhere terrible. And I need your help to get away. Everyone said you could help, when people need it. I have the cash. I can pay for my passage.',
 			options: [
 				{
-					text: "No need to worry. Hop on board and let's get you where you need to go.",
+					text: "No need to worry. Let's get you where you need to go.",
 					link: 'firstLanding3',
 				},
 			],
@@ -52,5 +52,8 @@ export function getDialogTree() {
 }
 
 export function getDialogObjectForKey(key) {
-	return getDialogTree()[key];
+	if (getDialogTree()[key]) {
+		return { options: [], action: null, text: '', ...getDialogTree()[key] };
+	}
+	return { options: [], action: null, text: '' };
 }

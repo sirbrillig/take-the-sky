@@ -11,9 +11,9 @@ export function setUpKeyboardControls(game, state, actions) {
 		getPressingState,
 		isDialogVisible,
 		getDialogSelection,
-		getDialog,
+		getDialogKey,
 	} = state;
-	const { changePressingState, changeControlMode, dialogSelect, changeDialogSelection } = actions;
+	const { changePressingState, changeControlMode, showDialog, changeDialogSelection } = actions;
 	const onKeyDown = event => {
 		switch (event.code) {
 			case 'ArrowUp':
@@ -26,17 +26,21 @@ export function setUpKeyboardControls(game, state, actions) {
 			case 'KeyS':
 				if (
 					isDialogVisible() &&
-					getDialogSelection() < getDialogObjectForKey(getDialog()).options.length - 1
+					getDialogSelection() < getDialogObjectForKey(getDialogKey()).options.length - 1
 				) {
 					changeDialogSelection(getDialogSelection() + 1);
 				}
 				return '';
 			case 'Space':
 			case 'Enter':
-				if (!event.repeat) {
-					dialogSelect();
+				if (!event.repeat && isDialogVisible()) {
+					const dialogObject = getDialogObjectForKey(getDialogKey());
+					if (dialogObject.options[getDialogSelection()]) {
+						showDialog(dialogObject.options[getDialogSelection()].link || null);
+						changeDialogSelection(0);
+					}
 				}
-				return '';
+				return changePressingState({ ...getPressingState(), up: true });
 			case 'ArrowLeft':
 			case 'KeyA':
 				return changePressingState({ ...getPressingState(), left: true });

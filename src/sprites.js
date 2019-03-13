@@ -134,6 +134,8 @@ function createDialogOptions(game, dialog, currentDialogObject) {
 	dialog.changeSelectedOption = index => {
 		arrow.y = arrow.height + index * 32;
 	};
+
+	arrow.visible = !!currentDialogObject.options.length;
 }
 
 export function createAndPlaceDialog(game) {
@@ -237,6 +239,7 @@ function sortSpritesByZIndex(game) {
 
 export function getSpriteMover(game) {
 	let lastRenderedSystem = '';
+	let lastShownDialog = '';
 	return (sprites, state, actions) => {
 		const {
 			getControlMode,
@@ -247,7 +250,7 @@ export function getSpriteMover(game) {
 			getChargeMeterAmount,
 			getHealthAmount,
 			isDialogVisible,
-			getDialog,
+			getDialogKey,
 			getDialogSelection,
 		} = state;
 		const { handleAction } = actions;
@@ -255,16 +258,14 @@ export function getSpriteMover(game) {
 		const systemPosition = getSystemPosition();
 
 		// render dialog
-		if (sprites.dialog.visible === false && isDialogVisible()) {
+		if (lastShownDialog !== getDialogKey() && isDialogVisible()) {
 			sprites.dialog.visible = true;
-			const currentDialogObject = getDialogObjectForKey(getDialog());
+			const currentDialogObject = getDialogObjectForKey(getDialogKey());
 			sprites.dialog.textArea.text = currentDialogObject.text;
 			if (currentDialogObject.action) {
 				handleAction(currentDialogObject.action);
 			}
-			if (currentDialogObject.options) {
-				createDialogOptions(game, sprites.dialog, currentDialogObject);
-			}
+			createDialogOptions(game, sprites.dialog, currentDialogObject);
 		}
 		if (sprites.dialog.visible && !isDialogVisible()) {
 			sprites.dialog.visible = false;
@@ -272,6 +273,7 @@ export function getSpriteMover(game) {
 		if (isDialogVisible()) {
 			sprites.dialog.changeSelectedOption(getDialogSelection());
 		}
+		lastShownDialog = getDialogKey();
 
 		// render planets, stars, and gates
 		if (getCurrentSystem() !== lastRenderedSystem) {
