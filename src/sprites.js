@@ -176,14 +176,21 @@ export function createAndPlaceModePointer(game) {
 }
 
 export function createAndPlaceHealthMeter(game) {
-	const outerBar = game.rectangle(128, 16, 0x000000, 0x008000, 2);
-	const innerBar = game.rectangle(6, 16, 0x008000);
+	const outerBar = game.rectangle(164, 24, 0x000000, 0x008000, 2);
+	const innerBar = game.rectangle(6, 24, 0x008000);
+	const meterLabel = game.text('Hull strength', {
+		fontFamily: 'Arial',
+		fontSize: 20,
+		fill: 0xffffff,
+	});
 	const meter = game.group();
 	meter.addChild(outerBar);
 	meter.addChild(innerBar);
+	meter.addChild(meterLabel);
+	setSpritePosition(meterLabel, { x: -120, y: 0 });
 	meter.innerBar = innerBar;
 	meter.outerBar = outerBar;
-	setSpritePosition(meter, { x: game.renderer.width - 148, y: 16 });
+	setSpritePosition(meter, { x: game.renderer.width - 188, y: 16 });
 	meter.zIndex = 15;
 	game.stage.addChild(meter);
 	return meter;
