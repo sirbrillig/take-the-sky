@@ -341,7 +341,7 @@ export function getSpriteMover(game) {
 		const systemPosition = getSystemPosition();
 
 		// render ship
-		if (getControlMode() === 'pilot' && (pressing.left || pressing.right)) {
+		if (!isDialogVisible() && getControlMode() === 'pilot' && (pressing.left || pressing.right)) {
 			setSpriteRotation(
 				sprites.ship,
 				adjustRotation(

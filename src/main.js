@@ -71,7 +71,7 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 	if (isDialogVisible()) {
 		setChargeMeterAmount(0);
 		moveSprites(sprites, state, actions);
-		return; // freeze the game if the dialog is showing
+		return;
 	}
 
 	if (getEvent('gameOver')) {
