@@ -15,7 +15,9 @@ function updateSystemPositionFromSpeed(state, actions) {
 	const { changeSystemPosition } = actions;
 	const speed = getSpeed();
 	const system = getSystemPosition();
-	changeSystemPosition({ x: system.x + speed.x, y: system.y + speed.y });
+	if (speed.x + speed.y !== 0) {
+		changeSystemPosition({ x: system.x + speed.x, y: system.y + speed.y });
+	}
 }
 
 function shouldIncreaseChargeMeter({ getPressingState, getControlMode }) {
