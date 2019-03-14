@@ -27,6 +27,18 @@ function shouldIncreaseChargeMeter({ getPressingState, getControlMode }) {
 	return false;
 }
 
+function showFirstLandingNotDoneDialog({ showDialog, getEvent }) {
+	if (!getEvent('firstLandingNotDone')) {
+		showDialog('firstLandingNotDone');
+	}
+	if (getEvent('firstLandingNotDone') === 1) {
+		showDialog('firstLandingNotDone2');
+	}
+	if (getEvent('firstLandingNotDone') > 1) {
+		showDialog('firstLandingNotDone3');
+	}
+}
+
 /**
  * Update state based on other state
  *
@@ -102,7 +114,7 @@ export default function renderGame(game, sprites, state, actions, moveSprites) {
 		if (getEvent('firstLanding')) {
 			changeCurrentSystem('Betan');
 		} else {
-			showDialog('firstLandingNotDone');
+			showFirstLandingNotDoneDialog({ showDialog, getEvent });
 		}
 	}
 
