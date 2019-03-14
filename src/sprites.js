@@ -1,7 +1,8 @@
 /* @format */
 
 import { getPlanetsInSystem, getStarsInSystem, getGatesInSystem } from './planets';
-import { adjustSpeedForOtherShip, adjustPositionToFollow, getAngleBetweenSprites } from './math';
+import { getTurningDirectionFromPressingState } from './controls';
+import { adjustRotation } from './math';
 import { getDialogObjectForKey } from './dialog-tree';
 
 export function setSpritePosition(sprite, { x, y }) {
@@ -325,7 +326,6 @@ export function getSpriteMover(game) {
 	return (sprites, state, actions) => {
 		const {
 			getControlMode,
-			getSpeed,
 			getSystemPosition,
 			getCurrentSystem,
 			getChargeMeterAmount,
@@ -334,9 +334,22 @@ export function getSpriteMover(game) {
 			getDialogKey,
 			getDialogSelection,
 			getEvent,
+			getPressingState,
 		} = state;
 		const { handleAction } = actions;
+		const pressing = getPressingState();
 		const systemPosition = getSystemPosition();
+
+		// render ship
+		if (getControlMode() === 'pilot' && (pressing.left || pressing.right)) {
+			setSpriteRotation(
+				sprites.ship,
+				adjustRotation(
+					getTurningDirectionFromPressingState(pressing),
+					getSpriteRotation(sprites.ship)
+				)
+			);
+		}
 
 		// render dialog
 		if (lastShownDialog !== getDialogKey() && isDialogVisible()) {
@@ -406,27 +419,27 @@ export function getSpriteMover(game) {
 		);
 
 		// render other ships
-		if (!sprites.ships) {
-			// sprites.ships = createAndPlaceOtherShips(game);
-			sprites.ships = { children: [] };
-		}
-		sprites.ships.children.forEach(other => {
-			other.rotation = getAngleBetweenSprites(sprites.ship, other);
-			// adjust the ship's speed to accelerate
-			other.speed = adjustSpeedForOtherShip(other.rotation, other.speed);
-			// adjust the position to follow the player
-			adjustPositionToFollow(other, sprites.ship, other.speed);
-			// adjust the position for the system position
-			setSpritePosition(other, {
-				x: other.x + getSpeed().x,
-				y: other.y + getSpeed().y,
-			});
-		});
+		// if (!sprites.ships) {
+		// 	 sprites.ships = createAndPlaceOtherShips(game);
+		// }
+		// sprites.ships.children.forEach(other => {
+		// 	other.rotation = getAngleBetweenSprites(sprites.ship, other);
+		// 	// adjust the ship's speed to accelerate
+		// 	other.speed = adjustSpeedForOtherShip(other.rotation, other.speed);
+		// 	// adjust the position to follow the player
+		// 	adjustPositionToFollow(other, sprites.ship, other.speed);
+		// 	// adjust the position for the system position
+		// 	setSpritePosition(other, {
+		// 		x: other.x + getSpeed().x,
+		// 		y: other.y + getSpeed().y,
+		// 	});
+		// });
 
 		// render background
 		setTilePosition(sprites.sky, { x: systemPosition.x, y: systemPosition.y });
 
 		// render ring
+		setSpriteRotation(sprites.ring, getSpriteRotation(sprites.ship));
 		sprites.ring.visible = !getEvent('gameOver') && getControlMode() === 'pilot';
 
 		// render mode pointer

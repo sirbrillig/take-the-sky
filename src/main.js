@@ -1,10 +1,10 @@
 /* @format */
 
 import createGame from './pixi-wrapper';
-import { adjustSpeedForRotation, adjustRotation, adjustNumberBetween } from './math';
+import { adjustSpeedForRotation, adjustNumberBetween } from './math';
 import { makeReducer, makeState } from './state';
 import reducer from './state-reducer';
-import { setUpKeyboardControls, getTurningDirectionFromPressingState } from './controls';
+import { setUpKeyboardControls } from './controls';
 import {
 	createAndPlaceModeButton,
 	createAndPlaceModePointer,
@@ -14,7 +14,6 @@ import {
 	createAndPlaceHealthMeter,
 	createAndPlaceChargeMeter,
 	createAndPlaceDialog,
-	setSpriteRotation,
 	getSpriteRotation,
 	getSpriteMover,
 	isShipTouchingStar,
@@ -51,7 +50,6 @@ function shouldIncreaseChargeMeter({ getPressingState, getControlMode }) {
 }
 
 function renderGame(game, sprites, state, actions, moveSprites) {
-	const { ship, ring } = sprites;
 	const {
 		getPressingState,
 		getSpeed,
@@ -92,7 +90,7 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 	}
 
 	if (getHealthAmount() < 1) {
-		ship.visible = false;
+		sprites.ship.visible = false;
 		explodeShip(game);
 		showDialog('explodedShip');
 		return;
@@ -122,7 +120,7 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 	}
 
 	if (pressing.up && getControlMode() === 'pilot') {
-		changeSpeed(adjustSpeedForRotation(getSpriteRotation(ship), getSpeed()));
+		changeSpeed(adjustSpeedForRotation(getSpriteRotation(sprites.ship), getSpeed()));
 	}
 
 	setChargeMeterAmount(
@@ -134,15 +132,6 @@ function renderGame(game, sprites, state, actions, moveSprites) {
 			100
 		)
 	);
-
-	if (getControlMode() === 'pilot' && (pressing.left || pressing.right)) {
-		setSpriteRotation(
-			ship,
-			adjustRotation(getTurningDirectionFromPressingState(pressing), getSpriteRotation(ship))
-		);
-	}
-
-	setSpriteRotation(ring, getSpriteRotation(ship));
 
 	updateSystemPositionFromSpeed(state, actions);
 
