@@ -205,7 +205,7 @@ export function createAndPlaceModeControls(game) {
 		arrow.y = arrow.height + boxPadding + getModePointerIndexForMode(name) * 30;
 	};
 
-	setSpritePosition(box, { x: 10, y: 40 });
+	setSpritePosition(box, { x: game.renderer.width - box.width - 20, y: 85 });
 	game.stage.addChild(box);
 	return box;
 }
@@ -225,24 +225,31 @@ export function createAndPlaceHealthMeter(game) {
 	setSpritePosition(meterLabel, { x: -120, y: 0 });
 	meter.innerBar = innerBar;
 	meter.outerBar = outerBar;
-	setSpritePosition(meter, { x: game.renderer.width - 188, y: 16 });
+	setSpritePosition(meter, { x: game.renderer.width - outerBar.width - 20, y: 16 });
 	meter.zIndex = 15;
 	game.stage.addChild(meter);
 	return meter;
 }
 
 export function createAndPlaceChargeMeter(game) {
-	const outerBar = game.rectangle(164, 16, 0x000000, 0x0000ff, 2);
-	const innerBar = game.rectangle(6, 16, 0x0000ff);
+	const outerBar = game.rectangle(164, 24, 0x000000, 0x0000ff, 2);
+	const innerBar = game.rectangle(6, 24, 0x0000ff);
 	const limitLine = game.rectangle(2, 14, 0xff0000);
-	setSpritePosition(limitLine, { x: 108, y: 2 });
+	setSpritePosition(limitLine, { x: 108, y: 4 });
+	const meterLabel = game.text('Charge', {
+		fontFamily: 'Arial',
+		fontSize: 20,
+		fill: 0xffffff,
+	});
 	const meter = game.group();
 	meter.addChild(outerBar);
 	meter.addChild(innerBar);
 	meter.addChild(limitLine);
+	meter.addChild(meterLabel);
+	setSpritePosition(meterLabel, { x: -80, y: 0 });
 	meter.innerBar = innerBar;
 	meter.outerBar = outerBar;
-	setSpritePosition(meter, { x: 30, y: 16 });
+	setSpritePosition(meter, { x: game.renderer.width - outerBar.width - 20, y: 50 });
 	meter.zIndex = 15;
 	game.stage.addChild(meter);
 	return meter;
