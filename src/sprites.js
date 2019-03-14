@@ -128,8 +128,7 @@ function createDialogOptions(game, dialog, currentDialogObject) {
 
 	const arrow = game.sprite('assets/pointer.png');
 	arrow.anchor.set(0.5, 0.5);
-	arrow.x = 10;
-	arrow.y = arrow.height;
+	setSpritePosition(arrow, { x: 10, y: arrow.height });
 	dialog.optionArea.addChild(arrow);
 
 	dialog.changeSelectedOption = index => {
@@ -159,21 +158,56 @@ export function createAndPlaceDialog(game) {
 	return box;
 }
 
-export function createAndPlaceModeButton(game, modeTitle, orderIndex) {
-	const buttonLabel = game.text(modeTitle, { fontFamily: 'Arial', fontSize: 36, fill: 'white' });
+function createModeOption(game, modeTitle, orderIndex, boxPadding) {
+	const buttonLabel = game.text(modeTitle, { fontFamily: 'Arial', fontSize: 24, fill: 'white' });
 	buttonLabel.zIndex = 15;
-	setSpritePosition(buttonLabel, { x: 40, y: 10 * orderIndex * 5 });
-	game.stage.addChild(buttonLabel);
+	setSpritePosition(buttonLabel, { x: 30, y: 30 * orderIndex + boxPadding });
 	return buttonLabel;
 }
 
-export function createAndPlaceModePointer(game) {
-	const pointer = game.sprite('assets/pointer.png');
-	pointer.zIndex = 15;
-	pointer.x = 10;
-	pointer.y = 10 * 5 + 16; // modeButton position + a bit to vertically center it
-	game.stage.addChild(pointer);
-	return pointer;
+export function createAndPlaceModeControls(game) {
+	const boxPadding = 10;
+	const box = game.rectangle(110, 110, 0x00335a, 0x0f95ff, 2);
+	box.zIndex = 15;
+
+	const getModePointerIndexForMode = modeName => {
+		return ['pilot', 'land', 'jump'].indexOf(modeName);
+	};
+
+	const pilotModeButton = createModeOption(
+		game,
+		'pilot',
+		getModePointerIndexForMode('pilot'),
+		boxPadding
+	);
+	const landModeButton = createModeOption(
+		game,
+		'land',
+		getModePointerIndexForMode('land'),
+		boxPadding
+	);
+	const jumpModeButton = createModeOption(
+		game,
+		'jump',
+		getModePointerIndexForMode('jump'),
+		boxPadding
+	);
+	box.addChild(pilotModeButton);
+	box.addChild(landModeButton);
+	box.addChild(jumpModeButton);
+
+	const arrow = game.sprite('assets/pointer.png');
+	arrow.anchor.set(0.5, 0.5);
+	setSpritePosition(arrow, { x: 15, y: arrow.height + boxPadding });
+	box.addChild(arrow);
+
+	box.changeSelectedOption = name => {
+		arrow.y = arrow.height + boxPadding + getModePointerIndexForMode(name) * 30;
+	};
+
+	setSpritePosition(box, { x: 10, y: 40 });
+	game.stage.addChild(box);
+	return box;
 }
 
 export function createAndPlaceHealthMeter(game) {
@@ -240,19 +274,6 @@ export function isChargeMeterFull(amount) {
 
 export function getCurrentCoordinates(game) {
 	return { x: game.pointer.x, y: game.pointer.y };
-}
-
-export function getModePointerPositionForMode(modeName) {
-	switch (modeName) {
-		case 'jump':
-			return 10 * 3 * 5 + 16;
-		case 'land':
-			return 10 * 2 * 5 + 16;
-		case 'pilot':
-			return 10 * 5 + 16; // modeButton position + a bit to vertically center it
-		default:
-			throw new Error(`No mode named ${modeName}`);
-	}
 }
 
 function sortSpritesByZIndex(game) {
@@ -443,7 +464,7 @@ export function getSpriteMover(game) {
 		sprites.ring.visible = !getEvent('gameOver') && getControlMode() === 'pilot';
 
 		// render mode pointer
-		sprites.modePointer.y = getModePointerPositionForMode(getControlMode());
+		sprites.modeControls.changeSelectedOption(getControlMode());
 
 		// render health bar
 		sprites.healthMeter.innerBar.width =

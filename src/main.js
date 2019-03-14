@@ -6,8 +6,7 @@ import { makeReducer, makeState } from './state';
 import reducer from './state-reducer';
 import { setUpKeyboardControls } from './controls';
 import {
-	createAndPlaceModeButton,
-	createAndPlaceModePointer,
+	createAndPlaceModeControls,
 	createAndPlaceBackground,
 	createAndPlaceShip,
 	createAndPlaceNavigationRing,
@@ -146,10 +145,7 @@ function initSprites(game) {
 		ring: createAndPlaceNavigationRing(game),
 		healthMeter: createAndPlaceHealthMeter(game),
 		chargeMeter: createAndPlaceChargeMeter(game),
-		pilotModeButton: createAndPlaceModeButton(game, 'pilot', 1),
-		landModeButton: createAndPlaceModeButton(game, 'land', 2),
-		jumpModeButton: createAndPlaceModeButton(game, 'jump', 3),
-		modePointer: createAndPlaceModePointer(game),
+		modeControls: createAndPlaceModeControls(game),
 	};
 }
 
