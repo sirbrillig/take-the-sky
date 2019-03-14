@@ -1,18 +1,47 @@
 /* @format */
 
-export default function reducer(state, { type, payload }) {
+import debugFactory from './debug';
+
+const debug = debugFactory('sky');
+
+function events(state = {}, { type, payload }) {
 	switch (type) {
-		case 'CHANGE_SYSTEM_POSITION':
-			return { ...state, position: payload };
-		case 'CHANGE_SYSTEM':
-			return { ...state, currentSystem: payload };
 		case 'EVENT_FIRST_LANDING':
-			return { ...state, events: { ...state.events, firstLanding: true } };
+			return { ...state, firstLanding: true };
 		case 'EVENT_STAR_WARNING':
-			return { ...state, events: { ...state.events, starsAreHot: true } };
+			return { ...state, starsAreHot: true };
 		case 'EVENT_GAME_OVER':
-			return { ...state, events: { ...state.events, gameOver: true } };
+			return { ...state, gameOver: true };
+		case 'EVENT_FIRST_LANDING_NOT_DONE':
+			return { ...state, firstLandingNotDone: payload };
 		default:
 			return state;
 	}
+}
+
+function currentSystem(state = 'Algol', { type, payload }) {
+	switch (type) {
+		case 'CHANGE_SYSTEM':
+			return payload;
+		default:
+			return state;
+	}
+}
+
+function position(state = {}, { type, payload }) {
+	switch (type) {
+		case 'CHANGE_SYSTEM_POSITION':
+			return payload;
+		default:
+			return state;
+	}
+}
+
+export default function reducer(state, action) {
+	debug(state, action);
+	return {
+		events: events(state.events, action),
+		position: position(state.position, action),
+		currentSystem: currentSystem(state.currentSystem, action),
+	};
 }
