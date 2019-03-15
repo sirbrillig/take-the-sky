@@ -2,7 +2,7 @@
 /* globals window */
 
 import getNextMode from './control-modes';
-import { getDialogObjectForKey } from './dialog-tree';
+import getDialogObjectForKey from './dialog/index';
 
 export function setUpKeyboardControls(game, state, actions) {
 	const {

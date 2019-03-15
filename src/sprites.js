@@ -3,7 +3,7 @@
 import { getPlanetsInSystem, getStarsInSystem, getGatesInSystem } from './planets';
 import { getTurningDirectionFromPressingState } from './controls';
 import { adjustRotation } from './math';
-import { getDialogObjectForKey } from './dialog-tree';
+import getDialogObjectForKey from './dialog/index';
 
 export function setSpritePosition(sprite, { x, y }) {
 	sprite.position.set(x, y);

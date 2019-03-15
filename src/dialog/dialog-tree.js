@@ -1,8 +1,8 @@
 /* @format */
 
-import { getNpcHappiness } from './selectors';
+import { getNpcHappiness } from '../selectors';
 
-export function getDialogTree() {
+export default function getDialogTree() {
 	return {
 		explodedShip: {
 			text: "As the ship's hull tears apart, you reflect that at least, at the end, you were free.",
@@ -76,17 +76,4 @@ export function getDialogTree() {
 			],
 		},
 	};
-}
-
-export function getDialogObjectForKey(key, state) {
-	const dialogObject = getDialogTree()[key];
-	if (dialogObject) {
-		if (dialogObject.variants) {
-			const matchingVariant =
-				dialogObject.variants.find(variant => variant.condition(state)) || dialogObject.variants[0];
-			return { options: [], action: null, text: '', ...matchingVariant };
-		}
-		return { options: [], action: null, text: '', ...dialogObject };
-	}
-	return { options: [], action: null, text: '' };
 }
