@@ -11,6 +11,7 @@ export function setUpKeyboardControls(game, state, actions) {
 		isDialogVisible,
 		getDialogSelection,
 		getDialogKey,
+		getState,
 	} = state;
 	const { changePressingState, changeControlMode, showDialog, changeDialogSelection } = actions;
 	const onKeyDown = event => {
@@ -25,7 +26,8 @@ export function setUpKeyboardControls(game, state, actions) {
 			case 'KeyS':
 				if (
 					isDialogVisible() &&
-					getDialogSelection() < getDialogObjectForKey(getDialogKey()).options.length - 1
+					getDialogSelection() <
+						getDialogObjectForKey(getDialogKey(), getState()).options.length - 1
 				) {
 					changeDialogSelection(getDialogSelection() + 1);
 				}
@@ -33,7 +35,7 @@ export function setUpKeyboardControls(game, state, actions) {
 			case 'Space':
 			case 'Enter':
 				if (!event.repeat && isDialogVisible()) {
-					const dialogObject = getDialogObjectForKey(getDialogKey());
+					const dialogObject = getDialogObjectForKey(getDialogKey(), getState());
 					if (dialogObject.options[getDialogSelection()]) {
 						showDialog(dialogObject.options[getDialogSelection()].link || null);
 						changeDialogSelection(0);

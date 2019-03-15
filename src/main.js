@@ -81,6 +81,7 @@ function initGame() {
 		isDialogVisible,
 		getDialogKey,
 		getDialogSelection,
+		getState,
 	};
 	const actions = {
 		changeControlMode,

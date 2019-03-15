@@ -1,5 +1,7 @@
 /* @format */
 
+import { getNpcHappiness } from './selectors';
+
 export function getDialogTree() {
 	return {
 		explodedShip: {
@@ -13,22 +15,29 @@ export function getDialogTree() {
 			options: [{ text: 'Continue' }],
 		},
 		firstLandingNotDone: {
-			text:
-				"Engineer: Captain, we came to this backwater planet because there's a job to be had. Let's not leave before we at least hear them out.",
-			action: { type: 'EVENT_FIRST_LANDING_NOT_DONE' },
-			options: [{ text: 'Continue' }],
-		},
-		firstLandingNotDone2: {
-			text:
-				"Engineer: Did you not hear me the first time, Cap? This was a long trip. Let's see what's on that moon.",
-			action: { type: 'EVENT_FIRST_LANDING_NOT_DONE' },
-			options: [{ text: 'Continue' }],
-		},
-		firstLandingNotDone3: {
-			text:
-				"Engineer: Oh come on, Captain! Go back to that moon and land there or this ship isn't going another inch.",
-			action: { type: 'EVENT_FIRST_LANDING_NOT_DONE' },
-			options: [{ text: 'Continue' }],
+			variants: [
+				{
+					condition: state => getNpcHappiness(state, 'engineer') >= 0,
+					text:
+						"Engineer: Captain, we came to this backwater planet because there's a job to be had. Let's not leave before we at least hear them out.",
+					action: { type: 'EVENT_FIRST_LANDING_NOT_DONE' },
+					options: [{ text: 'Continue' }],
+				},
+				{
+					condition: state => getNpcHappiness(state, 'engineer') === -1,
+					text:
+						"Engineer: Did you not hear me the first time, Cap? This was a long trip. Let's see what's on that moon.",
+					action: { type: 'EVENT_FIRST_LANDING_NOT_DONE' },
+					options: [{ text: 'Continue' }],
+				},
+				{
+					condition: state => getNpcHappiness(state, 'engineer') < -1,
+					text:
+						"Engineer: Oh come on, Captain! Go back to that moon and land there or this ship isn't going another inch.",
+					action: { type: 'EVENT_FIRST_LANDING_NOT_DONE' },
+					options: [{ text: 'Continue' }],
+				},
+			],
 		},
 		firstLanding1: {
 			text:
@@ -69,9 +78,15 @@ export function getDialogTree() {
 	};
 }
 
-export function getDialogObjectForKey(key) {
-	if (getDialogTree()[key]) {
-		return { options: [], action: null, text: '', ...getDialogTree()[key] };
+export function getDialogObjectForKey(key, state) {
+	const dialogObject = getDialogTree()[key];
+	if (dialogObject) {
+		if (dialogObject.variants) {
+			const matchingVariant =
+				dialogObject.variants.find(variant => variant.condition(state)) || dialogObject.variants[0];
+			return { options: [], action: null, text: '', ...matchingVariant };
+		}
+		return { options: [], action: null, text: '', ...dialogObject };
 	}
 	return { options: [], action: null, text: '' };
 }

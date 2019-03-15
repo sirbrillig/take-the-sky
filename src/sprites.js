@@ -363,6 +363,7 @@ export function getSpriteMover(game) {
 			getDialogSelection,
 			getEvent,
 			getPressingState,
+			getState,
 		} = state;
 		const { handleAction } = actions;
 		const pressing = getPressingState();
@@ -382,7 +383,7 @@ export function getSpriteMover(game) {
 		// render dialog
 		if (lastShownDialog !== getDialogKey() && isDialogVisible()) {
 			sprites.dialog.visible = true;
-			const currentDialogObject = getDialogObjectForKey(getDialogKey());
+			const currentDialogObject = getDialogObjectForKey(getDialogKey(), getState());
 			sprites.dialog.textArea.text = currentDialogObject.text;
 			if (currentDialogObject.action) {
 				handleAction(currentDialogObject.action);
