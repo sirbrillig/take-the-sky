@@ -15,19 +15,19 @@ export function getDialogTree() {
 		firstLandingNotDone: {
 			text:
 				"Engineer: Captain, we came to this backwater planet because there's a job to be had. Let's not leave before we at least hear them out.",
-			action: { type: 'EVENT_FIRST_LANDING_NOT_DONE', payload: 1 },
+			action: { type: 'EVENT_FIRST_LANDING_NOT_DONE' },
 			options: [{ text: 'Continue' }],
 		},
 		firstLandingNotDone2: {
 			text:
 				"Engineer: Did you not hear me the first time, Cap? This was a long trip. Let's see what's on that moon.",
-			action: { type: 'EVENT_FIRST_LANDING_NOT_DONE', payload: 2 },
+			action: { type: 'EVENT_FIRST_LANDING_NOT_DONE' },
 			options: [{ text: 'Continue' }],
 		},
 		firstLandingNotDone3: {
 			text:
 				"Engineer: Oh come on, Captain! Go back to that moon and land there or this ship isn't going another inch.",
-			action: { type: 'EVENT_FIRST_LANDING_NOT_DONE', payload: 3 },
+			action: { type: 'EVENT_FIRST_LANDING_NOT_DONE' },
 			options: [{ text: 'Continue' }],
 		},
 		firstLanding1: {

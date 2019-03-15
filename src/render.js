@@ -27,14 +27,14 @@ function shouldIncreaseChargeMeter({ getPressingState, getControlMode }) {
 	return false;
 }
 
-function showFirstLandingNotDoneDialog({ showDialog, getEvent }) {
-	if (!getEvent('firstLandingNotDone')) {
+function showFirstLandingNotDoneDialog({ showDialog, getNpc }) {
+	if (getNpc('engineer').happiness === 0) {
 		showDialog('firstLandingNotDone');
 	}
-	if (getEvent('firstLandingNotDone') === 1) {
+	if (getNpc('engineer').happiness === -1) {
 		showDialog('firstLandingNotDone2');
 	}
-	if (getEvent('firstLandingNotDone') > 1) {
+	if (getNpc('engineer').happiness < -1) {
 		showDialog('firstLandingNotDone3');
 	}
 }
@@ -57,6 +57,7 @@ export default function renderGame(game, sprites, state, actions, moveSprites) {
 		getHealthAmount,
 		getEvent,
 		isDialogVisible,
+		getNpc,
 	} = state;
 	const {
 		changeSpeed,
@@ -114,7 +115,7 @@ export default function renderGame(game, sprites, state, actions, moveSprites) {
 		if (getEvent('firstLanding')) {
 			changeCurrentSystem('Betan');
 		} else {
-			showFirstLandingNotDoneDialog({ showDialog, getEvent });
+			showFirstLandingNotDoneDialog({ showDialog, getNpc });
 		}
 	}
 

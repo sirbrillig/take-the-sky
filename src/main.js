@@ -46,23 +46,14 @@ function setUpGameObjects(game, state, actions) {
 }
 
 function initGame() {
-	const [getState, handleAction] = makeReducer(reducer, {
-		currentSystem: 'Algol',
-		position: {
-			x: 100,
-			y: 100,
-		},
-		events: {
-			firstLanding: false,
-			gameOver: false,
-		},
-	});
+	const [getState, handleAction] = makeReducer(reducer);
 	const getCurrentSystem = () => getState().currentSystem;
 	const changeCurrentSystem = system => handleAction({ type: 'CHANGE_SYSTEM', payload: system });
 	const getSystemPosition = () => getState().position;
 	const changeSystemPosition = ({ x, y }) =>
 		handleAction({ type: 'CHANGE_SYSTEM_POSITION', payload: { x, y } });
 	const getEvent = key => getState().events[key];
+	const getNpc = key => getState().npcs[key];
 	const [getDialogKey, showDialog] = makeState(null);
 	const [getDialogSelection, changeDialogSelection] = makeState(0);
 	const isDialogVisible = () => !!getDialogKey();
@@ -86,6 +77,7 @@ function initGame() {
 		getChargeMeterAmount,
 		getHealthAmount,
 		getEvent,
+		getNpc,
 		isDialogVisible,
 		getDialogKey,
 		getDialogSelection,

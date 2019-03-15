@@ -12,7 +12,7 @@ export function makeState(initialState) {
 }
 
 export function makeReducer(reducerFunction, initialState) {
-	let state = initialState;
+	let state = reducerFunction(initialState, { type: 'INIT' });
 	const handleAction = ({ type, payload }) => {
 		state = reducerFunction(state, { type, payload });
 	};
