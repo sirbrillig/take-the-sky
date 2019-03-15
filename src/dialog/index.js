@@ -26,8 +26,7 @@ function compare(comparator, leftSide, rightSide) {
 function executeScript(state, script) {
 	const parser = new nearley.Parser(nearley.Grammar.fromCompiled(grammar));
 	parser.feed(script);
-
-	parser.results.forEach(statement => {
+	return parser.results.find(statement => {
 		switch (statement.command.value) {
 			case 'getNpcHappiness': {
 				const leftSide = getNpcHappiness(state, statement.key.value);
