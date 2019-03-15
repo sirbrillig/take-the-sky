@@ -1,7 +1,5 @@
 /* @format */
 
-import { getNpcHappiness } from '../selectors';
-
 export default function getDialogTree() {
 	return {
 		explodedShip: {
@@ -17,21 +15,21 @@ export default function getDialogTree() {
 		firstLandingNotDone: {
 			variants: [
 				{
-					condition: state => getNpcHappiness(state, 'engineer') >= 0,
+					condition: "getNpcHappiness 'engineer' >= 0",
 					text:
 						"Engineer: Captain, we came to this backwater planet because there's a job to be had. Let's not leave before we at least hear them out.",
 					action: { type: 'EVENT_FIRST_LANDING_NOT_DONE' },
 					options: [{ text: 'Continue' }],
 				},
 				{
-					condition: state => getNpcHappiness(state, 'engineer') === -1,
+					condition: "getNpcHappiness 'engineer' = -1",
 					text:
 						"Engineer: Did you not hear me the first time, Cap? This was a long trip. Let's see what's on that moon.",
 					action: { type: 'EVENT_FIRST_LANDING_NOT_DONE' },
 					options: [{ text: 'Continue' }],
 				},
 				{
-					condition: state => getNpcHappiness(state, 'engineer') < -1,
+					condition: "getNpcHappiness 'engineer' < -1",
 					text:
 						"Engineer: Oh come on, Captain! Go back to that moon and land there or this ship isn't going another inch.",
 					action: { type: 'EVENT_FIRST_LANDING_NOT_DONE' },
