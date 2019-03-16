@@ -1,6 +1,7 @@
 /* @format */
 
 import { adjustSpeedForRotation, adjustNumberBetween } from './math';
+import { getEvent, getSystemPosition } from './selectors';
 import {
 	getSpriteRotation,
 	isShipTouchingStar,
@@ -11,10 +12,10 @@ import {
 } from './sprites';
 
 function updateSystemPositionFromSpeed(state, actions) {
-	const { getSpeed, getSystemPosition } = state;
+	const { getSpeed, getState } = state;
 	const { changeSystemPosition } = actions;
 	const speed = getSpeed();
-	const system = getSystemPosition();
+	const system = getSystemPosition(getState());
 	if (speed.x + speed.y !== 0) {
 		changeSystemPosition({ x: system.x + speed.x, y: system.y + speed.y });
 	}
@@ -43,8 +44,8 @@ export default function renderGame(game, sprites, state, actions, moveSprites) {
 		getControlMode,
 		getChargeMeterAmount,
 		getHealthAmount,
-		getEvent,
 		isDialogVisible,
+		getState,
 	} = state;
 	const {
 		changeSpeed,
@@ -61,13 +62,13 @@ export default function renderGame(game, sprites, state, actions, moveSprites) {
 		return;
 	}
 
-	if (getEvent('gameOver')) {
+	if (getEvent(getState(), 'gameOver')) {
 		setChargeMeterAmount(0);
 		moveSprites(sprites, state, actions);
 		return;
 	}
 
-	if (isShipTouchingStar(sprites) && !getEvent('starsAreHot')) {
+	if (isShipTouchingStar(sprites) && !getEvent(getState(), 'starsAreHot')) {
 		changeSpeed({ x: 0, y: 0 });
 		showDialog('starsAreHot');
 		return;
@@ -99,7 +100,7 @@ export default function renderGame(game, sprites, state, actions, moveSprites) {
 		isShipTouchingGate(sprites)
 	) {
 		setChargeMeterAmount(0);
-		if (getEvent('firstLanding')) {
+		if (getEvent(getState(), 'firstLanding')) {
 			changeCurrentSystem('Betan');
 		} else {
 			showDialog('firstLandingNotDone');

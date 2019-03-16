@@ -8,3 +8,15 @@ export function getNpcHappiness(state, key) {
 	const npc = getNpc(state, key) || { happiness: 0 };
 	return npc.happiness;
 }
+
+export function getEvent(state, key) {
+	return state.events[key];
+}
+
+export function getCurrentSystem(state) {
+	return state.currentSystem;
+}
+
+export function getSystemPosition(state) {
+	return state.position;
+}

@@ -3,6 +3,7 @@
 import { getPlanetsInSystem, getStarsInSystem, getGatesInSystem } from './planets';
 import { getTurningDirectionFromPressingState } from './controls';
 import { adjustRotation } from './math';
+import { getEvent, getCurrentSystem, getSystemPosition } from './selectors';
 import getDialogObjectForKey from './dialog/index';
 
 export function setSpritePosition(sprite, { x, y }) {
@@ -354,20 +355,17 @@ export function getSpriteMover(game) {
 	return (sprites, state, actions) => {
 		const {
 			getControlMode,
-			getSystemPosition,
-			getCurrentSystem,
 			getChargeMeterAmount,
 			getHealthAmount,
 			isDialogVisible,
 			getDialogKey,
 			getDialogSelection,
-			getEvent,
 			getPressingState,
 			getState,
 		} = state;
 		const { handleAction } = actions;
 		const pressing = getPressingState();
-		const systemPosition = getSystemPosition();
+		const systemPosition = getSystemPosition(getState());
 
 		// render ship
 		if (!isDialogVisible() && getControlMode() === 'pilot' && (pressing.left || pressing.right)) {
@@ -399,11 +397,11 @@ export function getSpriteMover(game) {
 		lastShownDialog = getDialogKey();
 
 		// render planets, stars, and gates
-		if (getCurrentSystem() !== lastRenderedSystem) {
+		if (getCurrentSystem(getState()) !== lastRenderedSystem) {
 			if (sprites.planets) {
 				sprites.planets.map(sprite => game.stage.removeChild(sprite));
 			}
-			const currentSystem = getCurrentSystem();
+			const currentSystem = getCurrentSystem(getState());
 			sprites.planets = getPlanetsInSystem(currentSystem).map(planetData =>
 				createAndPlacePlanet(game, planetData)
 			);
@@ -427,7 +425,7 @@ export function getSpriteMover(game) {
 
 			sortSpritesByZIndex(game);
 		}
-		lastRenderedSystem = getCurrentSystem();
+		lastRenderedSystem = getCurrentSystem(getState());
 		sprites.planets.map(sprite =>
 			setSpritePosition(sprite, {
 				x: sprite.positionInSpace.x + systemPosition.x,
@@ -469,7 +467,7 @@ export function getSpriteMover(game) {
 
 		// render ring
 		setSpriteRotation(sprites.ring, getSpriteRotation(sprites.ship));
-		sprites.ring.visible = !getEvent('gameOver') && getControlMode() === 'pilot';
+		sprites.ring.visible = !getEvent(getState(), 'gameOver') && getControlMode() === 'pilot';
 
 		// render mode pointer
 		sprites.modeControls.changeSelectedOption(getControlMode());

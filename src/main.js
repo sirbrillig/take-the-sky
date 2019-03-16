@@ -47,12 +47,9 @@ function setUpGameObjects(game, state, actions) {
 
 function initGame() {
 	const [getState, handleAction] = makeReducer(reducer);
-	const getCurrentSystem = () => getState().currentSystem;
 	const changeCurrentSystem = system => handleAction({ type: 'CHANGE_SYSTEM', payload: system });
-	const getSystemPosition = () => getState().position;
 	const changeSystemPosition = ({ x, y }) =>
 		handleAction({ type: 'CHANGE_SYSTEM_POSITION', payload: { x, y } });
-	const getEvent = key => getState().events[key];
 	const [getDialogKey, showDialog] = makeState(null);
 	const [getDialogSelection, changeDialogSelection] = makeState(0);
 	const isDialogVisible = () => !!getDialogKey();
@@ -71,11 +68,8 @@ function initGame() {
 		getControlMode,
 		getPressingState,
 		getSpeed,
-		getCurrentSystem,
-		getSystemPosition,
 		getChargeMeterAmount,
 		getHealthAmount,
-		getEvent,
 		isDialogVisible,
 		getDialogKey,
 		getDialogSelection,
