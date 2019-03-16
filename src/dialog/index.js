@@ -3,10 +3,15 @@
 import nearley from 'nearley';
 import grammar from '../parser/grammar';
 import getDialogTree from './dialog-tree';
+import debugFactory from '../debug';
+import { getNpcHappiness, getEvent } from '../selectors';
 
-import { getNpcHappiness } from '../selectors';
+const debug = debugFactory('sky');
 
 function compare(comparator, leftSide, rightSide) {
+	if (rightSide === 'false' && comparator === '=') {
+		return !leftSide;
+	}
 	switch (comparator) {
 		case '>':
 			return leftSide > rightSide;
@@ -28,10 +33,27 @@ function executeScript(state, script) {
 	parser.feed(script);
 	return parser.results.find(statement => {
 		switch (statement.command.value) {
+			case 'getEvent': {
+				const leftSide = getEvent(state, statement.key.value);
+				debug(
+					statement,
+					'comparison:',
+					leftSide,
+					statement.comparator.value,
+					statement.rightside.value
+				);
+				return compare(statement.comparator.value, leftSide, statement.rightside.value);
+			}
 			case 'getNpcHappiness': {
 				const leftSide = getNpcHappiness(state, statement.key.value);
-				const result = compare(statement.comparator.value, leftSide, statement.number.value);
-				return result;
+				debug(
+					statement,
+					'comparison:',
+					leftSide,
+					statement.comparator.value,
+					statement.rightside.value
+				);
+				return compare(statement.comparator.value, leftSide, statement.rightside.value);
 			}
 			default:
 				throw new Error(`Unknown command ${statement.command.value}`);
