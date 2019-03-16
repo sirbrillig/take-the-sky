@@ -73,7 +73,7 @@ export default function renderGame(game, sprites, state, actions, moveSprites) {
 		return;
 	}
 	if (isShipTouchingStar(sprites) && getHealthAmount(getState()) > 0) {
-		handleAction({ type: 'HEALTH_CHANGE', payload: getHealthAmount(getState()) - 1 });
+		handleAction({ type: 'HEALTH_CHANGE', payload: getHealthAmount(getState()) - 0.5 });
 	}
 
 	if (getHealthAmount(getState()) < 1) {
