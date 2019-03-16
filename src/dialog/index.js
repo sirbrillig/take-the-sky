@@ -42,7 +42,7 @@ function executeScript(state, script) {
 export default function getDialogObjectForKey(key, state) {
 	const dialogObject = getDialogTree()[key];
 	if (dialogObject) {
-		if (dialogObject.variants) {
+		if (dialogObject.variants && dialogObject.variants.length) {
 			const matchingVariant =
 				dialogObject.variants.find(variant => executeScript(state, variant.condition)) ||
 				dialogObject.variants[0];
