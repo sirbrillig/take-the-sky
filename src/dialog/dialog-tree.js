@@ -38,10 +38,20 @@ export default function getDialogTree() {
 			],
 		},
 		firstLanding1: {
-			text:
-				"In the dingy space port, you are approached by a young woman. She's very confident, but always looking over her shoulder. You don't see anyone other than a drunk and a traffic controller nearby, but on this tiny planet you wouldn't be surprised if someone meant this woman harm.",
-			options: [{ text: 'Continue', link: 'firstLanding2' }],
-			action: { type: 'EVENT_FIRST_LANDING' },
+			variants: [
+				{
+					condition: "getEvent 'firstLanding' = true",
+					text:
+						"Not much action any more in Twist's dingy space port. The traffic controller looks up, frowns at you, and returns to her work.",
+					options: [{ text: 'Continue' }],
+				},
+				{
+					condition: "getEvent 'firstLanding' = false",
+					text:
+						"In the dingy space port, you are approached by a young woman. She's very confident, but always looking over her shoulder. You don't see anyone other than a drunk and a traffic controller nearby, but on this tiny planet you wouldn't be surprised if someone meant this woman harm.",
+					options: [{ text: 'Continue', link: 'firstLanding2' }],
+				},
+			],
 		},
 		firstLanding2: {
 			text:
@@ -62,6 +72,7 @@ export default function getDialogTree() {
 					text: 'Depart',
 				},
 			],
+			action: { type: 'EVENT_FIRST_LANDING' },
 		},
 		firstLanding4: {
 			text:
