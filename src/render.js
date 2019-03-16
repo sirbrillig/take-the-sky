@@ -45,7 +45,6 @@ export default function renderGame(game, sprites, state, actions, moveSprites) {
 		getHealthAmount,
 		getEvent,
 		isDialogVisible,
-		getNpc,
 	} = state;
 	const {
 		changeSpeed,

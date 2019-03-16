@@ -53,7 +53,6 @@ function initGame() {
 	const changeSystemPosition = ({ x, y }) =>
 		handleAction({ type: 'CHANGE_SYSTEM_POSITION', payload: { x, y } });
 	const getEvent = key => getState().events[key];
-	const getNpc = key => getState().npcs[key];
 	const [getDialogKey, showDialog] = makeState(null);
 	const [getDialogSelection, changeDialogSelection] = makeState(0);
 	const isDialogVisible = () => !!getDialogKey();
@@ -77,7 +76,6 @@ function initGame() {
 		getChargeMeterAmount,
 		getHealthAmount,
 		getEvent,
-		getNpc,
 		isDialogVisible,
 		getDialogKey,
 		getDialogSelection,
