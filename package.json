@@ -27,6 +27,7 @@
     "serve": "http-server public",
     "build": "rollup --config rollup.config.js",
     "watch": "rollup --watch --config rollup.config.js",
+    "compile-grammar": "nearleyc src/parser/grammar.ne -o src/parser/grammar.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Payton Swick <payton@foolord.com>",
