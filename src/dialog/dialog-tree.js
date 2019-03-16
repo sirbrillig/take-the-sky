@@ -37,13 +37,18 @@ export default function getDialogTree() {
 				},
 			],
 		},
-		firstLanding1: {
+		landingPlanetBeta: {
+			text:
+				'Home to many researchers and medical professionals. Expensive tech. Folks are overworked, mostly.',
+			options: [{ text: 'Depart' }],
+		},
+		landingPlanetTwist: {
 			variants: [
 				{
 					condition: "getEvent 'firstLanding' = true",
 					text:
 						"Not much action any more in Twist's dingy space port. The traffic controller looks up, frowns at you, and returns to her work.",
-					options: [{ text: 'Continue' }],
+					options: [{ text: 'Depart' }],
 				},
 				{
 					condition: "getEvent 'firstLanding' = false",

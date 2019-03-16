@@ -5,7 +5,7 @@ import { getEvent, getSystemPosition, getHealthAmount } from './selectors';
 import {
 	getSpriteRotation,
 	isShipTouchingStar,
-	isShipTouchingPlanet,
+	getPlanetTouchingShip,
 	isShipTouchingGate,
 	isChargeMeterFull,
 	explodeShip,
@@ -83,14 +83,11 @@ export default function renderGame(game, sprites, state, actions, moveSprites) {
 		return;
 	}
 
-	if (
-		getControlMode() === 'land' &&
-		isChargeMeterFull(getChargeMeterAmount()) &&
-		isShipTouchingPlanet(sprites)
-	) {
+	const touchingPlanet = getPlanetTouchingShip(sprites);
+	if (getControlMode() === 'land' && isChargeMeterFull(getChargeMeterAmount()) && touchingPlanet) {
 		setChargeMeterAmount(0);
 		changeSpeed({ x: 0, y: 0 });
-		showDialog('firstLanding1');
+		showDialog(`landingPlanet${touchingPlanet.planetData.name}`);
 	}
 
 	if (

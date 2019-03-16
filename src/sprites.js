@@ -42,6 +42,7 @@ function createAndPlacePlanet(game, planetData) {
 	const planetSprite = game.circle(planetData.size, planetData.color);
 	planetSprite.positionInSpace = planetData.position;
 	planetSprite.zIndex = 5;
+	planetSprite.planetData = planetData;
 	setSpritePosition(planetSprite, { x: planetData.position.x, y: planetData.position.y });
 	return planetSprite;
 }
@@ -341,7 +342,7 @@ export function isShipTouchingStar({ stars, ship }) {
 	return stars && stars.find(star => doSpritesOverlap(ship, star));
 }
 
-export function isShipTouchingPlanet({ planets, ship }) {
+export function getPlanetTouchingShip({ planets, ship }) {
 	return planets && planets.find(planet => doSpritesOverlap(ship, planet));
 }
 
