@@ -41,14 +41,14 @@ function executeScript(state, script) {
 
 export default function getDialogObjectForKey(key, state) {
 	const dialogObject = getDialogTree()[key];
-	if (dialogObject) {
-		if (dialogObject.variants && dialogObject.variants.length) {
-			const matchingVariant =
-				dialogObject.variants.find(variant => executeScript(state, variant.condition)) ||
-				dialogObject.variants[0];
-			return { options: [], action: null, text: '', ...matchingVariant };
-		}
-		return { options: [], action: null, text: '', ...dialogObject };
+	if (!dialogObject) {
+		return { options: [], action: null, text: '' };
 	}
-	return { options: [], action: null, text: '' };
+	if (dialogObject.variants && dialogObject.variants.length) {
+		const matchingVariant =
+			dialogObject.variants.find(variant => executeScript(state, variant.condition)) ||
+			dialogObject.variants[0];
+		return { options: [], action: null, text: '', ...matchingVariant };
+	}
+	return { options: [], action: null, text: '', ...dialogObject };
 }
