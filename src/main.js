@@ -54,7 +54,6 @@ function initGame() {
 	const [getDialogSelection, changeDialogSelection] = makeState(0);
 	const isDialogVisible = () => !!getDialogKey();
 	const [getChargeMeterAmount, setChargeMeterAmount] = makeState(0);
-	const [getHealthAmount, setHealthAmount] = makeState(100);
 	const [getSpeed, changeSpeed] = makeState({ x: 0, y: 0 });
 	const [getPressingState, changePressingState] = makeState({
 		up: false,
@@ -69,7 +68,6 @@ function initGame() {
 		getPressingState,
 		getSpeed,
 		getChargeMeterAmount,
-		getHealthAmount,
 		isDialogVisible,
 		getDialogKey,
 		getDialogSelection,
@@ -82,7 +80,6 @@ function initGame() {
 		changeCurrentSystem,
 		changeSystemPosition,
 		setChargeMeterAmount,
-		setHealthAmount,
 		handleAction,
 		showDialog,
 		changeDialogSelection,

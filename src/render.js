@@ -1,7 +1,7 @@
 /* @format */
 
 import { adjustSpeedForRotation, adjustNumberBetween } from './math';
-import { getEvent, getSystemPosition } from './selectors';
+import { getEvent, getSystemPosition, getHealthAmount } from './selectors';
 import {
 	getSpriteRotation,
 	isShipTouchingStar,
@@ -43,7 +43,6 @@ export default function renderGame(game, sprites, state, actions, moveSprites) {
 		getSpeed,
 		getControlMode,
 		getChargeMeterAmount,
-		getHealthAmount,
 		isDialogVisible,
 		getState,
 	} = state;
@@ -51,8 +50,8 @@ export default function renderGame(game, sprites, state, actions, moveSprites) {
 		changeSpeed,
 		changeCurrentSystem,
 		setChargeMeterAmount,
-		setHealthAmount,
 		showDialog,
+		handleAction,
 	} = actions;
 	const pressing = getPressingState();
 
@@ -73,11 +72,11 @@ export default function renderGame(game, sprites, state, actions, moveSprites) {
 		showDialog('starsAreHot');
 		return;
 	}
-	if (isShipTouchingStar(sprites) && getHealthAmount() > 0) {
-		setHealthAmount(getHealthAmount() - 1);
+	if (isShipTouchingStar(sprites) && getHealthAmount(getState()) > 0) {
+		handleAction({ type: 'HEALTH_CHANGE', payload: getHealthAmount(getState()) - 1 });
 	}
 
-	if (getHealthAmount() < 1) {
+	if (getHealthAmount(getState()) < 1) {
 		sprites.ship.visible = false;
 		explodeShip(game);
 		showDialog('explodedShip');

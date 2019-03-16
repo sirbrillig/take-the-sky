@@ -20,3 +20,7 @@ export function getCurrentSystem(state) {
 export function getSystemPosition(state) {
 	return state.position;
 }
+
+export function getHealthAmount(state) {
+	return state.shipHealth;
+}

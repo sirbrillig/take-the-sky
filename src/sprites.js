@@ -3,7 +3,7 @@
 import { getPlanetsInSystem, getStarsInSystem, getGatesInSystem } from './planets';
 import { getTurningDirectionFromPressingState } from './controls';
 import { adjustRotation } from './math';
-import { getEvent, getCurrentSystem, getSystemPosition } from './selectors';
+import { getEvent, getCurrentSystem, getSystemPosition, getHealthAmount } from './selectors';
 import getDialogObjectForKey from './dialog/index';
 
 export function setSpritePosition(sprite, { x, y }) {
@@ -356,7 +356,6 @@ export function getSpriteMover(game) {
 		const {
 			getControlMode,
 			getChargeMeterAmount,
-			getHealthAmount,
 			isDialogVisible,
 			getDialogKey,
 			getDialogSelection,
@@ -474,7 +473,7 @@ export function getSpriteMover(game) {
 
 		// render health bar
 		sprites.healthMeter.innerBar.width =
-			(sprites.healthMeter.outerBar.width / 100) * getHealthAmount();
+			(sprites.healthMeter.outerBar.width / 100) * getHealthAmount(getState());
 
 		// render charge meter
 		if (!isChargeMeterVisible(state)) {

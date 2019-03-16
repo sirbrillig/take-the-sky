@@ -1,6 +1,7 @@
 /* @format */
 
 import debugFactory from './debug';
+import { adjustNumberBetween } from './math';
 
 const debug = debugFactory('sky');
 
@@ -52,6 +53,15 @@ function position(state = { x: 100, y: 100 }, { type, payload }) {
 	}
 }
 
+function shipHealth(state = 100, { type, payload }) {
+	switch (type) {
+		case 'HEALTH_CHANGE':
+			return adjustNumberBetween(payload, 0, 100);
+		default:
+			return state;
+	}
+}
+
 export default function reducer(state = {}, action) {
 	debug(state, action);
 	return {
@@ -59,5 +69,6 @@ export default function reducer(state = {}, action) {
 		events: events(state.events, action),
 		position: position(state.position, action),
 		currentSystem: currentSystem(state.currentSystem, action),
+		shipHealth: shipHealth(state.shipHealth, action),
 	};
 }
