@@ -257,7 +257,7 @@ export function createAndPlaceChargeMeter(game) {
 	return meter;
 }
 
-export function explodeShip(game) {
+export function explodeShip(game, sprites) {
 	const images = [
 		'assets/explosion_01.png',
 		'assets/explosion_02.png',
@@ -273,6 +273,7 @@ export function explodeShip(game) {
 	animatedSprite.loop = false;
 	animatedSprite.onComplete = () => animatedSprite.destroy();
 	game.stage.addChild(animatedSprite);
+	sprites.ship.visible = false;
 	animatedSprite.play();
 }
 

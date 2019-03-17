@@ -77,8 +77,7 @@ export default function renderGame(game, sprites, state, actions, moveSprites) {
 	}
 
 	if (getHealthAmount(getState()) < 1) {
-		sprites.ship.visible = false;
-		explodeShip(game);
+		explodeShip(game, sprites);
 		showDialog('explodedShip');
 		return;
 	}
