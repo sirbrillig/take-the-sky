@@ -5,9 +5,7 @@ import { makeUniqueId } from './math';
 
 export function getOtherShipsToCreate(shipSprites, state) {
 	const existingShipIds = shipSprites.map(sprite => sprite.shipId);
-	return getShips(state).filter(
-		shipData => !existingShipIds.find(shipId => shipId === shipData.shipId)
-	);
+	return getShips(state).filter(shipData => !existingShipIds.includes(shipData.shipId));
 }
 
 export function makeShipData(shipType) {
