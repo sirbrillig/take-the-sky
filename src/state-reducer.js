@@ -63,19 +63,25 @@ function shipHealth(state = 100, { type, payload }) {
 	}
 }
 
+function updateShipInArray(dataArray, shipData) {
+	const matchingShipData = dataArray.find(otherShip => otherShip.shipId === shipData.shipId);
+	if (!matchingShipData) {
+		throw new Error(
+			`Ship data not found when trying to change ship data for id ${shipData.shipId}`
+		);
+	}
+	const dataArrayWithDataRemoved = dataArray.filter(
+		otherShip => otherShip.shipId !== shipData.shipId
+	);
+	return [...dataArrayWithDataRemoved, { ...matchingShipData, ...shipData }];
+}
+
 function otherShips(state = [], { type, payload }) {
 	switch (type) {
 		case 'EVENT_FIRST_LANDING':
 			return [...state, makeShipData('cruiser')];
 		case 'CHANGE_OTHER_SHIP_DATA': {
-			const ship = state.find(otherShip => otherShip.shipId === payload.shipId);
-			if (!ship) {
-				throw new Error(`Ship not found when trying to change ship data for id ${payload.shipId}`);
-			}
-			return [
-				...state.filter(otherShip => otherShip.shipId === payload.shipId),
-				{ ...ship, payload },
-			];
+			return updateShipInArray(state, payload);
 		}
 		default:
 			return state;
