@@ -2,8 +2,9 @@
 
 import debugFactory from './debug';
 import { adjustNumberBetween } from './math';
+import { makeShipData } from './other-ships';
 
-const debug = debugFactory('sky');
+const debug = debugFactory('sky:state');
 
 function npc(state = { happiness: 0 }, action = {}) {
 	return { happiness: state.happiness + action.happiness || 0 };
@@ -62,13 +63,34 @@ function shipHealth(state = 100, { type, payload }) {
 	}
 }
 
+function otherShips(state = [], { type, payload }) {
+	switch (type) {
+		case 'EVENT_FIRST_LANDING':
+			return [...state, makeShipData('cruiser')];
+		case 'CHANGE_OTHER_SHIP_DATA': {
+			const ship = state.find(otherShip => otherShip.shipId === payload.shipId);
+			if (!ship) {
+				throw new Error(`Ship not found when trying to change ship data for id ${payload.shipId}`);
+			}
+			return [
+				...state.filter(otherShip => otherShip.shipId === payload.shipId),
+				{ ...ship, payload },
+			];
+		}
+		default:
+			return state;
+	}
+}
+
 export default function reducer(state = {}, action) {
-	debug(state, action);
-	return {
+	const updated = {
 		npcs: npcs(state.npcs, action),
 		events: events(state.events, action),
 		position: position(state.position, action),
 		currentSystem: currentSystem(state.currentSystem, action),
 		shipHealth: shipHealth(state.shipHealth, action),
+		otherShips: otherShips(state.otherShips, action),
 	};
+	debug(state, action, updated);
+	return updated;
 }

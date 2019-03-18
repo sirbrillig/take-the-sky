@@ -33,6 +33,7 @@ function initSprites(game) {
 		dialog: createAndPlaceDialog(game),
 		ship: createAndPlaceShip(game),
 		ring: createAndPlaceNavigationRing(game),
+		ships: [],
 		healthMeter: createAndPlaceHealthMeter(game),
 		chargeMeter: createAndPlaceChargeMeter(game),
 		modeControls: createAndPlaceModeControls(game),

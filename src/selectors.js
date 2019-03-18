@@ -24,3 +24,7 @@ export function getSystemPosition(state) {
 export function getHealthAmount(state) {
 	return state.shipHealth;
 }
+
+export function getShips(state) {
+	return state.otherShips;
+}

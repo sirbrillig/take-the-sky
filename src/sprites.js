@@ -1,10 +1,19 @@
 /* @format */
 
+import debugFactory from './debug';
 import { getPlanetsInSystem, getStarsInSystem, getGatesInSystem } from './planets';
 import { getTurningDirectionFromPressingState } from './controls';
-import { adjustRotation } from './math';
+import {
+	adjustRotation,
+	adjustSpeedForOtherShip,
+	getAngleBetweenSprites,
+	adjustPositionToFollow,
+} from './math';
 import { getEvent, getCurrentSystem, getSystemPosition, getHealthAmount } from './selectors';
 import getDialogObjectForKey from './dialog/index';
+import { getOtherShipsToCreate, getShipSpriteForType } from './other-ships';
+
+const debug = debugFactory('sky:sprites');
 
 export function setSpritePosition(sprite, { x, y }) {
 	sprite.position.set(x, y);
@@ -56,18 +65,18 @@ function createAndPlaceGate(game, gateData) {
 	return gate;
 }
 
-export function createAndPlaceOtherShips(game) {
-	const shipLayer = game.group();
-	const ship = game.sprite('assets/ship-2.png');
-	setSpritePosition(ship, { x: 600, y: 20 });
-	ship.pivot.set(0.5, 0.5);
-	ship.zIndex = 10;
-	ship.speed = { x: 1, y: 1 };
-	// TODO: set the anchor
-	shipLayer.addChild(ship);
-	game.stage.addChild(shipLayer);
-	setSpritePosition(shipLayer, { x: 0, y: 0 });
-	return shipLayer;
+export function createAndPlaceOtherShips(game, shipDataObjects) {
+	return shipDataObjects.map(shipData => {
+		const ship = game.sprite(getShipSpriteForType(shipData.shipType));
+		ship.shipData = shipData;
+		ship.zIndex = 10;
+		ship.pivot.set(0.5, 0.5);
+		ship.anchor.set(0.5, 0.5);
+		ship.positionInSpace = shipData.position;
+		setSpritePosition(ship, { x: shipData.position.x, y: shipData.position.y });
+		game.stage.addChild(ship);
+		return ship;
+	});
 }
 
 export function createAndPlaceShip(game) {
@@ -351,6 +360,38 @@ export function isShipTouchingGate({ gates, ship }) {
 	return gates && gates.find(gate => doSpritesOverlap(ship, gate));
 }
 
+function moveOtherShipForBehavior(shipSprite, behavior, sprites, handleAction) {
+	switch (behavior) {
+		case 'follow': {
+			shipSprite.rotation = getAngleBetweenSprites(sprites.ship, shipSprite);
+			// adjust the ship's speed to accelerate
+			const newSpeed = adjustSpeedForOtherShip(shipSprite.rotation, shipSprite.shipData.speed);
+			// adjust the position to follow the player
+			const newPosition = adjustPositionToFollow(shipSprite, sprites.ship, newSpeed);
+			handleAction({
+				type: 'CHANGE_OTHER_SHIP_DATA',
+				payload: {
+					...shipSprite.shipData,
+					position: newPosition,
+					speed: newSpeed,
+				},
+			});
+			break;
+		}
+		default:
+			break;
+	}
+}
+
+function moveSpritesForSystemPosition(sprites, systemPosition) {
+	sprites.map(sprite =>
+		setSpritePosition(sprite, {
+			x: sprite.positionInSpace.x + systemPosition.x,
+			y: sprite.positionInSpace.y + systemPosition.y,
+		})
+	);
+}
+
 export function getSpriteMover(game) {
 	let lastRenderedSystem = '';
 	let lastShownDialog = '';
@@ -427,41 +468,20 @@ export function getSpriteMover(game) {
 			sortSpritesByZIndex(game);
 		}
 		lastRenderedSystem = getCurrentSystem(getState());
-		sprites.planets.map(sprite =>
-			setSpritePosition(sprite, {
-				x: sprite.positionInSpace.x + systemPosition.x,
-				y: sprite.positionInSpace.y + systemPosition.y,
-			})
-		);
-		sprites.stars.map(sprite =>
-			setSpritePosition(sprite, {
-				x: sprite.positionInSpace.x + systemPosition.x,
-				y: sprite.positionInSpace.y + systemPosition.y,
-			})
-		);
-		sprites.gates.map(sprite =>
-			setSpritePosition(sprite, {
-				x: sprite.positionInSpace.x + systemPosition.x,
-				y: sprite.positionInSpace.y + systemPosition.y,
-			})
-		);
+		moveSpritesForSystemPosition(sprites.planets, systemPosition);
+		moveSpritesForSystemPosition(sprites.stars, systemPosition);
+		moveSpritesForSystemPosition(sprites.gates, systemPosition);
 
 		// render other ships
-		// if (!sprites.ships) {
-		// 	 sprites.ships = createAndPlaceOtherShips(game);
-		// }
-		// sprites.ships.children.forEach(other => {
-		// 	other.rotation = getAngleBetweenSprites(sprites.ship, other);
-		// 	// adjust the ship's speed to accelerate
-		// 	other.speed = adjustSpeedForOtherShip(other.rotation, other.speed);
-		// 	// adjust the position to follow the player
-		// 	adjustPositionToFollow(other, sprites.ship, other.speed);
-		// 	// adjust the position for the system position
-		// 	setSpritePosition(other, {
-		// 		x: other.x + getSpeed().x,
-		// 		y: other.y + getSpeed().y,
-		// 	});
-		// });
+		const otherShipsToCreate = getOtherShipsToCreate(sprites.ships, getState());
+		if (otherShipsToCreate.length) {
+			debug('creating ships', otherShipsToCreate);
+			sprites.ships = [...sprites.ships, ...createAndPlaceOtherShips(game, otherShipsToCreate)];
+		}
+		sprites.ships.forEach(other => {
+			moveOtherShipForBehavior(other, other.shipData.behavior, sprites, handleAction);
+		});
+		moveSpritesForSystemPosition(sprites.ships, systemPosition);
 
 		// render background
 		setTilePosition(sprites.sky, { x: systemPosition.x, y: systemPosition.y });

@@ -48,19 +48,25 @@ export function getCenter(o, dimension, axis) {
 export function adjustPositionToFollow(follower, leader, speed) {
 	// Figure out the distance between the sprites
 	const vx =
-		leader.x +
+		leader.position.x +
 		getCenter(leader, leader.width, 'x') -
-		(follower.x + getCenter(follower, follower.width, 'x'));
+		(follower.position.x + getCenter(follower, follower.width, 'x'));
 	const vy =
-		leader.y +
+		leader.position.y +
 		getCenter(leader, leader.height, 'y') -
-		(follower.y + getCenter(follower, follower.height, 'y'));
+		(follower.position.y + getCenter(follower, follower.height, 'y'));
 	const distance = Math.sqrt(vx * vx + vy * vy);
 
 	if (distance >= speed.x + speed.y) {
-		follower.x += (vx / distance) * Math.abs(speed.x);
-		follower.y += (vy / distance) * Math.abs(speed.y);
+		return {
+			x: follower.position.x + (vx / distance) * Math.abs(speed.x),
+			y: follower.position.y + (vy / distance) * Math.abs(speed.y),
+		};
 	}
+	return {
+		x: 0,
+		y: 0,
+	};
 }
 
 export function adjustRotation(direction, rotation) {
@@ -114,4 +120,11 @@ export function getAngleBetweenSprites(s1, s2) {
 		s2.y + getCenter(s2, s2.height, 'y') - (s1.y + getCenter(s1, s1.height, 'y')),
 		s2.x + getCenter(s2, s2.width, 'x') - (s1.x + getCenter(s1, s1.width, 'x'))
 	);
+}
+
+// From: https://gist.github.com/gordonbrander/2230317
+export function makeUniqueId() {
+	return `_${Math.random()
+		.toString(36)
+		.substr(2, 9)}`;
 }
