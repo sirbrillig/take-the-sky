@@ -4,6 +4,7 @@ import debugFactory from './debug';
 import { getPlanetsInSystem, getStarsInSystem, getGatesInSystem } from './planets';
 import { getTurningDirectionFromPressingState } from './controls';
 import {
+	areVectorsSame,
 	adjustRotation,
 	adjustSpeedForOtherShip,
 	getAngleBetweenSprites,
@@ -374,6 +375,13 @@ function moveOtherShipForBehavior(shipSprite, shipData, sprites, handleAction) {
 			const newSpeed = adjustSpeedForOtherShip(shipSprite.rotation, shipData.speed);
 			// adjust the position to follow the player
 			const newPosition = adjustPositionToFollow(shipSprite, sprites.ship, newSpeed);
+			if (
+				areVectorsSame(newPosition, shipData.position) &&
+				areVectorsSame(newSpeed, shipData.speed)
+			) {
+				return;
+			}
+			debug('moving ship', shipData, newPosition, newSpeed);
 			handleAction({
 				type: 'CHANGE_OTHER_SHIP_DATA',
 				payload: {
@@ -486,17 +494,18 @@ export function getSpriteMover(game) {
 		}
 		sprites.ships.forEach(other => {
 			const shipData = getShipDataForId(getState(), other.shipId);
+			if (!shipData) {
+				throw new Error(`No ship data found when moving ship id ${other.shipId}`);
+			}
 			moveOtherShipForBehavior(other, shipData, sprites, handleAction);
 		});
 		sprites.ships.forEach(other => {
-			// we must use updated ship data that might differ from that attached to the sprite
 			const shipData = getShipDataForId(getState(), other.shipId);
 			if (!shipData) {
 				throw new Error(`No ship data found when moving ship id ${other.shipId}`);
 			}
 			// update the positionInSpace which is used by moveSpritesForSystemPosition
 			other.positionInSpace = shipData.position;
-			setSpritePosition(other, shipData.position);
 		});
 		moveSpritesForSystemPosition(sprites.ships, systemPosition);
 
