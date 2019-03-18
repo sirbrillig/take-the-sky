@@ -28,3 +28,7 @@ export function getHealthAmount(state) {
 export function getShips(state) {
 	return state.otherShips;
 }
+
+export function getShipDataForId(state, id) {
+	return getShips(state).find(ship => ship.shipId === id);
+}

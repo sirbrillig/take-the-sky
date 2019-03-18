@@ -9,7 +9,13 @@ import {
 	getAngleBetweenSprites,
 	adjustPositionToFollow,
 } from './math';
-import { getEvent, getCurrentSystem, getSystemPosition, getHealthAmount } from './selectors';
+import {
+	getEvent,
+	getCurrentSystem,
+	getSystemPosition,
+	getHealthAmount,
+	getShipDataForId,
+} from './selectors';
 import getDialogObjectForKey from './dialog/index';
 import { getOtherShipsToCreate, getShipSpriteForType } from './other-ships';
 
@@ -68,7 +74,7 @@ function createAndPlaceGate(game, gateData) {
 export function createAndPlaceOtherShips(game, shipDataObjects) {
 	return shipDataObjects.map(shipData => {
 		const ship = game.sprite(getShipSpriteForType(shipData.shipType));
-		ship.shipData = shipData;
+		ship.shipId = shipData.shipId;
 		ship.zIndex = 10;
 		ship.pivot.set(0.5, 0.5);
 		ship.anchor.set(0.5, 0.5);
@@ -360,18 +366,18 @@ export function isShipTouchingGate({ gates, ship }) {
 	return gates && gates.find(gate => doSpritesOverlap(ship, gate));
 }
 
-function moveOtherShipForBehavior(shipSprite, behavior, sprites, handleAction) {
-	switch (behavior) {
+function moveOtherShipForBehavior(shipSprite, shipData, sprites, handleAction) {
+	switch (shipData.behavior) {
 		case 'follow': {
 			shipSprite.rotation = getAngleBetweenSprites(sprites.ship, shipSprite);
 			// adjust the ship's speed to accelerate
-			const newSpeed = adjustSpeedForOtherShip(shipSprite.rotation, shipSprite.shipData.speed);
+			const newSpeed = adjustSpeedForOtherShip(shipSprite.rotation, shipData.speed);
 			// adjust the position to follow the player
 			const newPosition = adjustPositionToFollow(shipSprite, sprites.ship, newSpeed);
 			handleAction({
 				type: 'CHANGE_OTHER_SHIP_DATA',
 				payload: {
-					...shipSprite.shipData,
+					...shipData,
 					position: newPosition,
 					speed: newSpeed,
 				},
@@ -479,7 +485,18 @@ export function getSpriteMover(game) {
 			sprites.ships = [...sprites.ships, ...createAndPlaceOtherShips(game, otherShipsToCreate)];
 		}
 		sprites.ships.forEach(other => {
-			moveOtherShipForBehavior(other, other.shipData.behavior, sprites, handleAction);
+			const shipData = getShipDataForId(getState(), other.shipId);
+			moveOtherShipForBehavior(other, shipData, sprites, handleAction);
+		});
+		sprites.ships.forEach(other => {
+			// we must use updated ship data that might differ from that attached to the sprite
+			const shipData = getShipDataForId(getState(), other.shipId);
+			if (!shipData) {
+				throw new Error(`No ship data found when moving ship id ${other.shipId}`);
+			}
+			// update the positionInSpace which is used by moveSpritesForSystemPosition
+			other.positionInSpace = shipData.position;
+			setSpritePosition(other, shipData.position);
 		});
 		moveSpritesForSystemPosition(sprites.ships, systemPosition);
 
