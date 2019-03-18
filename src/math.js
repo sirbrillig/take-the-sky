@@ -6,7 +6,7 @@ export function adjustNumberBetween(num, min, max) {
 	return num;
 }
 
-function areVectorsSame(first, second) {
+export function areVectorsSame(first, second) {
 	return first.x === second.x && first.y === second.y;
 }
 
