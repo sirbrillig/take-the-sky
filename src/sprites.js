@@ -125,9 +125,10 @@ function createDialogOption(game, option, index) {
 		fill: 'white',
 	});
 	const paddingForArrow = 28;
+	const textHeight = 35;
 	setSpritePosition(dialogText, {
 		x: paddingForArrow,
-		y: index * 35,
+		y: index * textHeight,
 	});
 	return dialogText;
 }
@@ -146,8 +147,9 @@ function createDialogOptions(game, dialog, currentDialogObject) {
 	setSpritePosition(arrow, { x: 10, y: arrow.height });
 	dialog.optionArea.addChild(arrow);
 
+	const textHeight = 32;
 	dialog.changeSelectedOption = index => {
-		arrow.y = arrow.height + index * 32;
+		arrow.y = arrow.height + index * textHeight;
 	};
 
 	arrow.visible = !!currentDialogObject.options.length;
@@ -161,11 +163,12 @@ export function createAndPlaceDialog(game) {
 	box.addChild(dialogText);
 
 	box.optionArea = game.group();
-	setSpritePosition(box.optionArea, { x: boxPadding, y: box.height - 110 });
+	const optionAreaHeight = 90;
+	setSpritePosition(box.optionArea, { x: boxPadding, y: box.height - optionAreaHeight });
 	box.addChild(box.optionArea);
 
 	box.zIndex = 15;
-	setSpritePosition(box, { x: 20, y: game.canvasHeight - 260 });
+	setSpritePosition(box, { x: 20, y: game.canvasHeight - box.height - 10 });
 	box.visible = false;
 	box.textArea = dialogText;
 	box.boxPadding = boxPadding;
