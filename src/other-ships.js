@@ -15,7 +15,7 @@ export function makeShipData(shipType) {
 				shipType,
 				shipId: makeUniqueId(),
 				behavior: 'follow',
-				position: { x: 0, y: 0 },
+				positionInSpace: { x: 0, y: 0 },
 				speed: { x: 0, y: 0 },
 			};
 		default:

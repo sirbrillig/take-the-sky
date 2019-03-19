@@ -17,8 +17,8 @@ export function getCurrentSystem(state) {
 	return state.currentSystem;
 }
 
-export function getSystemPosition(state) {
-	return state.position;
+export function getPlayerPosition(state) {
+	return state.playerPosition;
 }
 
 export function getHealthAmount(state) {

@@ -6,14 +6,16 @@ import { getTurningDirectionFromPressingState } from './controls';
 import {
 	areVectorsSame,
 	adjustRotation,
-	adjustSpeedForOtherShip,
 	getAngleBetweenSprites,
-	adjustPositionToFollow,
+	adjustSpeedToFollow,
+	adjustSpeedForRotation,
+	adjustSpeedForMax,
+	getScreenPositionFromSpacePosition,
 } from './math';
 import {
 	getEvent,
 	getCurrentSystem,
-	getSystemPosition,
+	getPlayerPosition,
 	getHealthAmount,
 	getShipDataForId,
 } from './selectors';
@@ -72,15 +74,18 @@ function createAndPlaceGate(game, gateData) {
 	return gate;
 }
 
-export function createAndPlaceOtherShips(game, shipDataObjects) {
+export function createAndPlaceOtherShips(game, shipDataObjects, playerPosition) {
 	return shipDataObjects.map(shipData => {
 		const ship = game.sprite(getShipSpriteForType(shipData.shipType));
 		ship.shipId = shipData.shipId;
 		ship.zIndex = 10;
 		ship.pivot.set(0.5, 0.5);
 		ship.anchor.set(0.5, 0.5);
-		ship.positionInSpace = shipData.position;
-		setSpritePosition(ship, { x: shipData.position.x, y: shipData.position.y });
+		ship.positionInSpace = shipData.positionInSpace;
+		setSpritePosition(
+			ship,
+			getScreenPositionFromSpacePosition(shipData.positionInSpace, playerPosition)
+		);
 		game.stage.addChild(ship);
 		return ship;
 	});
@@ -370,39 +375,49 @@ export function isShipTouchingGate({ gates, ship }) {
 function moveOtherShipForBehavior(shipSprite, shipData, sprites, handleAction) {
 	switch (shipData.behavior) {
 		case 'follow': {
+			const maxSpeed = 1;
 			shipSprite.rotation = getAngleBetweenSprites(sprites.ship, shipSprite);
-			// adjust the ship's speed to accelerate
-			const newSpeed = adjustSpeedForOtherShip(shipSprite.rotation, shipData.speed);
-			// adjust the position to follow the player
-			const newPosition = adjustPositionToFollow(shipSprite, sprites.ship, newSpeed);
+			const newSpeed = adjustSpeedForMax(
+				adjustSpeedToFollow(
+					shipSprite,
+					sprites.ship,
+					adjustSpeedForRotation(shipSprite.rotation, shipData.speed, 0.04, 1)
+				),
+				maxSpeed
+			);
+			const newPosition = {
+				x: shipData.positionInSpace.x + newSpeed.x,
+				y: shipData.positionInSpace.y + newSpeed.y,
+			};
 			if (
-				areVectorsSame(newPosition, shipData.position) &&
+				areVectorsSame(newPosition, shipData.positionInSpace) &&
 				areVectorsSame(newSpeed, shipData.speed)
 			) {
-				return;
+				return shipData;
 			}
-			debug('moving ship', shipData, newPosition, newSpeed);
+			debug('moving ship', shipData.shipId, 'positionInSpace', newPosition, 'speed', newSpeed);
+			const newShipData = {
+				...shipData,
+				positionInSpace: newPosition,
+				speed: newSpeed,
+			};
 			handleAction({
 				type: 'CHANGE_OTHER_SHIP_DATA',
-				payload: {
-					...shipData,
-					position: newPosition,
-					speed: newSpeed,
-				},
+				payload: newShipData,
 			});
-			break;
+			return newShipData;
 		}
 		default:
-			break;
+			return shipData;
 	}
 }
 
-function moveSpritesForSystemPosition(sprites, systemPosition) {
-	sprites.map(sprite =>
-		setSpritePosition(sprite, {
-			x: sprite.positionInSpace.x + systemPosition.x,
-			y: sprite.positionInSpace.y + systemPosition.y,
-		})
+function moveSpritesForPlayerPosition(sprites, playerPosition) {
+	sprites.forEach(sprite =>
+		setSpritePosition(
+			sprite,
+			getScreenPositionFromSpacePosition(sprite.positionInSpace, playerPosition)
+		)
 	);
 }
 
@@ -421,7 +436,7 @@ export function getSpriteMover(game) {
 		} = state;
 		const { handleAction } = actions;
 		const pressing = getPressingState();
-		const systemPosition = getSystemPosition(getState());
+		const playerPosition = getPlayerPosition(getState());
 
 		// render ship
 		if (!isDialogVisible() && getControlMode() === 'pilot' && (pressing.left || pressing.right)) {
@@ -482,35 +497,31 @@ export function getSpriteMover(game) {
 			sortSpritesByZIndex(game);
 		}
 		lastRenderedSystem = getCurrentSystem(getState());
-		moveSpritesForSystemPosition(sprites.planets, systemPosition);
-		moveSpritesForSystemPosition(sprites.stars, systemPosition);
-		moveSpritesForSystemPosition(sprites.gates, systemPosition);
+		moveSpritesForPlayerPosition(sprites.planets, playerPosition);
+		moveSpritesForPlayerPosition(sprites.stars, playerPosition);
+		moveSpritesForPlayerPosition(sprites.gates, playerPosition);
 
 		// render other ships
 		const otherShipsToCreate = getOtherShipsToCreate(sprites.ships, getState());
 		if (otherShipsToCreate.length) {
 			debug('creating ships', otherShipsToCreate);
-			sprites.ships = [...sprites.ships, ...createAndPlaceOtherShips(game, otherShipsToCreate)];
+			sprites.ships = [
+				...sprites.ships,
+				...createAndPlaceOtherShips(game, otherShipsToCreate, playerPosition),
+			];
 		}
 		sprites.ships.forEach(other => {
 			const shipData = getShipDataForId(getState(), other.shipId);
 			if (!shipData) {
 				throw new Error(`No ship data found when moving ship id ${other.shipId}`);
 			}
-			moveOtherShipForBehavior(other, shipData, sprites, handleAction);
+			const updatedShipData = moveOtherShipForBehavior(other, shipData, sprites, handleAction);
+			other.positionInSpace = updatedShipData.positionInSpace;
 		});
-		sprites.ships.forEach(other => {
-			const shipData = getShipDataForId(getState(), other.shipId);
-			if (!shipData) {
-				throw new Error(`No ship data found when moving ship id ${other.shipId}`);
-			}
-			// update the positionInSpace which is used by moveSpritesForSystemPosition
-			other.positionInSpace = shipData.position;
-		});
-		moveSpritesForSystemPosition(sprites.ships, systemPosition);
+		moveSpritesForPlayerPosition(sprites.ships, playerPosition);
 
 		// render background
-		setTilePosition(sprites.sky, { x: systemPosition.x, y: systemPosition.y });
+		setTilePosition(sprites.sky, { x: playerPosition.x, y: playerPosition.y });
 
 		// render ring
 		setSpriteRotation(sprites.ring, getSpriteRotation(sprites.ship));

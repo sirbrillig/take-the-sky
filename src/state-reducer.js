@@ -45,9 +45,9 @@ function currentSystem(state = 'Algol', { type, payload }) {
 	}
 }
 
-function position(state = { x: 100, y: 100 }, { type, payload }) {
+function playerPosition(state = { x: 0, y: 0 }, { type, payload }) {
 	switch (type) {
-		case 'CHANGE_SYSTEM_POSITION':
+		case 'CHANGE_PLAYER_POSITION':
 			return payload;
 		default:
 			return state;
@@ -92,7 +92,7 @@ export default function reducer(state = {}, action) {
 	const updated = {
 		npcs: npcs(state.npcs, action),
 		events: events(state.events, action),
-		position: position(state.position, action),
+		playerPosition: playerPosition(state.playerPosition, action),
 		currentSystem: currentSystem(state.currentSystem, action),
 		shipHealth: shipHealth(state.shipHealth, action),
 		otherShips: otherShips(state.otherShips, action),

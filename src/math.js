@@ -6,27 +6,28 @@ export function adjustNumberBetween(num, min, max) {
 	return num;
 }
 
+export function getScreenPositionFromSpacePosition(positionInSpace, playerPositionInSpace) {
+	return {
+		x: positionInSpace.x + playerPositionInSpace.x,
+		y: positionInSpace.y + playerPositionInSpace.y,
+	};
+}
+
 export function areVectorsSame(first, second) {
 	return first.x === second.x && first.y === second.y;
 }
 
-export function adjustSpeedForRotation(rotation, speed) {
-	const accelerationRate = 0.04;
-	const maxSpeed = 3;
+export function adjustSpeedForMax(speed, maxSpeed = 3) {
+	return {
+		x: adjustNumberBetween(speed.x, -maxSpeed, maxSpeed),
+		y: adjustNumberBetween(speed.y, -maxSpeed, maxSpeed),
+	};
+}
+
+export function adjustSpeedForRotation(rotation, speed, accelerationRate = 0.04, maxSpeed = 3) {
 	let { x, y } = speed;
 	y += accelerationRate * Math.sin(rotation);
 	x += accelerationRate * Math.cos(rotation);
-	y = adjustNumberBetween(y, -maxSpeed, maxSpeed);
-	x = adjustNumberBetween(x, -maxSpeed, maxSpeed);
-	return areVectorsSame({ x, y }, speed) ? speed : { x, y };
-}
-
-export function adjustSpeedForOtherShip(rotation, speed) {
-	const accelerationRate = 0.04;
-	const maxSpeed = 4;
-	let { x, y } = speed;
-	y += accelerationRate * Math.cos(rotation);
-	x += accelerationRate * Math.sin(rotation);
 	y = adjustNumberBetween(y, -maxSpeed, maxSpeed);
 	x = adjustNumberBetween(x, -maxSpeed, maxSpeed);
 	return areVectorsSame({ x, y }, speed) ? speed : { x, y };
@@ -45,22 +46,17 @@ export function getCenter(o, dimension, axis) {
 
 // From: https://github.com/kittykatattack/gameUtilities/blob/4b496be24b656c36b8932d9ee44146cd92e612e9/src/gameUtilities.js#L74
 // Adapted for x and y speeds.
-export function adjustPositionToFollow(follower, leader, speed) {
+export function adjustSpeedToFollow(follower, leader, speed) {
 	// Figure out the distance between the sprites
-	const vx =
-		leader.position.x +
-		getCenter(leader, leader.width, 'x') -
-		(follower.position.x + getCenter(follower, follower.width, 'x'));
-	const vy =
-		leader.position.y +
-		getCenter(leader, leader.height, 'y') -
-		(follower.position.y + getCenter(follower, follower.height, 'y'));
+	const vx = leader.x - follower.x;
+	const vy = leader.y - follower.y;
 	const distance = Math.sqrt(vx * vx + vy * vy);
 
+	// FIXME: this is always 1, 1 for some reason
 	if (distance >= speed.x + speed.y) {
 		return {
-			x: follower.position.x + (vx / distance) * Math.abs(speed.x),
-			y: follower.position.y + (vy / distance) * Math.abs(speed.y),
+			x: follower.x + (vx / distance) * Math.abs(speed.x),
+			y: follower.y + (vy / distance) * Math.abs(speed.y),
 		};
 	}
 	return {

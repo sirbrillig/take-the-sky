@@ -1,7 +1,7 @@
 /* @format */
 
 import { adjustSpeedForRotation, adjustNumberBetween } from './math';
-import { getEvent, getSystemPosition, getHealthAmount } from './selectors';
+import { getEvent, getPlayerPosition, getHealthAmount } from './selectors';
 import {
 	getSpriteRotation,
 	isShipTouchingStar,
@@ -11,13 +11,13 @@ import {
 	explodeShip,
 } from './sprites';
 
-function updateSystemPositionFromSpeed(state, actions) {
+function updatePlayerPositionFromSpeed(state, actions) {
 	const { getSpeed, getState } = state;
-	const { changeSystemPosition } = actions;
+	const { changePlayerPosition } = actions;
 	const speed = getSpeed();
-	const system = getSystemPosition(getState());
+	const playerPosition = getPlayerPosition(getState());
 	if (speed.x + speed.y !== 0) {
-		changeSystemPosition({ x: system.x + speed.x, y: system.y + speed.y });
+		changePlayerPosition({ x: playerPosition.x + speed.x, y: playerPosition.y + speed.y });
 	}
 }
 
@@ -116,7 +116,7 @@ export default function renderGame(game, sprites, state, actions, moveSprites) {
 		)
 	);
 
-	updateSystemPositionFromSpeed(state, actions);
+	updatePlayerPositionFromSpeed(state, actions);
 
 	moveSprites(sprites, state, actions);
 }
