@@ -52,7 +52,6 @@ export function adjustSpeedToFollow(follower, leader, speed) {
 	const vy = leader.y - follower.y;
 	const distance = Math.sqrt(vx * vx + vy * vy);
 
-	// FIXME: this is always 1, 1 for some reason
 	if (distance >= speed.x + speed.y) {
 		return {
 			x: follower.x + (vx / distance) * Math.abs(speed.x),
