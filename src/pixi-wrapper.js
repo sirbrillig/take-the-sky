@@ -4,11 +4,23 @@
 export default function createGame({ canvasWidth, canvasHeight, setupCallback, filesToLoad }) {
 	const app = new PIXI.Application({ width: canvasWidth, height: canvasHeight });
 	window.document.body.appendChild(app.view);
+
+	app.canvasWidth = canvasWidth;
+	app.canvasHeight = canvasHeight;
+
 	app.renderer.backgroundColor = 0x000000;
 	app.renderer.view.style.position = 'absolute';
 	app.renderer.view.style.display = 'block';
-	app.renderer.autoResize = true;
-	app.renderer.resize(window.innerWidth, window.innerHeight);
+
+	app.mainContainer = new PIXI.Container();
+	app.stage.addChild(app.mainContainer);
+	const scaleFactor = Math.min(window.innerWidth / canvasWidth, window.innerHeight / canvasHeight);
+	const newWidth = Math.ceil(canvasWidth * scaleFactor);
+	const newHeight = Math.ceil(canvasHeight * scaleFactor);
+	app.renderer.view.style.width = `${newWidth}px`;
+	app.renderer.view.style.height = `${newHeight}px`;
+	app.renderer.resize(newWidth, newHeight);
+	app.mainContainer.scale.set(scaleFactor);
 
 	PIXI.loader.add(filesToLoad).load((loader, resources) => {
 		app.resources = resources;

@@ -7,9 +7,7 @@ import {
 	areVectorsSame,
 	adjustRotation,
 	getAngleBetweenSprites,
-	adjustSpeedToFollow,
 	adjustSpeedForRotation,
-	adjustSpeedForMax,
 	getScreenPositionFromSpacePosition,
 } from './math';
 import {
@@ -41,18 +39,10 @@ export function setTilePosition(sprite, { x, y }) {
 	sprite.tilePosition.y = y;
 }
 
-function setSpritePositionToCenter(game, sprite) {
-	sprite.anchor.set(0.5, 0.5);
-	setSpritePosition(sprite, {
-		x: game.renderer.width / 2,
-		y: game.renderer.height / 2,
-	});
-}
-
 export function createAndPlaceBackground(game) {
-	const sky = game.tilingSprite('assets/star-field.png', game.renderer.width, game.renderer.height);
+	const sky = game.tilingSprite('assets/star-field.png', game.canvasWidth, game.canvasHeight);
 	sky.zIndex = 0;
-	game.stage.addChild(sky);
+	game.mainContainer.addChild(sky);
 	return sky;
 }
 
@@ -86,29 +76,31 @@ export function createAndPlaceOtherShips(game, shipDataObjects, playerPosition) 
 			ship,
 			getScreenPositionFromSpacePosition(shipData.positionInSpace, playerPosition)
 		);
-		game.stage.addChild(ship);
+		game.mainContainer.addChild(ship);
 		return ship;
 	});
 }
 
-export function createAndPlaceShip(game) {
+export function createAndPlaceShip(game, playerPosition) {
 	const ship = game.sprite('assets/ship.png');
 	ship.rotation = Math.floor(Math.random() * Math.floor(360));
 	ship.pivot.set(0.5, 0.5);
-	setSpritePositionToCenter(game, ship);
+	ship.anchor.set(0.5, 0.5);
+	setSpritePosition(ship, playerPosition);
 	ship.zIndex = 10;
-	game.stage.addChild(ship);
+	game.mainContainer.addChild(ship);
 	return ship;
 }
 
-export function createAndPlaceNavigationRing(game) {
+export function createAndPlaceNavigationRing(game, playerPosition) {
 	const navRing = game.sprite('assets/nav-ring.png');
 	navRing.zIndex = 15;
 	navRing.rotation = 0;
 	navRing.pivot.set(0.5, 0.5);
 	navRing.alpha = 0.6;
-	setSpritePositionToCenter(game, navRing);
-	game.stage.addChild(navRing);
+	navRing.anchor.set(0.5, 0.5);
+	setSpritePosition(navRing, playerPosition);
+	game.mainContainer.addChild(navRing);
 	return navRing;
 }
 
@@ -163,7 +155,7 @@ function createDialogOptions(game, dialog, currentDialogObject) {
 
 export function createAndPlaceDialog(game) {
 	const boxPadding = 10;
-	const box = game.rectangle(game.renderer.width - 40, 250, 0x00335a, 0x0f95ff, 2);
+	const box = game.rectangle(game.canvasWidth - 40, 250, 0x00335a, 0x0f95ff, 2);
 
 	const dialogText = createTextAreaForDialog(game, box, boxPadding);
 	box.addChild(dialogText);
@@ -173,11 +165,11 @@ export function createAndPlaceDialog(game) {
 	box.addChild(box.optionArea);
 
 	box.zIndex = 15;
-	setSpritePosition(box, { x: 20, y: game.renderer.height - 260 });
+	setSpritePosition(box, { x: 20, y: game.canvasHeight - 260 });
 	box.visible = false;
 	box.textArea = dialogText;
 	box.boxPadding = boxPadding;
-	game.stage.addChild(box);
+	game.mainContainer.addChild(box);
 	return box;
 }
 
@@ -228,8 +220,8 @@ export function createAndPlaceModeControls(game) {
 		arrow.y = arrow.height + boxPadding + getModePointerIndexForMode(name) * 30;
 	};
 
-	setSpritePosition(box, { x: game.renderer.width - box.width - 20, y: 85 });
-	game.stage.addChild(box);
+	setSpritePosition(box, { x: game.canvasWidth - box.width - 20, y: 85 });
+	game.mainContainer.addChild(box);
 	return box;
 }
 
@@ -248,9 +240,9 @@ export function createAndPlaceHealthMeter(game) {
 	setSpritePosition(meterLabel, { x: -120, y: 0 });
 	meter.innerBar = innerBar;
 	meter.outerBar = outerBar;
-	setSpritePosition(meter, { x: game.renderer.width - outerBar.width - 20, y: 16 });
+	setSpritePosition(meter, { x: game.canvasWidth - outerBar.width - 20, y: 16 });
 	meter.zIndex = 15;
-	game.stage.addChild(meter);
+	game.mainContainer.addChild(meter);
 	return meter;
 }
 
@@ -272,9 +264,9 @@ export function createAndPlaceChargeMeter(game) {
 	setSpritePosition(meterLabel, { x: -80, y: 0 });
 	meter.innerBar = innerBar;
 	meter.outerBar = outerBar;
-	setSpritePosition(meter, { x: game.renderer.width - outerBar.width - 20, y: 50 });
+	setSpritePosition(meter, { x: game.canvasWidth - outerBar.width - 20, y: 50 });
 	meter.zIndex = 15;
-	game.stage.addChild(meter);
+	game.mainContainer.addChild(meter);
 	return meter;
 }
 
@@ -289,11 +281,11 @@ export function explodeShip(game, sprites) {
 		'assets/explosion_07.png',
 	];
 	const animatedSprite = game.animatedSpriteFromImages(images);
-	setSpritePositionToCenter(game, animatedSprite);
+	setSpritePosition(animatedSprite, sprites.ship.position);
 	animatedSprite.animationSpeed = 0.2;
 	animatedSprite.loop = false;
 	animatedSprite.onComplete = () => animatedSprite.destroy();
-	game.stage.addChild(animatedSprite);
+	game.mainContainer.addChild(animatedSprite);
 	sprites.ship.visible = false;
 	animatedSprite.play();
 }
@@ -309,7 +301,7 @@ export function getCurrentCoordinates(game) {
 
 function sortSpritesByZIndex(game) {
 	// sort sprites by zorder
-	game.stage.children.sort((a, b) => {
+	game.mainContainer.children.sort((a, b) => {
 		a.zIndex = a.zIndex || 0;
 		b.zIndex = b.zIndex || 0;
 		return a.zIndex > b.zIndex ? 1 : -1;
@@ -488,29 +480,29 @@ export function getSpriteMover(game) {
 		// render planets, stars, and gates
 		if (getCurrentSystem(getState()) !== lastRenderedSystem) {
 			if (sprites.planets) {
-				sprites.planets.map(sprite => game.stage.removeChild(sprite));
+				sprites.planets.map(sprite => game.mainContainer.removeChild(sprite));
 			}
 			const currentSystem = getCurrentSystem(getState());
 			sprites.planets = getPlanetsInSystem(currentSystem).map(planetData =>
 				createAndPlacePlanet(game, planetData)
 			);
-			sprites.planets.map(sprite => game.stage.addChild(sprite));
+			sprites.planets.map(sprite => game.mainContainer.addChild(sprite));
 
 			if (sprites.stars) {
-				sprites.stars.map(sprite => game.stage.removeChild(sprite));
+				sprites.stars.map(sprite => game.mainContainer.removeChild(sprite));
 			}
 			sprites.stars = getStarsInSystem(currentSystem).map(starData =>
 				createAndPlacePlanet(game, starData)
 			);
-			sprites.stars.map(sprite => game.stage.addChild(sprite));
+			sprites.stars.map(sprite => game.mainContainer.addChild(sprite));
 
 			if (sprites.gates) {
-				sprites.gates.map(gate => game.stage.removeChild(gate));
+				sprites.gates.map(gate => game.mainContainer.removeChild(gate));
 			}
 			sprites.gates = getGatesInSystem(currentSystem).map(gateData =>
 				createAndPlaceGate(game, gateData)
 			);
-			sprites.gates.map(sprite => game.stage.addChild(sprite));
+			sprites.gates.map(sprite => game.mainContainer.addChild(sprite));
 
 			sortSpritesByZIndex(game);
 		}
@@ -545,7 +537,7 @@ export function getSpriteMover(game) {
 		moveSpritesForPlayerPosition(sprites.ships, playerPosition);
 
 		// render background
-		setTilePosition(sprites.sky, { x: playerPosition.x, y: playerPosition.y });
+		setTilePosition(sprites.sky, playerPosition);
 
 		// render ring
 		setSpriteRotation(sprites.ring, getSpriteRotation(sprites.ship));

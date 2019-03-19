@@ -45,7 +45,8 @@ function currentSystem(state = 'Algol', { type, payload }) {
 	}
 }
 
-function playerPosition(state = { x: 0, y: 0 }, { type, payload }) {
+// canvas is 800x600, so 400x300 is in the middle
+function playerPosition(state = { x: 400, y: 300 }, { type, payload }) {
 	switch (type) {
 		case 'CHANGE_PLAYER_POSITION':
 			return payload;

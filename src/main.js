@@ -2,6 +2,7 @@
 
 import createGame from './pixi-wrapper';
 import { makeReducer, makeState } from './state';
+import { getPlayerPosition } from './selectors';
 import reducer from './state-reducer';
 import { setUpKeyboardControls } from './controls';
 import {
@@ -27,12 +28,13 @@ const filesToLoad = [
 	'assets/pointer.png',
 ];
 
-function initSprites(game) {
+function initSprites(game, state) {
+	const { getState } = state;
 	return {
 		sky: createAndPlaceBackground(game),
 		dialog: createAndPlaceDialog(game),
-		ship: createAndPlaceShip(game),
-		ring: createAndPlaceNavigationRing(game),
+		ship: createAndPlaceShip(game, getPlayerPosition(getState())),
+		ring: createAndPlaceNavigationRing(game, getPlayerPosition(getState())),
 		ships: [],
 		healthMeter: createAndPlaceHealthMeter(game),
 		chargeMeter: createAndPlaceChargeMeter(game),
@@ -41,7 +43,7 @@ function initSprites(game) {
 }
 
 function setUpGameObjects(game, state, actions) {
-	const sprites = initSprites(game);
+	const sprites = initSprites(game, state);
 	setUpKeyboardControls(game, state, actions);
 	return sprites;
 }
