@@ -45,7 +45,7 @@ export function getCenter(o, dimension, axis) {
 }
 
 export function adjustRotation(direction, rotation) {
-	const rotationRate = 0.1;
+	const rotationRate = 0.08;
 	switch (direction) {
 		case 'left':
 			return rotation - rotationRate;
