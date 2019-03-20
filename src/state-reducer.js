@@ -1,7 +1,7 @@
 /* @format */
 
 import debugFactory from './debug';
-import { adjustNumberBetween } from './math';
+import { clampNumber } from './math';
 import { makeShipData } from './other-ships';
 
 const debug = debugFactory('sky:state');
@@ -58,7 +58,7 @@ function playerPosition(state = { x: 400, y: 300 }, { type, payload }) {
 function shipHealth(state = 100, { type, payload }) {
 	switch (type) {
 		case 'HEALTH_CHANGE':
-			return adjustNumberBetween(payload, 0, 100);
+			return clampNumber(payload, 0, 100);
 		default:
 			return state;
 	}

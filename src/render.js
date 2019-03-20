@@ -1,6 +1,6 @@
 /* @format */
 
-import { adjustSpeedForRotation, adjustNumberBetween } from './math';
+import { adjustSpeedForRotation, clampNumber } from './math';
 import { getEvent, getPlayerPosition, getHealthAmount } from './selectors';
 import {
 	isShipTouchingStar,
@@ -106,7 +106,7 @@ export default function renderGame(game, sprites, state, actions, moveSprites) {
 	}
 
 	setChargeMeterAmount(
-		adjustNumberBetween(
+		clampNumber(
 			shouldIncreaseChargeMeter(state)
 				? getChargeMeterAmount() + 1.0
 				: getChargeMeterAmount() - 0.2,

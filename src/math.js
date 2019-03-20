@@ -1,40 +1,50 @@
 /* @format */
 
-export function adjustNumberBetween(num, min, max) {
+export function clampNumber(num, min, max) {
 	num = num > max ? max : num;
 	num = num < min ? min : num;
 	return num;
 }
 
-export function getScreenPositionFromSpacePosition(positionInSpace, playerPositionInSpace) {
+export function addVectors(first, second) {
 	return {
-		x: positionInSpace.x + playerPositionInSpace.x,
-		y: positionInSpace.y + playerPositionInSpace.y,
+		x: first.x + second.x,
+		y: first.y + second.y,
 	};
+}
+
+export function getScreenPositionFromSpacePosition(positionInSpace, playerPositionInSpace) {
+	return addVectors(positionInSpace, playerPositionInSpace);
 }
 
 export function areVectorsSame(first, second) {
 	return first.x === second.x && first.y === second.y;
 }
 
-export function adjustSpeedForMax(speed, maxSpeed = 3) {
-	return {
-		x: adjustNumberBetween(speed.x, -maxSpeed, maxSpeed),
-		y: adjustNumberBetween(speed.y, -maxSpeed, maxSpeed),
-	};
-}
-
 export function invertVector({ x, y }) {
 	return { x: -x, y: -y };
 }
 
+export function multiplyVector({ x, y }, scalar) {
+	return {
+		x: x * scalar,
+		y: y * scalar,
+	};
+}
+
+export function clampVector({ x, y }, min = -3, max = 3) {
+	return {
+		x: clampNumber(x, min, max),
+		y: clampNumber(y, min, max),
+	};
+}
+
 export function adjustSpeedForRotation(rotation, speed, accelerationRate = 0.04, maxSpeed = 3) {
-	let { x, y } = speed;
-	y += accelerationRate * Math.sin(rotation);
-	x += accelerationRate * Math.cos(rotation);
-	y = adjustNumberBetween(y, -maxSpeed, maxSpeed);
-	x = adjustNumberBetween(x, -maxSpeed, maxSpeed);
-	return areVectorsSame({ x, y }, speed) ? speed : { x, y };
+	const newSpeed = {
+		x: clampNumber(speed.x + accelerationRate * Math.cos(rotation), -maxSpeed, maxSpeed),
+		y: clampNumber(speed.y + accelerationRate * Math.sin(rotation), -maxSpeed, maxSpeed),
+	};
+	return areVectorsSame(newSpeed, speed) ? speed : newSpeed;
 }
 
 // From: https://github.com/kittykatattack/gameUtilities/blob/4b496be24b656c36b8932d9ee44146cd92e612e9/src/gameUtilities.js#L126
@@ -106,7 +116,7 @@ export function getAngleBetweenSprites(s1, s2) {
 		s2.y + getCenter(s2, s2.height, 'y') - (s1.y + getCenter(s1, s1.height, 'y')),
 		s2.x + getCenter(s2, s2.width, 'x') - (s1.x + getCenter(s1, s1.width, 'x'))
 	);
-	return radians > 0 ? radians : radians;
+	return radians;
 	// return radians > 0 ? radians : radians + Math.PI;
 }
 
