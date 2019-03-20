@@ -510,20 +510,22 @@ export function getSpriteMover(game) {
 				...createAndPlaceOtherShips(game, otherShipsToCreate, playerPosition),
 			];
 		}
-		sprites.ships.forEach(other => {
-			const shipData = getShipDataForId(getState(), other.shipId);
-			if (!shipData) {
-				throw new Error(`No ship data found when moving ship id ${other.shipId}`);
-			}
-			const updatedShipData = moveOtherShipForBehavior({
-				shipSprite: other,
-				shipData,
-				playerSprite: sprites.ship,
-				handleAction,
+		if (!isDialogVisible()) {
+			sprites.ships.forEach(other => {
+				const shipData = getShipDataForId(getState(), other.shipId);
+				if (!shipData) {
+					throw new Error(`No ship data found when moving ship id ${other.shipId}`);
+				}
+				const updatedShipData = moveOtherShipForBehavior({
+					shipSprite: other,
+					shipData,
+					playerSprite: sprites.ship,
+					handleAction,
+				});
+				other.positionInSpace = updatedShipData.positionInSpace;
 			});
-			other.positionInSpace = updatedShipData.positionInSpace;
-		});
-		moveSpritesForPlayerPosition(sprites.ships, playerPosition);
+			moveSpritesForPlayerPosition(sprites.ships, playerPosition);
+		}
 
 		// render background
 		setTilePosition(sprites.sky, playerPosition);

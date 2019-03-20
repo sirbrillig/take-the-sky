@@ -49,7 +49,7 @@ export function setUpKeyboardControls(game, state, actions) {
 			case 'KeyD':
 				return changePressingState({ ...getPressingState(), right: true });
 			case 'KeyM':
-				return changeControlMode(getNextMode(getControlMode()));
+				return isDialogVisible() ? '' : changeControlMode(getNextMode(getControlMode()));
 			default:
 				return '';
 		}
