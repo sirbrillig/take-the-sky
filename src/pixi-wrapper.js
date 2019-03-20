@@ -44,6 +44,14 @@ export default function createGame({ canvasWidth, canvasHeight, setupCallback, f
 			shape.lineStyle();
 			return shape;
 		};
+		app.line = (startVector, endVector, lineColor = 0, lineWidth = 2) => {
+			const shape = new PIXI.Graphics();
+			shape.lineStyle(lineWidth, lineColor);
+			shape.moveTo(startVector.x, startVector.y);
+			shape.lineTo(endVector.x, endVector.y);
+			shape.lineStyle();
+			return shape;
+		};
 		app.group = () => new PIXI.Container();
 		app.tilingSprite = (key, width, height) =>
 			new PIXI.extras.TilingSprite(resources[key].texture, width, height);
