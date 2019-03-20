@@ -24,6 +24,10 @@ export function adjustSpeedForMax(speed, maxSpeed = 3) {
 	};
 }
 
+export function invertVector({ x, y }) {
+	return { x: -x, y: -y };
+}
+
 export function adjustSpeedForRotation(rotation, speed, accelerationRate = 0.04, maxSpeed = 3) {
 	let { x, y } = speed;
 	y += accelerationRate * Math.sin(rotation);
@@ -44,15 +48,21 @@ export function getCenter(o, dimension, axis) {
 	return dimension;
 }
 
-export function adjustRotation(direction, rotation) {
-	const rotationRate = 0.08;
+/**
+ * Return a new angle in radians based on a turning direction
+ *
+ * Direction can be one of 'left' (decrease radians) or 'right' (increase radians).
+ */
+export function adjustRotationForDirection(rotation, direction, rotationRate = 0.06) {
+	const adjustForNegative = angle => (angle < 0 ? angle + Math.PI * 2 : angle);
+	const adjustForMax = angle => (angle > Math.PI * 2 ? angle - Math.PI * 2 : angle);
 	switch (direction) {
 		case 'left':
-			return rotation - rotationRate;
+			return adjustForNegative(rotation - rotationRate);
 		case 'right':
-			return rotation + rotationRate;
+			return adjustForMax(rotation + rotationRate);
 		default:
-			return rotation;
+			throw new Error(`Unknown direction '${direction}' when trying to calculate rotation`);
 	}
 }
 
@@ -92,10 +102,12 @@ export function isClockwise(center, start, end) {
 export function getAngleBetweenSprites(s1, s2) {
 	// From: https://github.com/kittykatattack/gameUtilities/blob/4b496be24b656c36b8932d9ee44146cd92e612e9/src/gameUtilities.js#L103
 	// Returns angle in radians from the 0 position of s1 (pointing left)
-	return Math.atan2(
+	const radians = Math.atan2(
 		s2.y + getCenter(s2, s2.height, 'y') - (s1.y + getCenter(s1, s1.height, 'y')),
 		s2.x + getCenter(s2, s2.width, 'x') - (s1.x + getCenter(s1, s1.width, 'x'))
 	);
+	return radians > 0 ? radians : radians;
+	// return radians > 0 ? radians : radians + Math.PI;
 }
 
 // From: https://gist.github.com/gordonbrander/2230317

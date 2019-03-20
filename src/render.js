@@ -3,7 +3,6 @@
 import { adjustSpeedForRotation, adjustNumberBetween } from './math';
 import { getEvent, getPlayerPosition, getHealthAmount } from './selectors';
 import {
-	getSpriteRotation,
 	isShipTouchingStar,
 	getPlanetTouchingShip,
 	isShipTouchingGate,
@@ -103,7 +102,7 @@ export default function renderGame(game, sprites, state, actions, moveSprites) {
 	}
 
 	if (pressing.up && getControlMode() === 'pilot') {
-		changeSpeed(adjustSpeedForRotation(getSpriteRotation(sprites.ship), getSpeed()));
+		changeSpeed(adjustSpeedForRotation(sprites.ship.rotation, getSpeed()));
 	}
 
 	setChargeMeterAmount(

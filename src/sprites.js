@@ -5,7 +5,7 @@ import { getPlanetsInSystem, getStarsInSystem, getGatesInSystem } from './planet
 import { getTurningDirectionFromPressingState } from './controls';
 import {
 	areVectorsSame,
-	adjustRotation,
+	adjustRotationForDirection,
 	getAngleBetweenSprites,
 	adjustSpeedForRotation,
 	getScreenPositionFromSpacePosition,
@@ -24,14 +24,6 @@ const debug = debugFactory('sky:sprites');
 
 export function setSpritePosition(sprite, { x, y }) {
 	sprite.position.set(x, y);
-}
-
-export function setSpriteRotation(sprite, rotation) {
-	sprite.rotation = rotation;
-}
-
-export function getSpriteRotation(sprite) {
-	return sprite.rotation;
 }
 
 export function setTilePosition(sprite, { x, y }) {
@@ -83,7 +75,7 @@ export function createAndPlaceOtherShips(game, shipDataObjects, playerPosition) 
 
 export function createAndPlaceShip(game, playerPosition) {
 	const ship = game.sprite('assets/ship.png');
-	ship.rotation = Math.floor(Math.random() * Math.floor(360));
+	ship.rotation = Math.random() * Math.PI * 2;
 	ship.pivot.set(0.5, 0.5);
 	ship.anchor.set(0.5, 0.5);
 	setSpritePosition(ship, playerPosition);
@@ -367,24 +359,83 @@ export function isShipTouchingGate({ gates, ship }) {
 	return gates && gates.find(gate => doSpritesOverlap(ship, gate));
 }
 
-function changeOtherShipToFollowPlayer({ shipSprite, playerSprite, shipData, handleAction }) {
+function displayDebugText({ game, id, text, x, y }) {
+	if (!game.debugText) {
+		game.debugText = [];
+	}
+	const textToShow = `${id}: ${text}`;
+	if (!game.debugText[id]) {
+		game.debugText[id] = game.text(textToShow, {
+			fontFamily: 'Arial',
+			fontSize: 14,
+			fill: 'white',
+		});
+		game.debugText[id].zIndex = 100;
+		setSpritePosition(game.debugText[id], { x, y });
+		game.mainContainer.addChild(game.debugText[id]);
+	} else {
+		game.debugText[id].text = textToShow;
+		setSpritePosition(game.debugText[id], { x, y });
+	}
+}
+
+function adjustRotationForFollowingShip({ angleToPlayer, shipSprite, game }) {
+	const radiansNeededToRotate = angleToPlayer - shipSprite.rotation;
+	displayDebugText({
+		game,
+		id: 'angleToPlayer',
+		text: angleToPlayer,
+		x: shipSprite.x - 30,
+		y: shipSprite.y + 25,
+	});
+	displayDebugText({
+		game,
+		id: 'needed',
+		text: radiansNeededToRotate,
+		x: shipSprite.x - 30,
+		y: shipSprite.y + 10,
+	});
+	const isPositiveRadians = radiansNeededToRotate > 0;
+	const maxRotationRate = 0.03;
+	if (isPositiveRadians) {
+		// TODO: I think this needs to be a different calculation
+		return adjustRotationForDirection(shipSprite.rotation, 'right', maxRotationRate);
+	}
+	return adjustRotationForDirection(shipSprite.rotation, 'left', maxRotationRate);
+}
+
+/**
+ * Return speed for following ship only if ship is facing player
+ */
+function getSpeedForFollowingShip({ shipSprite, shipData, angleToPlayer }) {
+	const radiansNeededToRotate = angleToPlayer - shipSprite.rotation;
+	if (Math.abs(radiansNeededToRotate) < 0.1) {
+		return adjustSpeedForRotation(shipSprite.rotation, shipData.speed);
+	}
+	return shipData.speed;
+}
+
+function changeOtherShipToFollowPlayer({ game, shipSprite, playerSprite, shipData, handleAction }) {
 	// find angle from ship to player in radians
 	const angleToPlayer = getAngleBetweenSprites(playerSprite, shipSprite);
+	displayDebugText({
+		game,
+		id: 'angle',
+		text: shipSprite.rotation,
+		x: shipSprite.x - 30,
+		y: shipSprite.y - 30,
+	});
 	// rotate angle
-	const getRadiansToRotateWithMax = () => {
-		const radiansNeededToRotate = angleToPlayer - shipSprite.rotation;
-		const isPositiveRadians = radiansNeededToRotate > 0;
-		const maxRotationRate = 0.05;
-		if (isPositiveRadians) {
-			return radiansNeededToRotate > maxRotationRate ? maxRotationRate : radiansNeededToRotate;
-		}
-		return Math.abs(radiansNeededToRotate) > maxRotationRate
-			? -maxRotationRate
-			: radiansNeededToRotate;
-	};
-	shipSprite.rotation += getRadiansToRotateWithMax({ angleToPlayer, shipSprite });
+	shipSprite.rotation = adjustRotationForFollowingShip({ game, angleToPlayer, shipSprite });
 	// increment acceleration and add acceleration to speed at current rotation
-	const newSpeed = adjustSpeedForRotation(shipSprite.rotation, shipData.speed);
+	const newSpeed = getSpeedForFollowingShip({ shipData, shipSprite, angleToPlayer });
+	displayDebugText({
+		game,
+		id: 'newSpeed',
+		text: JSON.stringify(newSpeed),
+		x: shipSprite.x - 30,
+		y: shipSprite.y + 40,
+	});
 	// move ship based on speed; we have to subtract because the ship is moving toward the player I guess
 	const newPosition = {
 		x: shipData.positionInSpace.x - newSpeed.x,
@@ -408,10 +459,11 @@ function changeOtherShipToFollowPlayer({ shipSprite, playerSprite, shipData, han
 	return newShipData;
 }
 
-function moveOtherShipForBehavior({ shipSprite, shipData, playerSprite, handleAction }) {
+function moveOtherShipForBehavior({ game, shipSprite, shipData, playerSprite, handleAction }) {
 	switch (shipData.behavior) {
 		case 'follow': {
 			return changeOtherShipToFollowPlayer({
+				game,
 				shipData,
 				shipSprite,
 				playerSprite,
@@ -451,14 +503,18 @@ export function getSpriteMover(game) {
 
 		// render ship
 		if (!isDialogVisible() && getControlMode() === 'pilot' && (pressing.left || pressing.right)) {
-			setSpriteRotation(
-				sprites.ship,
-				adjustRotation(
-					getTurningDirectionFromPressingState(pressing),
-					getSpriteRotation(sprites.ship)
-				)
+			sprites.ship.rotation = adjustRotationForDirection(
+				sprites.ship.rotation,
+				getTurningDirectionFromPressingState(pressing)
 			);
 		}
+		displayDebugText({
+			game,
+			id: 'angleP',
+			text: sprites.ship.rotation,
+			x: sprites.ship.x - 20,
+			y: sprites.ship.y - 20,
+		});
 
 		// render dialog
 		if (lastShownDialog !== getDialogKey() && isDialogVisible()) {
@@ -528,6 +584,7 @@ export function getSpriteMover(game) {
 					throw new Error(`No ship data found when moving ship id ${other.shipId}`);
 				}
 				const updatedShipData = moveOtherShipForBehavior({
+					game,
 					shipSprite: other,
 					shipData,
 					playerSprite: sprites.ship,
@@ -542,7 +599,7 @@ export function getSpriteMover(game) {
 		setTilePosition(sprites.sky, playerPosition);
 
 		// render ring
-		setSpriteRotation(sprites.ring, getSpriteRotation(sprites.ship));
+		sprites.ring.rotation = sprites.ship.rotation;
 		sprites.ring.visible = !getEvent(getState(), 'gameOver') && getControlMode() === 'pilot';
 
 		// render mode pointer
