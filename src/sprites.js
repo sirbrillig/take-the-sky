@@ -367,58 +367,45 @@ export function isShipTouchingGate({ gates, ship }) {
 	return gates && gates.find(gate => doSpritesOverlap(ship, gate));
 }
 
-function getSpeedForOtherShip(speed, rotation, playerSprite, shipSprite) {
-	const newRotation = getAngleBetweenSprites(playerSprite, shipSprite);
-	const isShipFacingPlayer = newRotation - rotation < 10;
-	// if ship is not facing player, set accel to 0 (speed does not change)
-	if (!isShipFacingPlayer) {
-		return speed;
+function changeOtherShipToFollowPlayer({ shipSprite, playerSprite, shipData, handleAction }) {
+	// find angle from ship to player in radians
+	const angleToPlayer = getAngleBetweenSprites(playerSprite, shipSprite);
+	// rotate angle
+	shipSprite.rotation = angleToPlayer;
+	// increment acceleration and add acceleration to speed at current rotation
+	const newSpeed = adjustSpeedForRotation(shipSprite.rotation, shipData.speed);
+	// move ship based on speed; we have to subtract because the ship is moving toward the player I guess
+	const newPosition = {
+		x: shipData.positionInSpace.x - newSpeed.x,
+		y: shipData.positionInSpace.y - newSpeed.y,
+	};
+	if (
+		areVectorsSame(newPosition, shipData.positionInSpace) &&
+		areVectorsSame(newSpeed, shipData.speed)
+	) {
+		return shipData;
 	}
-	// FIXME: this doesn't work
-	// if ship is facing player, set accel to full
-	const newSpeed = adjustSpeedForRotation(rotation, speed, 0.04, 1);
-	return { x: -newSpeed.x, y: -newSpeed.y };
+	const newShipData = {
+		...shipData,
+		positionInSpace: newPosition,
+		speed: newSpeed,
+	};
+	handleAction({
+		type: 'CHANGE_OTHER_SHIP_DATA',
+		payload: newShipData,
+	});
+	return newShipData;
 }
 
-function moveOtherShipForBehavior(
-	shipSprite,
-	shipData,
-	playerPosition,
-	playerSprite,
-	handleAction
-) {
+function moveOtherShipForBehavior({ shipSprite, shipData, playerSprite, handleAction }) {
 	switch (shipData.behavior) {
 		case 'follow': {
-			// move toward player
-			const newSpeed = getSpeedForOtherShip(
-				shipData.speed,
-				shipSprite.rotation,
+			return changeOtherShipToFollowPlayer({
+				shipData,
+				shipSprite,
 				playerSprite,
-				shipSprite
-			);
-			// rotate ship toward player
-			shipSprite.rotation = getAngleBetweenSprites(playerSprite, shipSprite);
-			const newPosition = {
-				x: shipData.positionInSpace.x + newSpeed.x,
-				y: shipData.positionInSpace.y + newSpeed.y,
-			};
-			if (
-				areVectorsSame(newPosition, shipData.positionInSpace) &&
-				areVectorsSame(newSpeed, shipData.speed)
-			) {
-				return shipData;
-			}
-			debug('moving ship', shipData.shipId, 'positionInSpace', newPosition, 'speed', newSpeed);
-			const newShipData = {
-				...shipData,
-				positionInSpace: newPosition,
-				speed: newSpeed,
-			};
-			handleAction({
-				type: 'CHANGE_OTHER_SHIP_DATA',
-				payload: newShipData,
+				handleAction,
 			});
-			return newShipData;
 		}
 		default:
 			return shipData;
@@ -528,13 +515,12 @@ export function getSpriteMover(game) {
 			if (!shipData) {
 				throw new Error(`No ship data found when moving ship id ${other.shipId}`);
 			}
-			const updatedShipData = moveOtherShipForBehavior(
-				other,
+			const updatedShipData = moveOtherShipForBehavior({
+				shipSprite: other,
 				shipData,
-				playerPosition,
-				sprites.ship,
-				handleAction
-			);
+				playerSprite: sprites.ship,
+				handleAction,
+			});
 			other.positionInSpace = updatedShipData.positionInSpace;
 		});
 		moveSpritesForPlayerPosition(sprites.ships, playerPosition);
