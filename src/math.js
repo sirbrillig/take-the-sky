@@ -44,26 +44,6 @@ export function getCenter(o, dimension, axis) {
 	return dimension;
 }
 
-// From: https://github.com/kittykatattack/gameUtilities/blob/4b496be24b656c36b8932d9ee44146cd92e612e9/src/gameUtilities.js#L74
-// Adapted for x and y speeds.
-export function adjustSpeedToFollow(follower, leader, speed) {
-	// Figure out the distance between the sprites
-	const vx = leader.x - follower.x;
-	const vy = leader.y - follower.y;
-	const distance = Math.sqrt(vx * vx + vy * vy);
-
-	if (distance >= speed.x + speed.y) {
-		return {
-			x: follower.x + (vx / distance) * Math.abs(speed.x),
-			y: follower.y + (vy / distance) * Math.abs(speed.y),
-		};
-	}
-	return {
-		x: 0,
-		y: 0,
-	};
-}
-
 export function adjustRotation(direction, rotation) {
 	const rotationRate = 0.1;
 	switch (direction) {
