@@ -371,7 +371,18 @@ function changeOtherShipToFollowPlayer({ shipSprite, playerSprite, shipData, han
 	// find angle from ship to player in radians
 	const angleToPlayer = getAngleBetweenSprites(playerSprite, shipSprite);
 	// rotate angle
-	shipSprite.rotation = angleToPlayer;
+	const getRadiansToRotateWithMax = () => {
+		const radiansNeededToRotate = angleToPlayer - shipSprite.rotation;
+		const isPositiveRadians = radiansNeededToRotate > 0;
+		const maxRotationRate = 0.05;
+		if (isPositiveRadians) {
+			return radiansNeededToRotate > maxRotationRate ? maxRotationRate : radiansNeededToRotate;
+		}
+		return Math.abs(radiansNeededToRotate) > maxRotationRate
+			? -maxRotationRate
+			: radiansNeededToRotate;
+	};
+	shipSprite.rotation += getRadiansToRotateWithMax({ angleToPlayer, shipSprite });
 	// increment acceleration and add acceleration to speed at current rotation
 	const newSpeed = adjustSpeedForRotation(shipSprite.rotation, shipData.speed);
 	// move ship based on speed; we have to subtract because the ship is moving toward the player I guess
