@@ -39,10 +39,17 @@ export function clampVector({ x, y }, min = -3, max = 3) {
 	};
 }
 
-export function adjustSpeedForRotation(rotation, speed, accelerationRate = 0.04, maxSpeed = 3) {
+export function adjustSpeedForRotation(
+	rotation,
+	speed,
+	accelerationRate = 0.04,
+	maxSpeed = 3,
+	dragRate = 0
+) {
+	const modifiedAcceleration = accelerationRate - dragRate;
 	const newSpeed = {
-		x: clampNumber(speed.x + accelerationRate * Math.cos(rotation), -maxSpeed, maxSpeed),
-		y: clampNumber(speed.y + accelerationRate * Math.sin(rotation), -maxSpeed, maxSpeed),
+		x: clampNumber(speed.x + modifiedAcceleration * Math.cos(rotation), -maxSpeed, maxSpeed),
+		y: clampNumber(speed.y + modifiedAcceleration * Math.sin(rotation), -maxSpeed, maxSpeed),
 	};
 	return areVectorsSame(newSpeed, speed) ? speed : newSpeed;
 }
@@ -61,15 +68,15 @@ export function getCenter(o, dimension, axis) {
 /**
  * Return a new angle in radians based on a turning direction
  *
- * Direction can be one of 'left' (decrease radians) or 'right' (increase radians).
+ * Direction can be one of 'counterclockwise' (decrease radians) or 'clockwise' (increase radians).
  */
 export function adjustRotationForDirection(rotation, direction, rotationRate = 0.06) {
 	const adjustForNegative = angle => (angle < 0 ? angle + Math.PI * 2 : angle);
 	const adjustForMax = angle => (angle > Math.PI * 2 ? angle - Math.PI * 2 : angle);
 	switch (direction) {
-		case 'left':
+		case 'counterclockwise':
 			return adjustForNegative(rotation - rotationRate);
-		case 'right':
+		case 'clockwise':
 			return adjustForMax(rotation + rotationRate);
 		default:
 			throw new Error(`Unknown direction '${direction}' when trying to calculate rotation`);
@@ -118,6 +125,10 @@ export function getAngleBetweenSprites(s1, s2) {
 	);
 	return radians;
 	// return radians > 0 ? radians : radians + Math.PI;
+}
+
+export function getAngleBetweenVectors(v1, v2) {
+	return Math.atan2(v2.y - v1.y, v2.x - v1.x);
 }
 
 // From: https://gist.github.com/gordonbrander/2230317

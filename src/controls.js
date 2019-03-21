@@ -76,10 +76,10 @@ export function setUpKeyboardControls(game, state, actions) {
 
 export function getTurningDirectionFromPressingState(pressing) {
 	if (pressing.left) {
-		return 'left';
+		return 'counterclockwise';
 	}
 	if (pressing.right) {
-		return 'right';
+		return 'clockwise';
 	}
 	return '';
 }

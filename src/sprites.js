@@ -1,6 +1,6 @@
 /* @format */
 
-import debugFactory from './debug';
+import debugFactory, { displayDebugText } from './debug';
 import { getPlanetsInSystem, getStarsInSystem, getGatesInSystem } from './planets';
 import { getTurningDirectionFromPressingState } from './controls';
 import {
@@ -19,6 +19,8 @@ import {
 } from './selectors';
 import getDialogObjectForKey from './dialog/index';
 import { getOtherShipsToCreate, getShipSpriteForType } from './other-ships';
+import ShipAi from './ship-ai';
+import Vector from './vector';
 
 const debug = debugFactory('sky:sprites');
 
@@ -359,26 +361,6 @@ export function isShipTouchingGate({ gates, ship }) {
 	return gates && gates.find(gate => doSpritesOverlap(ship, gate));
 }
 
-function displayDebugText({ game, id, text, x, y }) {
-	if (!game.debugText) {
-		game.debugText = [];
-	}
-	const textToShow = `${id}: ${text}`;
-	if (!game.debugText[id]) {
-		game.debugText[id] = game.text(textToShow, {
-			fontFamily: 'Arial',
-			fontSize: 14,
-			fill: 'white',
-		});
-		game.debugText[id].zIndex = 100;
-		setSpritePosition(game.debugText[id], { x, y });
-		game.mainContainer.addChild(game.debugText[id]);
-	} else {
-		game.debugText[id].text = textToShow;
-		setSpritePosition(game.debugText[id], { x, y });
-	}
-}
-
 function adjustRotationForFollowingShip({ angleToPlayer, shipSprite, game }) {
 	const radiansNeededToRotate = angleToPlayer - shipSprite.rotation;
 	displayDebugText({
@@ -404,75 +386,40 @@ function adjustRotationForFollowingShip({ angleToPlayer, shipSprite, game }) {
 	return adjustRotationForDirection(shipSprite.rotation, 'left', maxRotationRate);
 }
 
-/**
- * Return speed for following ship only if ship is facing player
- */
-function getSpeedForFollowingShip({ shipSprite, shipData, angleToPlayer }) {
-	const radiansNeededToRotate = angleToPlayer - shipSprite.rotation;
-	if (Math.abs(radiansNeededToRotate) < 0.1) {
-		return adjustSpeedForRotation(shipSprite.rotation, shipData.speed);
-	}
-	return shipData.speed;
-}
-
-function changeOtherShipToFollowPlayer({ game, shipSprite, playerSprite, shipData, handleAction }) {
-	// find angle from ship to player in radians
-	const angleToPlayer = getAngleBetweenSprites(playerSprite, shipSprite);
-	displayDebugText({
-		game,
-		id: 'angle',
-		text: shipSprite.rotation,
-		x: shipSprite.x - 30,
-		y: shipSprite.y - 30,
-	});
-	// rotate angle
-	shipSprite.rotation = adjustRotationForFollowingShip({ game, angleToPlayer, shipSprite });
-	// increment acceleration and add acceleration to speed at current rotation
-	const newSpeed = getSpeedForFollowingShip({ shipData, shipSprite, angleToPlayer });
-	displayDebugText({
-		game,
-		id: 'newSpeed',
-		text: JSON.stringify(newSpeed),
-		x: shipSprite.x - 30,
-		y: shipSprite.y + 40,
-	});
-	// move ship based on speed; we have to subtract because the ship is moving toward the player I guess
-	const newPosition = {
-		x: shipData.positionInSpace.x - newSpeed.x,
-		y: shipData.positionInSpace.y - newSpeed.y,
-	};
-	if (
-		areVectorsSame(newPosition, shipData.positionInSpace) &&
-		areVectorsSame(newSpeed, shipData.speed)
-	) {
-		return shipData;
-	}
-	const newShipData = {
-		...shipData,
-		positionInSpace: newPosition,
-		speed: newSpeed,
-	};
-	handleAction({
-		type: 'CHANGE_OTHER_SHIP_DATA',
-		payload: newShipData,
-	});
-	return newShipData;
-}
-
 function moveOtherShipForBehavior({ game, shipSprite, shipData, playerSprite, handleAction }) {
-	switch (shipData.behavior) {
-		case 'follow': {
-			return changeOtherShipToFollowPlayer({
-				game,
-				shipData,
-				shipSprite,
-				playerSprite,
-				handleAction,
+	const ai = new ShipAi({
+		game,
+		playerVector: new Vector(playerSprite.x, playerSprite.y),
+		shipVector: new Vector(shipSprite.x, shipSprite.y),
+		rotation: shipSprite.rotation,
+		changeRotationCallback: radians => {
+			shipSprite.rotation = radians;
+		},
+		changeSpeedCallback: newSpeed => {
+			// move ship based on speed; we have to subtract because the ship is moving toward the player I guess
+			const newPosition = {
+				x: shipData.positionInSpace.x - newSpeed.x,
+				y: shipData.positionInSpace.y - newSpeed.y,
+			};
+			if (
+				areVectorsSame(newPosition, shipData.positionInSpace) &&
+				areVectorsSame(newSpeed, shipData.speed)
+			) {
+				return;
+			}
+			const newShipData = {
+				...shipData,
+				positionInSpace: newPosition,
+				speed: newSpeed,
+			};
+			handleAction({
+				type: 'CHANGE_OTHER_SHIP_DATA',
+				payload: newShipData,
 			});
-		}
-		default:
-			return shipData;
-	}
+		},
+		speed: shipData.speed,
+	});
+	shipData.behavior(ai);
 }
 
 function moveSpritesForPlayerPosition(sprites, playerPosition) {
@@ -508,14 +455,6 @@ export function getSpriteMover(game) {
 				getTurningDirectionFromPressingState(pressing)
 			);
 		}
-		displayDebugText({
-			game,
-			id: 'angleP',
-			text: sprites.ship.rotation,
-			x: sprites.ship.x - 20,
-			y: sprites.ship.y - 20,
-		});
-
 		// render dialog
 		if (lastShownDialog !== getDialogKey() && isDialogVisible()) {
 			sprites.dialog.visible = true;
@@ -583,14 +522,14 @@ export function getSpriteMover(game) {
 				if (!shipData) {
 					throw new Error(`No ship data found when moving ship id ${other.shipId}`);
 				}
-				const updatedShipData = moveOtherShipForBehavior({
+				moveOtherShipForBehavior({
 					game,
 					shipSprite: other,
 					shipData,
 					playerSprite: sprites.ship,
 					handleAction,
 				});
-				other.positionInSpace = updatedShipData.positionInSpace;
+				other.positionInSpace = shipData.positionInSpace;
 			});
 			moveSpritesForPlayerPosition(sprites.ships, playerPosition);
 		}

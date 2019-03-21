@@ -14,8 +14,21 @@ export function makeShipData(shipType) {
 			return {
 				shipType,
 				shipId: makeUniqueId(),
-				behavior: 'follow',
-				positionInSpace: { x: 0, y: 0 },
+				behavior: ai => {
+					if (ai.isPlayerWithinAttackRange()) {
+						ai.rotateTowardPlayer();
+						ai.decelerate();
+						ai.fire();
+						return;
+					}
+					if (ai.isPlayerWithinApproachRange()) {
+						ai.rotateTowardPlayer();
+						if (ai.isShipFacingPlayer()) {
+							ai.accelerate();
+						}
+					}
+				},
+				positionInSpace: { x: -100, y: -100 },
 				speed: { x: 0, y: 0 },
 			};
 		default:
