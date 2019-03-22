@@ -27,8 +27,6 @@ function events(state = {}, { type, payload }) {
 	switch (type) {
 		case 'EVENT_FIRST_LANDING':
 			return { ...state, firstLanding: true };
-		case 'EVENT_STAR_WARNING':
-			return { ...state, starsAreHot: true };
 		case 'EVENT_GAME_OVER':
 			return { ...state, gameOver: true };
 		case 'EVENT_TRIGGER':

@@ -9,7 +9,7 @@ export default function getDialogTree() {
 		},
 		starsAreHot: {
 			text: "Engineer: Captain, that star is millions of degrees. Let's try to avoid it, ok?",
-			action: { type: 'EVENT_STAR_WARNING' },
+			action: { type: 'EVENT_TRIGGER', payload: 'starsAreHot' },
 			options: [{ text: 'Continue' }],
 		},
 		firstLandingNotDone: {
