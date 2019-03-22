@@ -15,8 +15,7 @@ export function getAllSystems() {
 		Algol: {
 			star: {
 				position: { x: 800, y: 300 },
-				size: 200,
-				color: 0xffff00,
+				size: 500,
 			},
 			gates: [
 				{
@@ -30,15 +29,14 @@ export function getAllSystems() {
 						"Not much of a tourist destination. Or any kind of destination at all, really. The Empire tout it as a settler's paradise. Mostly it's just a lot of mud.",
 					position: { x: 25, y: 75 },
 					color: 0xff0000,
-					size: 40,
+					size: 100,
 				},
 			],
 		},
 		Betan: {
 			star: {
 				position: { x: 100, y: 400 },
-				size: 150,
-				color: 0xffa500,
+				size: 300,
 			},
 			planets: [
 				{

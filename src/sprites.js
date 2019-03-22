@@ -43,15 +43,19 @@ function createAndPlaceStar(game, planetData) {
 	planetSprite.positionInSpace = planetData.position;
 	planetSprite.anchor.set(0.5, 0.5);
 	planetSprite.zIndex = 5;
+	planetSprite.width = planetData.size;
+	planetSprite.height = planetData.size;
 	planetSprite.planetData = planetData;
 	setSpritePosition(planetSprite, { x: planetData.position.x, y: planetData.position.y });
 	return planetSprite;
 }
 
 function createAndPlacePlanet(game, planetData) {
-	const planetSprite = game.circle(planetData.size, planetData.color);
+	const planetSprite = game.sprite('assets/planet-1.png');
 	planetSprite.positionInSpace = planetData.position;
 	planetSprite.zIndex = 5;
+	planetSprite.width = planetData.size;
+	planetSprite.height = planetData.size;
 	planetSprite.planetData = planetData;
 	setSpritePosition(planetSprite, { x: planetData.position.x, y: planetData.position.y });
 	return planetSprite;

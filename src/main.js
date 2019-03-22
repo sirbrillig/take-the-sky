@@ -24,6 +24,7 @@ const filesToLoad = [
 	'assets/player-idle.png',
 	'assets/cruiser.png',
 	'assets/sun.png',
+	'assets/planet-1.png',
 	'assets/star-field.png',
 	'assets/nav-ring.png',
 	'assets/pointer.png',
