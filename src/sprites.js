@@ -1,6 +1,6 @@
 /* @format */
 
-import debugFactory, { displayDebugText } from './debug';
+import debugFactory, { debugTextFactory } from './debug';
 import { getPlanetsInSystem, getStarsInSystem, getGatesInSystem } from './planets';
 import { getTurningDirectionFromPressingState } from './controls';
 import {
@@ -21,6 +21,7 @@ import ShipAi from './ship-ai';
 import Vector from './vector';
 
 const debug = debugFactory('sky:sprites');
+const displayDebugText = debugTextFactory('sky:stats');
 
 export function setSpritePosition(sprite, { x, y }) {
 	sprite.position.set(x, y);
@@ -453,7 +454,6 @@ export function getSpriteMover(game) {
 		const { handleAction, showDialog } = actions;
 		const pressing = getPressingState();
 		const playerPosition = getPlayerPosition(getState());
-		const debugMode = true;
 
 		// render player ship
 		if (!isDialogVisible() && getControlMode() === 'pilot' && (pressing.left || pressing.right)) {
@@ -462,15 +462,13 @@ export function getSpriteMover(game) {
 				getTurningDirectionFromPressingState(pressing)
 			);
 		}
-		if (debugMode) {
-			displayDebugText({
-				game,
-				id: 'radP',
-				text: sprites.ship.rotation,
-				x: sprites.ship.x + 30,
-				y: sprites.ship.y + 30,
-			});
-		}
+		displayDebugText({
+			game,
+			id: 'radP',
+			text: sprites.ship.rotation,
+			x: sprites.ship.x + 30,
+			y: sprites.ship.y + 30,
+		});
 		if (!sprites.playerEngineOn) {
 			sprites.playerEngineOn = createAndPlacePlayerEngineOn(game, getPlayerPosition(getState()));
 		}
