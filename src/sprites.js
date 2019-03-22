@@ -1,6 +1,6 @@
 /* @format */
 
-import debugFactory from './debug';
+import debugFactory, { displayDebugText } from './debug';
 import { getPlanetsInSystem, getStarsInSystem, getGatesInSystem } from './planets';
 import { getTurningDirectionFromPressingState } from './controls';
 import {
@@ -453,13 +453,23 @@ export function getSpriteMover(game) {
 		const { handleAction, showDialog } = actions;
 		const pressing = getPressingState();
 		const playerPosition = getPlayerPosition(getState());
+		const debugMode = true;
 
-		// render ship
+		// render player ship
 		if (!isDialogVisible() && getControlMode() === 'pilot' && (pressing.left || pressing.right)) {
 			sprites.ship.rotation = adjustRotationForDirection(
 				sprites.ship.rotation,
 				getTurningDirectionFromPressingState(pressing)
 			);
+		}
+		if (debugMode) {
+			displayDebugText({
+				game,
+				id: 'radP',
+				text: sprites.ship.rotation,
+				x: sprites.ship.x + 30,
+				y: sprites.ship.y + 30,
+			});
 		}
 		if (!sprites.playerEngineOn) {
 			sprites.playerEngineOn = createAndPlacePlayerEngineOn(game, getPlayerPosition(getState()));
