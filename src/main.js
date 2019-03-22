@@ -23,6 +23,7 @@ const filesToLoad = [
 	'assets/gate.png',
 	'assets/player-idle.png',
 	'assets/cruiser.png',
+	'assets/sun.png',
 	'assets/star-field.png',
 	'assets/nav-ring.png',
 	'assets/pointer.png',

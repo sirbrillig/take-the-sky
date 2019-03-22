@@ -38,6 +38,16 @@ export function createAndPlaceBackground(game) {
 	return sky;
 }
 
+function createAndPlaceStar(game, planetData) {
+	const planetSprite = game.sprite('assets/sun.png');
+	planetSprite.positionInSpace = planetData.position;
+	planetSprite.anchor.set(0.5, 0.5);
+	planetSprite.zIndex = 5;
+	planetSprite.planetData = planetData;
+	setSpritePosition(planetSprite, { x: planetData.position.x, y: planetData.position.y });
+	return planetSprite;
+}
+
 function createAndPlacePlanet(game, planetData) {
 	const planetSprite = game.circle(planetData.size, planetData.color);
 	planetSprite.positionInSpace = planetData.position;
@@ -507,7 +517,7 @@ export function getSpriteMover(game) {
 				sprites.stars.map(sprite => game.mainContainer.removeChild(sprite));
 			}
 			sprites.stars = getStarsInSystem(currentSystem).map(starData =>
-				createAndPlacePlanet(game, starData)
+				createAndPlaceStar(game, starData)
 			);
 			sprites.stars.map(sprite => game.mainContainer.addChild(sprite));
 
