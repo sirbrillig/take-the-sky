@@ -294,26 +294,7 @@ export function createAndPlaceChargeMeter(game) {
 }
 
 export function explodeShip(game, sprites) {
-	const images = [
-		'assets/blue-explosion/1_0.png',
-		'assets/blue-explosion/1_1.png',
-		'assets/blue-explosion/1_2.png',
-		'assets/blue-explosion/1_3.png',
-		'assets/blue-explosion/1_4.png',
-		'assets/blue-explosion/1_5.png',
-		'assets/blue-explosion/1_6.png',
-		'assets/blue-explosion/1_7.png',
-		'assets/blue-explosion/1_8.png',
-		'assets/blue-explosion/1_9.png',
-		'assets/blue-explosion/1_10.png',
-		'assets/blue-explosion/1_11.png',
-		'assets/blue-explosion/1_12.png',
-		'assets/blue-explosion/1_13.png',
-		'assets/blue-explosion/1_14.png',
-		'assets/blue-explosion/1_15.png',
-		'assets/blue-explosion/1_16.png',
-	];
-	const animatedSprite = game.animatedSpriteFromImages(images);
+	const animatedSprite = game.animatedSpriteFromSpriteSheet('assets/explosion.json');
 	setSpritePosition(animatedSprite, sprites.ship.position);
 	animatedSprite.animationSpeed = 0.2;
 	animatedSprite.loop = false;

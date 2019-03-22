@@ -28,6 +28,7 @@ const filesToLoad = [
 	'assets/star-field.png',
 	'assets/nav-ring.png',
 	'assets/pointer.png',
+	'assets/explosion.json',
 ];
 
 function initSprites(game, state) {
