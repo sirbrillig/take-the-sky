@@ -296,7 +296,7 @@ export function createAndPlaceChargeMeter(game) {
 export function explodeShip(game, sprites) {
 	const animatedSprite = game.animatedSpriteFromSpriteSheet('assets/explosion.json');
 	setSpritePosition(animatedSprite, sprites.ship.position);
-	animatedSprite.animationSpeed = 0.2;
+	animatedSprite.animationSpeed = 0.6;
 	animatedSprite.loop = false;
 	animatedSprite.pivot.set(0.5, 0.5);
 	animatedSprite.anchor.set(0.5, 0.5);
