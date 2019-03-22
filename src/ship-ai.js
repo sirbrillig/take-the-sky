@@ -11,7 +11,7 @@ export default class ShipAi {
 		rotation,
 		speed,
 		changeSpeedCallback,
-		fireDistance = 100,
+		fireDistance = 150,
 		maxDistance = 1000,
 		rotationRate = 0.03,
 		accelerationRate = 0.05,
