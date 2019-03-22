@@ -381,9 +381,20 @@ export function isShipTouchingGate({ gates, ship }) {
 	return gates && gates.find(gate => doSpritesOverlap(ship, gate));
 }
 
-function moveOtherShipForBehavior({ game, shipSprite, shipData, playerSprite, handleAction }) {
+function moveOtherShipForBehavior({
+	game,
+	getState,
+	showDialog,
+	shipSprite,
+	shipData,
+	playerSprite,
+	handleAction,
+}) {
 	const ai = new ShipAi({
 		game,
+		getState,
+		showDialog,
+		handleAction,
 		playerVector: new Vector(playerSprite.x, playerSprite.y),
 		shipVector: new Vector(shipSprite.x, shipSprite.y),
 		rotation: shipSprite.rotation,
@@ -439,7 +450,7 @@ export function getSpriteMover(game) {
 			getPressingState,
 			getState,
 		} = state;
-		const { handleAction } = actions;
+		const { handleAction, showDialog } = actions;
 		const pressing = getPressingState();
 		const playerPosition = getPlayerPosition(getState());
 
@@ -538,6 +549,8 @@ export function getSpriteMover(game) {
 				}
 				moveOtherShipForBehavior({
 					game,
+					getState,
+					showDialog,
 					shipSprite: other,
 					shipData,
 					playerSprite: sprites.ship,

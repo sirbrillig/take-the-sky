@@ -75,6 +75,7 @@ export default function getDialogTree() {
 			options: [
 				{
 					text: 'Depart',
+					link: 'firstLanding5',
 				},
 			],
 			action: { type: 'EVENT_FIRST_LANDING' },
@@ -86,6 +87,24 @@ export default function getDialogTree() {
 				{
 					text: "No need to worry. Let's get you where you need to go.",
 					link: 'firstLanding3',
+				},
+			],
+		},
+		firstLanding5: {
+			text:
+				"Captain, I'm so glad you're back! I was trying to call you. There's an Empire cruiser that just entered the system. Why would they send a ship like that way out here? Think they found out about that run we did at Selkirk? Here they come!",
+			options: [
+				{
+					text: 'Continue',
+				},
+			],
+		},
+		firstCruiserEncounter: {
+			text:
+				"Greetings. This is Captain Drake of the Dauntless. We are looking for a runaway with stolen information who's been reported in this system. Please identify yourself and stand by for boarding.",
+			options: [
+				{
+					text: 'Continue',
 				},
 			],
 		},

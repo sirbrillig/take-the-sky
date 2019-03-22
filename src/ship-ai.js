@@ -1,10 +1,14 @@
 /* @format */
 
 import { adjustRotationForDirection, getAngleBetweenVectors, adjustSpeedForRotation } from './math';
+import { getEvent } from './selectors';
 
 export default class ShipAi {
 	constructor({
 		game,
+		getState,
+		showDialog,
+		handleAction,
 		playerVector,
 		shipVector,
 		changeRotationCallback,
@@ -18,6 +22,9 @@ export default class ShipAi {
 		maxSpeed = 3.5,
 	}) {
 		this.game = game;
+		this.getState = getState;
+		this.showDialog = showDialog;
+		this.handleAction = handleAction;
 		this.fireDistance = fireDistance;
 		this.maxDistance = maxDistance;
 		this.playerVector = playerVector;
@@ -70,7 +77,7 @@ export default class ShipAi {
 	decelerate() {
 		const drag = this.accelerationRate * 1.5;
 		this.changeSpeedCallback(
-			adjustSpeedForRotation(this.rotation, this.speed, this.accelerationRate, this.maxSpeed, drag)
+			adjustSpeedForRotation(this.rotation, this.speed, 0, this.maxSpeed, drag)
 		);
 	}
 
@@ -80,8 +87,11 @@ export default class ShipAi {
 		);
 	}
 
-	// eslint-disable-next-line class-methods-use-this
-	fire() {
-		// TODO
+	triggerEvent(key) {
+		this.handleAction({ type: 'EVENT_TRIGGER', payload: key });
+	}
+
+	isEventComplete(key) {
+		return getEvent(this.getState(), key);
 	}
 }

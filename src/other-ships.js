@@ -18,7 +18,10 @@ export function makeShipData(shipType) {
 					if (ai.isPlayerWithinAttackRange()) {
 						ai.rotateTowardPlayer();
 						ai.decelerate();
-						ai.fire();
+						if (!ai.isEventComplete('firstCruiserEncounter')) {
+							ai.showDialog('firstCruiserEncounter');
+							ai.triggerEvent('firstCruiserEncounter');
+						}
 						return;
 					}
 					if (ai.isPlayerWithinApproachRange()) {
@@ -28,7 +31,7 @@ export function makeShipData(shipType) {
 						}
 					}
 				},
-				positionInSpace: { x: -300, y: -300 },
+				positionInSpace: { x: -250, y: -250 },
 				speed: { x: 0, y: 0 },
 			};
 		default:

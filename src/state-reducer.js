@@ -23,7 +23,7 @@ function npcs(state, { type }) {
 	}
 }
 
-function events(state = {}, { type }) {
+function events(state = {}, { type, payload }) {
 	switch (type) {
 		case 'EVENT_FIRST_LANDING':
 			return { ...state, firstLanding: true };
@@ -31,6 +31,8 @@ function events(state = {}, { type }) {
 			return { ...state, starsAreHot: true };
 		case 'EVENT_GAME_OVER':
 			return { ...state, gameOver: true };
+		case 'EVENT_TRIGGER':
+			return { ...state, [payload]: true };
 		default:
 			return state;
 	}
