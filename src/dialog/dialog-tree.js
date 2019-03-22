@@ -92,7 +92,7 @@ export default function getDialogTree() {
 		},
 		firstLanding5: {
 			text:
-				"Captain, I'm so glad you're back! I was trying to call you. There's an Empire cruiser that just entered the system. Why would they send a ship like that way out here? Think they found out about that run we did at Selkirk? Here they come!",
+				"Engineer: Captain, I'm so glad you're back! I was trying to call you. There's an Empire cruiser that just entered the system. Why would they send a ship like that way out here? Think they found out about that run we did at Selkirk? Here they come!",
 			options: [
 				{
 					text: 'Continue',
@@ -101,7 +101,40 @@ export default function getDialogTree() {
 		},
 		firstCruiserEncounter: {
 			text:
-				"Greetings. This is Captain Drake of the Dauntless. We are looking for a runaway with stolen information who's been reported in this system. Please identify yourself and stand by for boarding.",
+				"Cruiser: Greetings. This is Captain Drake of the Dauntless. We are looking for a runaway with stolen information who's been reported in this system. Please identify yourself and stand by for boarding.",
+			options: [
+				{
+					text: 'Continue',
+					link: 'firstCruiserEncounter2',
+				},
+			],
+		},
+		firstCruiserEncounter2: {
+			text:
+				"Alana: It's a lie! I didn't steal anything. They just want to take me back. I have to get to safety. I'm begging you, Captain.",
+			options: [
+				{
+					text: 'Give your name and await boarding.',
+					link: 'firstCruiserEncounter3',
+				},
+				{
+					text: 'Ignore the warning and run.',
+				},
+			],
+		},
+		firstCruiserEncounter3: {
+			text:
+				"Engineer: Captain... someone is scrambling our communications... The Empire ship doesn't look happy.",
+			options: [
+				{
+					text: 'Continue',
+					link: 'firstCruiserEncounter4',
+				},
+			],
+		},
+		firstCruiserEncounter4: {
+			text:
+				"Alana: That was me. I'm sorry, Captain, but I can't let them take me back to that place.",
 			options: [
 				{
 					text: 'Continue',
