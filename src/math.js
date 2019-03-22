@@ -65,19 +65,23 @@ export function getCenter(o, dimension, axis) {
 	return dimension;
 }
 
+export function clampRadians(rotation) {
+	const adjustForNegative = angle => (angle < 0 ? angle + Math.PI * 2 : angle);
+	const adjustForMax = angle => (angle > Math.PI * 2 ? angle - Math.PI * 2 : angle);
+	return adjustForNegative(adjustForMax(rotation));
+}
+
 /**
  * Return a new angle in radians based on a turning direction
  *
  * Direction can be one of 'counterclockwise' (decrease radians) or 'clockwise' (increase radians).
  */
 export function adjustRotationForDirection(rotation, direction, rotationRate = 0.06) {
-	const adjustForNegative = angle => (angle < 0 ? angle + Math.PI * 2 : angle);
-	const adjustForMax = angle => (angle > Math.PI * 2 ? angle - Math.PI * 2 : angle);
 	switch (direction) {
 		case 'counterclockwise':
-			return adjustForNegative(rotation - rotationRate);
+			return clampRadians(rotation - rotationRate);
 		case 'clockwise':
-			return adjustForMax(rotation + rotationRate);
+			return clampRadians(rotation + rotationRate);
 		default:
 			throw new Error(`Unknown direction '${direction}' when trying to calculate rotation`);
 	}
