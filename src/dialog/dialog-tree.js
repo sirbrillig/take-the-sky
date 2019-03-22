@@ -125,6 +125,7 @@ export default function getDialogTree() {
 		firstCruiserEncounter3: {
 			text:
 				"Engineer: Captain... someone is scrambling our communications... The Empire ship doesn't look happy.",
+			script: "changeNpcHappiness 'alana' -1",
 			options: [
 				{
 					text: 'Continue',
