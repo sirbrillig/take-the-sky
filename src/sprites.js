@@ -15,7 +15,7 @@ import {
 	getHealthAmount,
 	getShipDataForId,
 } from './selectors';
-import getDialogObjectForKey from './dialog/index';
+import getDialogObjectForKey, { executeScript } from './dialog/index';
 import { getOtherShipsToCreate, getShipSpriteForType } from './other-ships';
 import ShipAi from './ship-ai';
 import Vector from './vector';
@@ -491,10 +491,13 @@ export function getSpriteMover(game) {
 		// render dialog
 		if (lastShownDialog !== getDialogKey() && isDialogVisible()) {
 			sprites.dialog.visible = true;
-			const currentDialogObject = getDialogObjectForKey(getDialogKey(), getState());
+			const currentDialogObject = getDialogObjectForKey(getDialogKey(), getState(), handleAction);
 			sprites.dialog.textArea.text = currentDialogObject.text;
 			if (currentDialogObject.action) {
 				handleAction(currentDialogObject.action);
+			}
+			if (currentDialogObject.script) {
+				executeScript(getState(), handleAction, currentDialogObject.script);
 			}
 			createDialogOptions(game, sprites.dialog, currentDialogObject);
 		}

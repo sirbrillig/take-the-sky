@@ -9,7 +9,7 @@ const lexer = moo.compile({
 	number:  /[-]?(?:0|[1-9][0-9]*)/,
 	bool: ['true', 'false'],
 	string:  /'[^']*'/,
-	command: ['getNpcHappiness', 'getEvent'],
+	command: ['getNpcHappiness', 'getEvent', 'changeNpcHappiness'],
 	nl: { match: /\n/, lineBreaks: true },
 	comparator: ['>=', '>', '<', '=', '<='],
 });
@@ -17,6 +17,7 @@ var grammar = {
     Lexer: lexer,
     ParserRules: [
     {"name": "expression", "symbols": [(lexer.has("command") ? {type: "command"} : command), (lexer.has("ws") ? {type: "ws"} : ws), "unquotedstring", (lexer.has("ws") ? {type: "ws"} : ws), (lexer.has("comparator") ? {type: "comparator"} : comparator), (lexer.has("ws") ? {type: "ws"} : ws), "rightside"], "postprocess": ( [ command, , key, , comparator, , rightside ] ) => ({ command, key, comparator, rightside })},
+    {"name": "expression", "symbols": [(lexer.has("command") ? {type: "command"} : command), (lexer.has("ws") ? {type: "ws"} : ws), "unquotedstring", (lexer.has("ws") ? {type: "ws"} : ws), "rightside"], "postprocess": ( [ command, , key, , rightside ] ) => ({ command, key, rightside })},
     {"name": "unquotedstring", "symbols": [(lexer.has("string") ? {type: "string"} : string)], "postprocess": ( [ quoted ] ) => ({type: 'string', value: quoted.value.replace(/[']/g, '')})},
     {"name": "rightside", "symbols": [(lexer.has("number") ? {type: "number"} : number)], "postprocess": ( [ rightside ] ) => rightside},
     {"name": "rightside", "symbols": [(lexer.has("bool") ? {type: "bool"} : bool)], "postprocess": ( [ rightside ] ) => rightside}

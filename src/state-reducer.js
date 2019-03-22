@@ -10,14 +10,22 @@ function npc(state = { happiness: 0 }, action = {}) {
 	return { happiness: state.happiness + action.happiness || 0 };
 }
 
-function npcs(state, { type }) {
+function npcs(state, { type, payload }) {
 	switch (type) {
 		case 'EVENT_FIRST_LANDING_NOT_DONE':
 			return { ...state, engineer: npc(state.engineer, { happiness: -1 }) };
+		case 'NPC_HAPPINESS_CHANGE':
+			return {
+				...state,
+				[payload.npc]: npc(state[payload.npc], {
+					happiness: state[payload.npc].happiness + parseInt(payload.change, 10),
+				}),
+			};
 		default:
 			return (
 				state || {
 					engineer: npc(),
+					alana: npc(),
 				}
 			);
 	}
