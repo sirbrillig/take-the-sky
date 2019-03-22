@@ -8,7 +8,7 @@ import { setUpKeyboardControls } from './controls';
 import {
 	createAndPlaceModeControls,
 	createAndPlaceBackground,
-	createAndPlaceShip,
+	createAndPlacePlayer,
 	createAndPlaceNavigationRing,
 	createAndPlaceHealthMeter,
 	createAndPlaceChargeMeter,
@@ -36,7 +36,7 @@ function initSprites(game, state) {
 	return {
 		sky: createAndPlaceBackground(game),
 		dialog: createAndPlaceDialog(game),
-		ship: createAndPlaceShip(game, getPlayerPosition(getState())),
+		player: createAndPlacePlayer(game, getPlayerPosition(getState())),
 		ring: createAndPlaceNavigationRing(game, getPlayerPosition(getState())),
 		ships: [],
 		healthMeter: createAndPlaceHealthMeter(game),

@@ -88,7 +88,7 @@ export function createAndPlaceOtherShips(game, shipDataObjects, playerPosition) 
 	});
 }
 
-export function createAndPlaceShip(game, playerPosition) {
+export function createAndPlacePlayer(game, playerPosition) {
 	const ship = game.sprite('assets/player-idle.png');
 	ship.rotation = Math.random() * Math.PI * 2;
 	ship.pivot.set(0.5, 0.5);
@@ -296,7 +296,7 @@ export function createAndPlaceChargeMeter(game) {
 
 export function explodeShip(game, sprites) {
 	const animatedSprite = game.animatedSpriteFromSpriteSheet('assets/explosion.json');
-	setSpritePosition(animatedSprite, sprites.ship.position);
+	setSpritePosition(animatedSprite, sprites.player.position);
 	animatedSprite.animationSpeed = 0.6;
 	animatedSprite.loop = false;
 	animatedSprite.pivot.set(0.5, 0.5);
@@ -304,7 +304,7 @@ export function explodeShip(game, sprites) {
 	animatedSprite.zIndex = 10;
 	animatedSprite.onComplete = () => animatedSprite.destroy();
 	game.mainContainer.addChild(animatedSprite);
-	sprites.ship.visible = false;
+	sprites.player.visible = false;
 	animatedSprite.play();
 }
 
@@ -370,16 +370,16 @@ function isChargeMeterVisible({ getControlMode, getChargeMeterAmount }) {
 	return ['land', 'jump'].includes(getControlMode()) || getChargeMeterAmount() > 1;
 }
 
-export function isShipTouchingStar({ stars, ship }) {
-	return stars && stars.find(star => doSpritesOverlap(ship, star));
+export function isShipTouchingStar({ stars, player }) {
+	return stars && stars.find(star => doSpritesOverlap(player, star));
 }
 
-export function getPlanetTouchingShip({ planets, ship }) {
-	return planets && planets.find(planet => doSpritesOverlap(ship, planet));
+export function getPlanetTouchingShip({ planets, player }) {
+	return planets && planets.find(planet => doSpritesOverlap(player, planet));
 }
 
-export function isShipTouchingGate({ gates, ship }) {
-	return gates && gates.find(gate => doSpritesOverlap(ship, gate));
+export function isShipTouchingGate({ gates, player }) {
+	return gates && gates.find(gate => doSpritesOverlap(player, gate));
 }
 
 function moveOtherShipForBehavior({
@@ -457,34 +457,34 @@ export function getSpriteMover(game) {
 
 		// render player ship
 		if (!isDialogVisible() && getControlMode() === 'pilot' && (pressing.left || pressing.right)) {
-			sprites.ship.rotation = adjustRotationForDirection(
-				sprites.ship.rotation,
+			sprites.player.rotation = adjustRotationForDirection(
+				sprites.player.rotation,
 				getTurningDirectionFromPressingState(pressing)
 			);
 		}
 		displayDebugText({
 			game,
 			id: 'radP',
-			text: sprites.ship.rotation,
-			x: sprites.ship.x + 30,
-			y: sprites.ship.y + 30,
+			text: sprites.player.rotation,
+			x: sprites.player.x + 30,
+			y: sprites.player.y + 30,
 		});
 		if (!sprites.playerEngineOn) {
 			sprites.playerEngineOn = createAndPlacePlayerEngineOn(game, getPlayerPosition(getState()));
 		}
 		if (!isDialogVisible() && getControlMode() === 'pilot' && pressing.up) {
-			sprites.ship.visible = false;
-			sprites.playerEngineOn.rotation = sprites.ship.rotation;
+			sprites.player.visible = false;
+			sprites.playerEngineOn.rotation = sprites.player.rotation;
 			sprites.playerEngineOn.visible = true;
 			sprites.playerEngineOn.play();
 		}
 		if (!isDialogVisible() && getControlMode() === 'pilot' && !pressing.up) {
-			sprites.ship.visible = true;
+			sprites.player.visible = true;
 			sprites.playerEngineOn.visible = false;
 			sprites.playerEngineOn.stop();
 		}
 		if (getEvent(getState(), 'gameOver')) {
-			sprites.ship.visible = false;
+			sprites.player.visible = false;
 			sprites.playerEngineOn.visible = false;
 		}
 
@@ -564,7 +564,7 @@ export function getSpriteMover(game) {
 					showDialog,
 					shipSprite: other,
 					shipData,
-					playerSprite: sprites.ship,
+					playerSprite: sprites.player,
 					handleAction,
 				});
 				other.positionInSpace = shipData.positionInSpace;
@@ -576,7 +576,7 @@ export function getSpriteMover(game) {
 		setTilePosition(sprites.sky, playerPosition);
 
 		// render ring
-		sprites.ring.rotation = sprites.ship.rotation;
+		sprites.ring.rotation = sprites.player.rotation;
 		sprites.ring.visible = !getEvent(getState(), 'gameOver') && getControlMode() === 'pilot';
 
 		// render mode pointer

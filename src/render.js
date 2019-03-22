@@ -68,7 +68,7 @@ export default function renderGame(game, sprites, state, actions, moveSprites) {
 
 	if (isShipTouchingStar(sprites) && !getEvent(getState(), 'starsAreHot')) {
 		changeSpeed({ x: 0, y: 0 });
-		sprites.ship.rotation = clampRadians(sprites.ship.rotation + Math.PI);
+		sprites.player.rotation = clampRadians(sprites.player.rotation + Math.PI);
 		showDialog('starsAreHot');
 		return;
 	}
@@ -103,7 +103,7 @@ export default function renderGame(game, sprites, state, actions, moveSprites) {
 	}
 
 	if (pressing.up && getControlMode() === 'pilot') {
-		changeSpeed(adjustSpeedForRotation(sprites.ship.rotation, getSpeed()));
+		changeSpeed(adjustSpeedForRotation(sprites.player.rotation, getSpeed()));
 	}
 
 	setChargeMeterAmount(
