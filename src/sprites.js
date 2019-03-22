@@ -490,16 +490,21 @@ export function getSpriteMover(game) {
 
 		// render dialog
 		if (lastShownDialog !== getDialogKey() && isDialogVisible()) {
-			sprites.dialog.visible = true;
 			const currentDialogObject = getDialogObjectForKey(getDialogKey(), getState(), handleAction);
-			sprites.dialog.textArea.text = currentDialogObject.text;
 			if (currentDialogObject.action) {
 				handleAction(currentDialogObject.action);
 			}
 			if (currentDialogObject.script) {
 				executeScript(getState(), handleAction, currentDialogObject.script);
 			}
-			createDialogOptions(game, sprites.dialog, currentDialogObject);
+			if (currentDialogObject.text) {
+				sprites.dialog.textArea.text = currentDialogObject.text;
+				createDialogOptions(game, sprites.dialog, currentDialogObject);
+				sprites.dialog.visible = true;
+			}
+			if (!currentDialogObject.text) {
+				showDialog(null);
+			}
 		}
 		if (sprites.dialog.visible && !isDialogVisible()) {
 			sprites.dialog.visible = false;
