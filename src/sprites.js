@@ -1,13 +1,11 @@
 /* @format */
 
-import debugFactory, { displayDebugText } from './debug';
+import debugFactory from './debug';
 import { getPlanetsInSystem, getStarsInSystem, getGatesInSystem } from './planets';
 import { getTurningDirectionFromPressingState } from './controls';
 import {
 	areVectorsSame,
 	adjustRotationForDirection,
-	getAngleBetweenSprites,
-	adjustSpeedForRotation,
 	getScreenPositionFromSpacePosition,
 } from './math';
 import {
@@ -76,7 +74,7 @@ export function createAndPlaceOtherShips(game, shipDataObjects, playerPosition) 
 }
 
 export function createAndPlaceShip(game, playerPosition) {
-	const ship = game.sprite('assets/ship.png');
+	const ship = game.sprite('assets/player-idle.png');
 	ship.rotation = Math.random() * Math.PI * 2;
 	ship.pivot.set(0.5, 0.5);
 	ship.anchor.set(0.5, 0.5);
@@ -84,6 +82,20 @@ export function createAndPlaceShip(game, playerPosition) {
 	ship.zIndex = 10;
 	game.mainContainer.addChild(ship);
 	return ship;
+}
+
+export function createAndPlacePlayerEngineOn(game, playerPosition) {
+	const images = ['assets/player-engine-on-1.png', 'assets/player-engine-on-2.png'];
+	const animatedSprite = game.animatedSpriteFromImages(images);
+	animatedSprite.pivot.set(0.5, 0.5);
+	animatedSprite.anchor.set(0.5, 0.5);
+	animatedSprite.zIndex = 10;
+	setSpritePosition(animatedSprite, playerPosition);
+	animatedSprite.animationSpeed = 0.2;
+	animatedSprite.loop = true;
+	animatedSprite.visible = false;
+	game.mainContainer.addChild(animatedSprite);
+	return animatedSprite;
 }
 
 export function createAndPlaceNavigationRing(game, playerPosition) {
@@ -361,31 +373,6 @@ export function isShipTouchingGate({ gates, ship }) {
 	return gates && gates.find(gate => doSpritesOverlap(ship, gate));
 }
 
-function adjustRotationForFollowingShip({ angleToPlayer, shipSprite, game }) {
-	const radiansNeededToRotate = angleToPlayer - shipSprite.rotation;
-	displayDebugText({
-		game,
-		id: 'angleToPlayer',
-		text: angleToPlayer,
-		x: shipSprite.x - 30,
-		y: shipSprite.y + 25,
-	});
-	displayDebugText({
-		game,
-		id: 'needed',
-		text: radiansNeededToRotate,
-		x: shipSprite.x - 30,
-		y: shipSprite.y + 10,
-	});
-	const isPositiveRadians = radiansNeededToRotate > 0;
-	const maxRotationRate = 0.03;
-	if (isPositiveRadians) {
-		// TODO: I think this needs to be a different calculation
-		return adjustRotationForDirection(shipSprite.rotation, 'right', maxRotationRate);
-	}
-	return adjustRotationForDirection(shipSprite.rotation, 'left', maxRotationRate);
-}
-
 function moveOtherShipForBehavior({ game, shipSprite, shipData, playerSprite, handleAction }) {
 	const ai = new ShipAi({
 		game,
@@ -455,6 +442,20 @@ export function getSpriteMover(game) {
 				getTurningDirectionFromPressingState(pressing)
 			);
 		}
+		if (!sprites.playerEngineOn) {
+			sprites.playerEngineOn = createAndPlacePlayerEngineOn(game, getPlayerPosition(getState()));
+		}
+		if (!isDialogVisible() && getControlMode() === 'pilot' && pressing.up) {
+			sprites.ship.visible = false;
+			sprites.playerEngineOn.rotation = sprites.ship.rotation;
+			sprites.playerEngineOn.visible = true;
+			sprites.playerEngineOn.play();
+		} else {
+			sprites.ship.visible = true;
+			sprites.playerEngineOn.visible = false;
+			sprites.playerEngineOn.stop();
+		}
+
 		// render dialog
 		if (lastShownDialog !== getDialogKey() && isDialogVisible()) {
 			sprites.dialog.visible = true;

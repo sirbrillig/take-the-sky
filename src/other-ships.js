@@ -28,7 +28,7 @@ export function makeShipData(shipType) {
 						}
 					}
 				},
-				positionInSpace: { x: -100, y: -100 },
+				positionInSpace: { x: -300, y: -300 },
 				speed: { x: 0, y: 0 },
 			};
 		default:
@@ -39,7 +39,7 @@ export function makeShipData(shipType) {
 export function getShipSpriteForType(shipType) {
 	switch (shipType) {
 		case 'cruiser':
-			return 'assets/ship-2.png';
+			return 'assets/cruiser.png';
 		default:
 			throw new Error(`Unknown ship type ${shipType}`);
 	}

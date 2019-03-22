@@ -21,8 +21,8 @@ const canvasWidth = 800;
 const canvasHeight = 600;
 const filesToLoad = [
 	'assets/gate.png',
-	'assets/ship.png',
-	'assets/ship-2.png',
+	'assets/player-idle.png',
+	'assets/cruiser.png',
 	'assets/star-field.png',
 	'assets/nav-ring.png',
 	'assets/pointer.png',
