@@ -1,9 +1,15 @@
-expression -> literal {% makeExpression %}
-expression -> functionCall {% makeExpression %}
-expression -> expression ws comparator ws expression {% makeComparison %}
+expression -> literal osemi {% makeExpression %}
+expression -> expression __ comparator __ expression osemi {% makeComparison %}
+expression -> functionCall osemi {% makeExpression %}
+expression -> "if" _ condition _ block osemi {% makeIfStatement %}
+
+condition -> "(" _ expression _ ")" {% makeCondition %}
+block -> "{" _ expression:* _ "}" {% makeBlock %}
+
 functionCall -> ("getEvent"|"getNpcHappiness") "(" functionArg:* ")" {% makeFunctionCall %}
 functionArg -> literal {% makeFunctionArg %}
-functionArg -> literal "," ws:* {% makeFunctionArg %}
+functionArg -> literal "," __:* {% makeFunctionArg %}
+
 literal -> (number|bool|string) {% passThrough %}
 string -> "'" char:* "'" {% makeString %}
 char -> [^\\'\n] {% id %}
@@ -11,7 +17,12 @@ bool -> ("true"|"false") {% makeBool %}
 number -> [0-9]:+ {% makeNumber %}
 number -> "-" [0-9]:+ {% makeNumber %}
 comparator -> ("="|"<"|">"|">="|"<=") {% makeObjectMaker('comparator') %}
-ws -> [\s] {% nothing %}
+
+osemi -> semi:?
+semi -> ";" _
+
+_ -> __:* {% nothing %}
+__ -> [\s] {% nothing %}
 
 @{%
 function makeObject(type, [value]) {
@@ -20,6 +31,31 @@ function makeObject(type, [value]) {
 
 function passThrough([[value]]) {
 	return value;
+}
+
+function makeIfStatement(value) {
+	value = value.filter(x => x);
+	return {
+		type: 'if',
+		condition: value[1],
+		block: value[2],
+	};
+}
+
+function makeCondition(value) {
+	value = value.filter(x => x).filter(x => !['(',')'].includes(x));
+	return {
+		type: 'condition',
+		value: value[0],
+	};
+}
+
+function makeBlock(value) {
+	value = value.filter(x => x).filter(x => !['{','}'].includes(x));
+	return {
+		type: 'block',
+		value: value[0],
+	};
 }
 
 function makeFunctionCall(value) {
