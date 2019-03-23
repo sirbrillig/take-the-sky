@@ -8,8 +8,8 @@ literal -> (number|bool|string) {% passThrough %}
 string -> "'" char:* "'" {% makeString %}
 char -> [^\\'\n] {% id %}
 bool -> ("true"|"false") {% makeBool %}
-number -> [0-9]:+ {% makeObjectMaker('number') %}
-number -> "-" [0-9]:+ {% makeObjectMaker('number') %}
+number -> [0-9]:+ {% makeNumber %}
+number -> "-" [0-9]:+ {% makeNumber %}
 comparator -> ("="|"<"|">"|">="|"<=") {% makeObjectMaker('comparator') %}
 ws -> [\s] {% nothing %}
 
@@ -33,6 +33,13 @@ function makeFunctionCall(value) {
 
 function makeFunctionArg([value]) {
 	return value;
+}
+
+function makeNumber(value) {
+	return {
+		type: 'number',
+		value: value.join(''),
+	};
 }
 
 function makeObjectMaker(type) {
