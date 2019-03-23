@@ -8,7 +8,7 @@ functionCall -> functionName functionArg:+ {% makeFunctionCall %}
 functionName -> ("getEvent"|"getNpcHappiness"|"isShipFacingPlayer"|"distanceToPlayer") {% id %}
 functionName -> ("rotateTowardPlayer"|"decelerate"|"accelerate") {% id %}
 functionName -> ("createShip"|"triggerEvent"|"linkToDialog") {% id %}
-functionName -> "finish" {% id %}
+functionName -> "finish"
 
 functionArg -> "," _ (literal|block) _ {% makeFunctionArg %}
 functionArg -> "," _ (literal|block) _ ")" {% makeFunctionArg %}
@@ -92,18 +92,18 @@ function makeObjectMaker(type) {
 	}
 }
 
-function makeExpression(value) {
-	return makeObject('expression', value);
+function makeExpression([value]) {
+	return value;
 }
 
 function makeComparison(value) {
 	value = value.filter(x => x);
-	return makeObject('expression', [{
+	return {
 		type: 'comparison',
 		leftSide: value[0],
 		comparator: value[1],
 		rightSide: value[2],
-	}]);
+	};
 }
 
 function makeBool([value]) {
