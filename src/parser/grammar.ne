@@ -1,6 +1,6 @@
 expression -> literal {% makeExpression %}
 expression -> functionCall {% makeExpression %}
-expression -> literal ws comparator ws literal {% makeComparison %}
+expression -> expression ws comparator ws expression {% makeComparison %}
 functionCall -> ("getEvent"|"getNpcHappiness") "(" functionArg:* ")" {% makeFunctionCall %}
 functionArg -> literal {% makeFunctionArg %}
 functionArg -> literal "," {% makeFunctionArg %}
