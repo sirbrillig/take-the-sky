@@ -370,6 +370,10 @@ function isChargeMeterVisible({ getControlMode, getChargeMeterAmount }) {
 	return ['land', 'jump'].includes(getControlMode()) || getChargeMeterAmount() > 1;
 }
 
+export function getShipTouchingPlayer(sprites) {
+	return sprites.ships && sprites.ships.find(ship => doSpritesOverlap(sprites.player, ship));
+}
+
 export function isShipTouchingStar({ stars, player }) {
 	return stars && stars.find(star => doSpritesOverlap(player, star));
 }
