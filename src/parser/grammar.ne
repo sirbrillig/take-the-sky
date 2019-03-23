@@ -3,12 +3,13 @@ expression -> expression __ comparator __ expression osemi {% makeComparison %}
 expression -> functionCall osemi {% makeExpression %}
 expression -> "if" _ condition _ block osemi {% makeIfStatement %}
 
+functionCall -> functionName "(" functionArg:* ")" {% makeFunctionCall %}
+functionName -> ("getEvent"|"getNpcHappiness") {% id %}
+functionArg -> literal ",":* _ {% makeFunctionArg %}
+functionArg -> block ",":* _ {% makeFunctionArg %}
+
 condition -> "(" _ expression _ ")" {% makeCondition %}
 block -> "{" _ expression:* _ "}" {% makeBlock %}
-
-functionCall -> ("getEvent"|"getNpcHappiness") "(" functionArg:* ")" {% makeFunctionCall %}
-functionArg -> literal {% makeFunctionArg %}
-functionArg -> literal "," __:* {% makeFunctionArg %}
 
 literal -> (number|bool|string) {% passThrough %}
 string -> "'" char:* "'" {% makeString %}
