@@ -3,13 +3,17 @@ expression -> expression __ comparator __ expression osemi {% makeComparison %}
 expression -> functionCall osemi {% makeExpression %}
 expression -> "if" _ condition _ block osemi {% makeIfStatement %}
 
-functionCall -> functionName "(" functionArg:* ")" {% makeFunctionCall %}
+functionCall -> functionName "()" {% makeFunctionCall %}
+functionCall -> functionName functionArg:+ {% makeFunctionCall %}
 functionName -> ("getEvent"|"getNpcHappiness"|"isShipFacingPlayer"|"distanceToPlayer") {% id %}
 functionName -> ("rotateTowardPlayer"|"decelerate"|"accelerate") {% id %}
 functionName -> ("createShip"|"triggerEvent"|"linkToDialog") {% id %}
 functionName -> "finish" {% id %}
-functionArg -> literal ",":* _ {% makeFunctionArg %}
-functionArg -> block ",":* _ {% makeFunctionArg %}
+
+functionArg -> "," _ (literal|block) _ {% makeFunctionArg %}
+functionArg -> "," _ (literal|block) _ ")" {% makeFunctionArg %}
+functionArg -> "(" _ (literal|block) _ {% makeFunctionArg %}
+functionArg -> "(" _ (literal|block) _ ")" {% makeFunctionArg %}
 
 condition -> "(" _ expression _ ")" {% makeCondition %}
 block -> "{" _ expression:* _ "}" {% makeBlock %}
@@ -18,8 +22,7 @@ literal -> (number|bool|string) {% passThrough %}
 string -> "'" char:* "'" {% makeString %}
 char -> [^\\'\n] {% id %}
 bool -> ("true"|"false") {% makeBool %}
-number -> [0-9]:+ {% makeNumber %}
-number -> "-" [0-9]:+ {% makeNumber %}
+number -> "-":? [0-9]:+ {% makeNumber %}
 comparator -> ("="|"<"|">"|">="|"<=") {% makeObjectMaker('comparator') %}
 
 osemi -> semi:?
@@ -63,22 +66,23 @@ function makeBlock(value) {
 }
 
 function makeFunctionCall(value) {
-	value = value.filter(x => !['(',')'].includes(x));
 	return {
 		type: 'functionCall',
 		functionName: value[0][0],
-		args: value[1],
+		args: value[1] === '()' ? [] : value[1],
 	};
 }
 
-function makeFunctionArg([value]) {
-	return value;
+function makeFunctionArg(value) {
+	return value.filter(x => x).filter(x => !['(',')',','].includes(x))[0][0];
 }
 
-function makeNumber([value]) {
+function makeNumber(value) {
+	const sign = value[0] === '-' ? '-' : '';
+	const number = value[1].join('');
 	return {
 		type: 'number',
-		value: value.join(''),
+		value: sign + number,
 	};
 }
 
