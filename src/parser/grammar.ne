@@ -1,7 +1,9 @@
-expression -> literal osemi {% makeExpression %}
-expression -> expression __ comparator __ expression osemi {% makeComparison %}
-expression -> functionCall osemi {% makeExpression %}
-expression -> "if" _ condition _ block osemi {% makeIfStatement %}
+statement -> expression semi {% makeStatement %}
+
+expression -> literal {% makeExpression %}
+expression -> expression __ comparator __ expression {% makeComparison %}
+expression -> functionCall {% makeExpression %}
+expression -> "if" _ condition _ block {% makeIfStatement %}
 
 functionCall -> functionName "()" {% makeFunctionCall %}
 functionCall -> functionName functionArg:+ {% makeFunctionCall %}
@@ -16,7 +18,8 @@ functionArg -> "(" _ (literal|block) _ {% makeFunctionArg %}
 functionArg -> "(" _ (literal|block) _ ")" {% makeFunctionArg %}
 
 condition -> "(" _ expression _ ")" {% makeCondition %}
-block -> "{" _ expression:* _ "}" {% makeBlock %}
+block -> "{" statement:* "}" {% makeBlock %}
+block -> "{" __ statement:* "}" {% makeBlock %} # Note that a statement ends with a semi which can have trailing whitespace
 
 literal -> (number|bool|string) {% passThrough %}
 string -> "'" char:* "'" {% makeString %}
@@ -25,7 +28,6 @@ bool -> ("true"|"false") {% makeBool %}
 number -> "-":? [0-9]:+ {% makeNumber %}
 comparator -> ("="|"<"|">"|">="|"<=") {% makeObjectMaker('comparator') %}
 
-osemi -> semi:?
 semi -> ";" _
 
 _ -> __:* {% nothing %}
@@ -90,6 +92,10 @@ function makeObjectMaker(type) {
 	return function([value]) {
 		return makeObject(type, value);
 	}
+}
+
+function makeStatement([value]) {
+	return value;
 }
 
 function makeExpression([value]) {
