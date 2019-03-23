@@ -4,7 +4,10 @@ expression -> functionCall osemi {% makeExpression %}
 expression -> "if" _ condition _ block osemi {% makeIfStatement %}
 
 functionCall -> functionName "(" functionArg:* ")" {% makeFunctionCall %}
-functionName -> ("getEvent"|"getNpcHappiness") {% id %}
+functionName -> ("getEvent"|"getNpcHappiness"|"isShipFacingPlayer"|"distanceToPlayer") {% id %}
+functionName -> ("rotateTowardPlayer"|"decelerate"|"accelerate") {% id %}
+functionName -> ("createShip"|"triggerEvent"|"linkToDialog") {% id %}
+functionName -> "finish" {% id %}
 functionArg -> literal ",":* _ {% makeFunctionArg %}
 functionArg -> block ",":* _ {% makeFunctionArg %}
 
