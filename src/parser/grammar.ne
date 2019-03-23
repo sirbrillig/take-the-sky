@@ -3,7 +3,7 @@ expression -> functionCall {% makeExpression %}
 expression -> expression ws comparator ws expression {% makeComparison %}
 functionCall -> ("getEvent"|"getNpcHappiness") "(" functionArg:* ")" {% makeFunctionCall %}
 functionArg -> literal {% makeFunctionArg %}
-functionArg -> literal "," {% makeFunctionArg %}
+functionArg -> literal "," ws:* {% makeFunctionArg %}
 literal -> (number|bool|string) {% passThrough %}
 string -> "'" char:* "'" {% makeString %}
 char -> [^\\'\n] {% id %}
