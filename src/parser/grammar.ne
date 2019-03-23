@@ -75,7 +75,7 @@ function makeFunctionArg([value]) {
 	return value;
 }
 
-function makeNumber(value) {
+function makeNumber([value]) {
 	return {
 		type: 'number',
 		value: value.join(''),
