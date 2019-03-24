@@ -2,7 +2,6 @@
 
 import debugFactory from './debug';
 import { clampNumber } from './math';
-import { makeShipData } from './other-ships';
 
 const debug = debugFactory('sky:state');
 
@@ -87,8 +86,8 @@ function updateShipInArray(dataArray, shipData) {
 
 function otherShips(state = [], { type, payload }) {
 	switch (type) {
-		case 'EVENT_FIRST_LANDING':
-			return [...state, makeShipData('cruiser')];
+		case 'OTHER_SHIP_ADD':
+			return [...state, payload];
 		case 'CHANGE_OTHER_SHIP_DATA': {
 			return updateShipInArray(state, payload);
 		}

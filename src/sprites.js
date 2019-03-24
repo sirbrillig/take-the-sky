@@ -15,7 +15,7 @@ import {
 	getHealthAmount,
 	getShipDataForId,
 } from './selectors';
-import getDialogObjectForKey, { executeScript } from './dialog/index';
+import Dialog from './dialog/index';
 import { getOtherShipsToCreate, getShipSpriteForType } from './other-ships';
 import ShipAi from './ship-ai';
 import Vector from './vector';
@@ -430,7 +430,8 @@ function moveOtherShipForBehavior({
 		},
 		speed: shipData.speed,
 	});
-	shipData.behavior(ai);
+	const dialog = new Dialog({ getState, handleAction, ai });
+	dialog.executeStatements(shipData.behavior);
 }
 
 function moveSpritesForPlayerPosition(sprites, playerPosition) {
@@ -494,12 +495,13 @@ export function getSpriteMover(game) {
 
 		// render dialog
 		if (lastShownDialog !== getDialogKey() && isDialogVisible()) {
-			const currentDialogObject = getDialogObjectForKey(getDialogKey(), getState(), handleAction);
+			const dialog = new Dialog({ getState, handleAction });
+			const currentDialogObject = dialog.getDialogObjectForKey(getDialogKey());
 			if (currentDialogObject.action) {
 				handleAction(currentDialogObject.action);
 			}
 			if (currentDialogObject.script) {
-				executeScript(getState(), handleAction, currentDialogObject.script);
+				dialog.executeScript(currentDialogObject.script);
 			}
 			if (currentDialogObject.text) {
 				sprites.dialog.textArea.text = currentDialogObject.text;

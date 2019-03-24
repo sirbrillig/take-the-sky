@@ -38,6 +38,10 @@ export default class ShipAi {
 		this.changeSpeedCallback = changeSpeedCallback;
 	}
 
+	distanceToPlayer() {
+		return this.playerVector.sub(this.shipVector).magnitude();
+	}
+
 	isPlayerWithinAttackRange() {
 		const distance = this.playerVector.sub(this.shipVector).magnitude();
 		return distance < this.fireDistance;

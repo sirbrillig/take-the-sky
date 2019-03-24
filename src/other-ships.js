@@ -8,29 +8,13 @@ export function getOtherShipsToCreate(shipSprites, state) {
 	return getShips(state).filter(shipData => !existingShipIds.includes(shipData.shipId));
 }
 
-export function makeShipData(shipType) {
+export function makeShipData(shipType, shipId, behavior) {
 	switch (shipType) {
 		case 'cruiser':
 			return {
 				shipType,
-				shipId: makeUniqueId(),
-				behavior: ai => {
-					if (ai.isPlayerWithinAttackRange()) {
-						ai.rotateTowardPlayer();
-						ai.decelerate();
-						if (!ai.isEventComplete('firstCruiserEncounter')) {
-							ai.showDialog('firstCruiserEncounter');
-							ai.triggerEvent('firstCruiserEncounter');
-						}
-						return;
-					}
-					if (ai.isPlayerWithinApproachRange()) {
-						ai.rotateTowardPlayer();
-						if (ai.isShipFacingPlayer()) {
-							ai.accelerate();
-						}
-					}
-				},
+				shipId: shipId || makeUniqueId(),
+				behavior,
 				positionInSpace: { x: -250, y: -250 },
 				speed: { x: 0, y: 0 },
 			};

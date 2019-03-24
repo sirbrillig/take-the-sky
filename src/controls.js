@@ -2,7 +2,7 @@
 /* globals window */
 
 import getNextMode from './control-modes';
-import getDialogObjectForKey from './dialog/index';
+import Dialog from './dialog/index';
 
 export function setUpKeyboardControls(game, state, actions) {
 	const {
@@ -20,6 +20,7 @@ export function setUpKeyboardControls(game, state, actions) {
 		changeDialogSelection,
 		handleAction,
 	} = actions;
+	const dialog = new Dialog({ getState, handleAction });
 	const onKeyDown = event => {
 		switch (event.code) {
 			case 'ArrowUp':
@@ -32,8 +33,7 @@ export function setUpKeyboardControls(game, state, actions) {
 			case 'KeyS':
 				if (
 					isDialogVisible() &&
-					getDialogSelection() <
-						getDialogObjectForKey(getDialogKey(), getState(), handleAction).options.length - 1
+					getDialogSelection() < dialog.getDialogObjectForKey(getDialogKey()).options.length - 1
 				) {
 					changeDialogSelection(getDialogSelection() + 1);
 				}
@@ -41,7 +41,7 @@ export function setUpKeyboardControls(game, state, actions) {
 			case 'Space':
 			case 'Enter':
 				if (!event.repeat && isDialogVisible()) {
-					const dialogObject = getDialogObjectForKey(getDialogKey(), getState(), handleAction);
+					const dialogObject = dialog.getDialogObjectForKey(getDialogKey());
 					if (dialogObject.options[getDialogSelection()]) {
 						showDialog(dialogObject.options[getDialogSelection()].link || null);
 						changeDialogSelection(0);
