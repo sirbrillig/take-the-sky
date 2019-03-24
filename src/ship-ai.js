@@ -2,6 +2,9 @@
 
 import { adjustRotationForDirection, getAngleBetweenVectors, adjustSpeedForRotation } from './math';
 import { getEvent } from './selectors';
+import debugFactory from './debug';
+
+const debug = debugFactory('sky:ai');
 
 export default class ShipAi {
 	constructor({
@@ -18,18 +21,20 @@ export default class ShipAi {
 		fireDistance = 150,
 		maxDistance = 1000,
 		rotationRate = 0.03,
+		minRotationRate = 0.02,
 		accelerationRate = 0.05,
 		maxSpeed = 3.5,
 	}) {
 		this.game = game;
 		this.getState = getState;
-		this.showDialog = showDialog;
+		this.showDialog = showDialog; // showDialog is assigned in directly
 		this.handleAction = handleAction;
 		this.fireDistance = fireDistance;
 		this.maxDistance = maxDistance;
 		this.playerVector = playerVector;
 		this.shipVector = shipVector;
 		this.rotationRate = rotationRate;
+		this.minRotationRate = minRotationRate;
 		this.changeRotationCallback = changeRotationCallback;
 		this.rotation = rotation;
 		this.speed = speed;
@@ -57,8 +62,21 @@ export default class ShipAi {
 	}
 
 	rotateTowardPlayer() {
+		const radiansNeededToRotate = this.getRadiansNeededToRotateTowardPlayer();
+		const radiansToRotate =
+			Math.abs(radiansNeededToRotate) < this.rotationRate
+				? radiansNeededToRotate
+				: this.rotationRate;
+		debug('radians to player', radiansNeededToRotate, 'radians to rotate', radiansToRotate);
+		if (radiansToRotate < this.minRotationRate) {
+			return;
+		}
 		this.changeRotationCallback(
-			adjustRotationForDirection(this.rotation, this.getRotationDirection(), this.rotationRate)
+			adjustRotationForDirection(
+				this.rotation,
+				this.getRotationDirection(radiansNeededToRotate),
+				radiansToRotate
+			)
 		);
 	}
 
@@ -74,8 +92,9 @@ export default class ShipAi {
 			: radiansNeededToRotateCounterclockwise;
 	}
 
-	getRotationDirection() {
-		return this.getRadiansNeededToRotateTowardPlayer() < 0 ? 'clockwise' : 'counterclockwise';
+	// eslint-disable-next-line class-methods-use-this
+	getRotationDirection(radiansNeededToRotate) {
+		return radiansNeededToRotate < 0 ? 'clockwise' : 'counterclockwise';
 	}
 
 	decelerate() {

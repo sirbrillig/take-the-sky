@@ -70,41 +70,49 @@ export default class Dialog {
 				const type = this.executeExpression(expression.args[0], finishScript);
 				const name = this.executeExpression(expression.args[1], finishScript);
 				const behavior = expression.args[2].value;
+				debug('createShip', type, name, behavior);
 				const shipData = makeShipData(type, name, behavior);
 				this.handleAction({ type: 'OTHER_SHIP_ADD', payload: shipData });
 				return true;
 			}
 			case 'distanceToPlayer':
+				debug('distanceToPlayer');
 				if (!this.ai) {
 					throw new Error('Cannot use AI functions without AI');
 				}
 				return this.ai.distanceToPlayer();
 			case 'isShipFacingPlayer':
+				debug('isShipFacingPlayer');
 				if (!this.ai) {
 					throw new Error('Cannot use AI functions without AI');
 				}
 				return this.ai.isShipFacingPlayer();
 			case 'triggerEvent':
+				debug('triggerEvent');
 				if (!this.ai) {
 					throw new Error('Cannot use AI functions without AI');
 				}
 				return this.ai.triggerEvent(this.executeExpression(expression.args[0], finishScript));
 			case 'linkToDialog':
+				debug('linkToDialog');
 				if (!this.ai) {
 					throw new Error('Cannot use AI functions without AI');
 				}
 				return this.ai.showDialog(this.executeExpression(expression.args[0], finishScript));
 			case 'rotateTowardPlayer':
+				debug('rotateTowardPlayer');
 				if (!this.ai) {
 					throw new Error('Cannot use AI functions without AI');
 				}
 				return this.ai.rotateTowardPlayer();
 			case 'accelerate':
+				debug('accelerate');
 				if (!this.ai) {
 					throw new Error('Cannot use AI functions without AI');
 				}
 				return this.ai.accelerate();
 			case 'decelerate':
+				debug('decelerate');
 				if (!this.ai) {
 					throw new Error('Cannot use AI functions without AI');
 				}
