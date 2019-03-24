@@ -128,6 +128,8 @@ var grammar = {
     {"name": "functionName$subexpression$3", "symbols": ["functionName$subexpression$3$string$2"]},
     {"name": "functionName$subexpression$3$string$3", "symbols": [{"literal":"l"}, {"literal":"i"}, {"literal":"n"}, {"literal":"k"}, {"literal":"T"}, {"literal":"o"}, {"literal":"D"}, {"literal":"i"}, {"literal":"a"}, {"literal":"l"}, {"literal":"o"}, {"literal":"g"}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "functionName$subexpression$3", "symbols": ["functionName$subexpression$3$string$3"]},
+    {"name": "functionName$subexpression$3$string$4", "symbols": [{"literal":"c"}, {"literal":"h"}, {"literal":"a"}, {"literal":"n"}, {"literal":"g"}, {"literal":"e"}, {"literal":"N"}, {"literal":"p"}, {"literal":"c"}, {"literal":"H"}, {"literal":"a"}, {"literal":"p"}, {"literal":"p"}, {"literal":"i"}, {"literal":"n"}, {"literal":"e"}, {"literal":"s"}, {"literal":"s"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "functionName$subexpression$3", "symbols": ["functionName$subexpression$3$string$4"]},
     {"name": "functionName", "symbols": ["functionName$subexpression$3"], "postprocess": id},
     {"name": "functionName$string$1", "symbols": [{"literal":"f"}, {"literal":"i"}, {"literal":"n"}, {"literal":"i"}, {"literal":"s"}, {"literal":"h"}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "functionName", "symbols": ["functionName$string$1"]},

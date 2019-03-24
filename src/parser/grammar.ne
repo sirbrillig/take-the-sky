@@ -9,7 +9,7 @@ functionCall -> functionName "()" {% makeFunctionCall %}
 functionCall -> functionName functionArg:+ {% makeFunctionCall %}
 functionName -> ("getEvent"|"getNpcHappiness"|"isShipFacingPlayer"|"distanceToPlayer") {% id %}
 functionName -> ("rotateTowardPlayer"|"decelerate"|"accelerate") {% id %}
-functionName -> ("createShip"|"triggerEvent"|"linkToDialog") {% id %}
+functionName -> ("createShip"|"triggerEvent"|"linkToDialog"|"changeNpcHappiness") {% id %}
 functionName -> "finish"
 
 functionArg -> "," _ (literal|block) _ {% makeFunctionArg %}
