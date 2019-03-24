@@ -20,11 +20,17 @@ function makeIfStatement(value) {
 	};
 }
 
+function makeNot() {
+	return 'not';
+}
+
 function makeCondition(value) {
 	value = value.filter(x => x).filter(x => !['(',')'].includes(x));
+	const isInverted = value[0] === 'not';
 	return {
 		type: 'condition',
-		value: value[0],
+		isInverted,
+		value: isInverted ? value[1] : value[0],
 	};
 }
 
@@ -146,12 +152,15 @@ var grammar = {
     {"name": "functionArg$subexpression$4", "symbols": ["block"]},
     {"name": "functionArg", "symbols": [{"literal":"("}, "_", "functionArg$subexpression$4", "_", {"literal":")"}], "postprocess": makeFunctionArg},
     {"name": "condition", "symbols": [{"literal":"("}, "_", "expression", "_", {"literal":")"}], "postprocess": makeCondition},
+    {"name": "condition", "symbols": [{"literal":"("}, "_", "not", "expression", "_", {"literal":")"}], "postprocess": makeCondition},
     {"name": "block$ebnf$1", "symbols": []},
     {"name": "block$ebnf$1", "symbols": ["block$ebnf$1", "statement"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
     {"name": "block", "symbols": [{"literal":"{"}, "block$ebnf$1", {"literal":"}"}], "postprocess": makeBlock},
     {"name": "block$ebnf$2", "symbols": []},
     {"name": "block$ebnf$2", "symbols": ["block$ebnf$2", "statement"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
     {"name": "block", "symbols": [{"literal":"{"}, "__", "block$ebnf$2", {"literal":"}"}], "postprocess": makeBlock},
+    {"name": "not$string$1", "symbols": [{"literal":"n"}, {"literal":"o"}, {"literal":"t"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "not", "symbols": ["not$string$1", "_"], "postprocess": makeNot},
     {"name": "literal$subexpression$1", "symbols": ["number"]},
     {"name": "literal$subexpression$1", "symbols": ["bool"]},
     {"name": "literal$subexpression$1", "symbols": ["string"]},

@@ -18,9 +18,11 @@ functionArg -> "(" _ (literal|block) _ {% makeFunctionArg %}
 functionArg -> "(" _ (literal|block) _ ")" {% makeFunctionArg %}
 
 condition -> "(" _ expression _ ")" {% makeCondition %}
+condition -> "(" _ not expression _ ")" {% makeCondition %}
 block -> "{" statement:* "}" {% makeBlock %}
 block -> "{" __ statement:* "}" {% makeBlock %} # Note that a statement ends with a semi which can have trailing whitespace
 
+not -> "not" _ {% makeNot %}
 literal -> (number|bool|string) {% passThrough %}
 string -> "'" char:* "'" {% makeString %}
 char -> [^\\'\n] {% id %}
@@ -51,11 +53,17 @@ function makeIfStatement(value) {
 	};
 }
 
+function makeNot() {
+	return 'not';
+}
+
 function makeCondition(value) {
 	value = value.filter(x => x).filter(x => !['(',')'].includes(x));
+	const isInverted = value[0] === 'not';
 	return {
 		type: 'condition',
-		value: value[0],
+		isInverted,
+		value: isInverted ? value[1] : value[0],
 	};
 }
 
