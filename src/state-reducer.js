@@ -84,9 +84,18 @@ function updateShipInArray(dataArray, shipData) {
 	return [...dataArrayWithDataRemoved, { ...matchingShipData, ...shipData }];
 }
 
+function throwIfOtherShipExists(ships, newShip) {
+	ships.forEach(ship => {
+		if (ship.shipId === newShip.shipId) {
+			throw new Error(`Ship with id "${newShip.shipId}" already exists."`);
+		}
+	});
+}
+
 function otherShips(state = [], { type, payload }) {
 	switch (type) {
 		case 'OTHER_SHIP_ADD':
+			throwIfOtherShipExists(state, payload);
 			return [...state, payload];
 		case 'CHANGE_OTHER_SHIP_DATA': {
 			return updateShipInArray(state, payload);
