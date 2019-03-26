@@ -5,25 +5,23 @@ expression -> literal {% makeExpression %}
 expression -> expression __ comparator __ expression {% makeComparison %}
 expression -> functionCall {% makeExpression %}
 
-functionCall -> functionName "()" {% makeFunctionCall %}
-functionCall -> functionName functionArg:+ {% makeFunctionCall %}
-functionName -> ("getEvent"|"getNpcHappiness"|"isShipFacingPlayer"|"distanceToPlayer") {% id %}
-functionName -> ("rotateTowardPlayer"|"decelerate"|"accelerate") {% id %}
-functionName -> ("createShip"|"triggerEvent"|"linkToDialog"|"changeNpcHappiness") {% id %}
-functionName -> "finish"
+functionCall -> char:+ "()" {% makeFunctionCall %}
+functionCall -> char:+ "(" functionArg ")" {% makeFunctionCall %}
 
-functionArg -> "," _ (functionCall|literal|block) _ {% makeFunctionArg %}
-functionArg -> "," _ (functionCall|literal|block) _ ")" {% makeFunctionArg %}
-functionArg -> "(" _ (functionCall|literal|block) _ {% makeFunctionArg %}
-functionArg -> "(" _ (functionCall|literal|block) _ ")" {% makeFunctionArg %}
+functionArg -> functionArg "," _ functionArgElement {% appendItem(0, 3) %}
+functionArg -> functionArgElement
+functionArgElement -> functionCall {% id %}
+functionArgElement -> literal {% id %}
+functionArgElement -> block {% id %}
 
 condition -> expression "," {% makeCondition %}
 condition -> not expression "," {% makeCondition %}
+
 block -> "{" statement:* "}" {% makeBlock %}
 block -> "{" __ statement:* "}" {% makeBlock %} # Note that a statement ends with a semi which can have trailing whitespace
 
 not -> "not" _ {% makeNot %}
-literal -> (number|bool|string) {% passThrough %}
+literal -> (number|bool|string) {% makeLiteral %}
 string -> "'" char:* "'" {% makeString %}
 char -> [^\\'\n] {% id %}
 bool -> ("true"|"false") {% makeBool %}
@@ -36,11 +34,20 @@ _ -> __:* {% nothing %}
 __ -> [\s] {% nothing %}
 
 @{%
+function filterChars(value, exclude) {
+	exclude = exclude || ['(', ')', ','];
+	return value.filter(x => x).filter(x => !exclude.includes(x));
+}
+
+function appendItem(lastItemIndex, newItemIndex) {
+	return items => items[lastItemIndex].concat([items[newItemIndex]]);
+}
+
 function makeObject(type, [value]) {
 	return { type, value };
 }
 
-function passThrough([[value]]) {
+function makeLiteral([[value]]) {
 	return value;
 }
 
@@ -76,15 +83,13 @@ function makeBlock(value) {
 }
 
 function makeFunctionCall(value) {
+	value = filterChars(value);
+	const args = value.slice(1)[0];
 	return {
 		type: 'functionCall',
-		functionName: value[0][0],
-		args: value[1] === '()' ? [] : value[1],
+		functionName: value[0].join(''),
+		args: args === "()" ? [] : args,
 	};
-}
-
-function makeFunctionArg(value) {
-	return value.filter(x => x).filter(x => !['(',')',','].includes(x))[0][0];
 }
 
 function makeNumber(value) {
@@ -126,6 +131,10 @@ function makeBool([value]) {
 
 function makeString(value) {
 	return makeObject('string', [value[1].join('')]);
+}
+
+function makeSymbol(value) {
+	return makeObject('synmbol', [value[0].join('')]);
 }
 
 function nothing() {

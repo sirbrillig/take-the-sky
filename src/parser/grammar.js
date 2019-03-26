@@ -3,11 +3,20 @@
 (function () {
 function id(x) { return x[0]; }
 
+function filterChars(value, exclude) {
+	exclude = exclude || ['(', ')', ','];
+	return value.filter(x => x).filter(x => !exclude.includes(x));
+}
+
+function appendItem(lastItemIndex, newItemIndex) {
+	return items => items[lastItemIndex].concat([items[newItemIndex]]);
+}
+
 function makeObject(type, [value]) {
 	return { type, value };
 }
 
-function passThrough([[value]]) {
+function makeLiteral([[value]]) {
 	return value;
 }
 
@@ -43,15 +52,13 @@ function makeBlock(value) {
 }
 
 function makeFunctionCall(value) {
+	value = filterChars(value);
+	const args = value.slice(1)[0];
 	return {
 		type: 'functionCall',
-		functionName: value[0][0],
-		args: value[1] === '()' ? [] : value[1],
+		functionName: value[0].join(''),
+		args: args === "()" ? [] : args,
 	};
-}
-
-function makeFunctionArg(value) {
-	return value.filter(x => x).filter(x => !['(',')',','].includes(x))[0][0];
 }
 
 function makeNumber(value) {
@@ -95,6 +102,10 @@ function makeString(value) {
 	return makeObject('string', [value[1].join('')]);
 }
 
+function makeSymbol(value) {
+	return makeObject('synmbol', [value[0].join('')]);
+}
+
 function nothing() {
 	return null;
 }
@@ -107,54 +118,18 @@ var grammar = {
     {"name": "expression", "symbols": ["literal"], "postprocess": makeExpression},
     {"name": "expression", "symbols": ["expression", "__", "comparator", "__", "expression"], "postprocess": makeComparison},
     {"name": "expression", "symbols": ["functionCall"], "postprocess": makeExpression},
+    {"name": "functionCall$ebnf$1", "symbols": ["char"]},
+    {"name": "functionCall$ebnf$1", "symbols": ["functionCall$ebnf$1", "char"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
     {"name": "functionCall$string$1", "symbols": [{"literal":"("}, {"literal":")"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "functionCall", "symbols": ["functionName", "functionCall$string$1"], "postprocess": makeFunctionCall},
-    {"name": "functionCall$ebnf$1", "symbols": ["functionArg"]},
-    {"name": "functionCall$ebnf$1", "symbols": ["functionCall$ebnf$1", "functionArg"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
-    {"name": "functionCall", "symbols": ["functionName", "functionCall$ebnf$1"], "postprocess": makeFunctionCall},
-    {"name": "functionName$subexpression$1$string$1", "symbols": [{"literal":"g"}, {"literal":"e"}, {"literal":"t"}, {"literal":"E"}, {"literal":"v"}, {"literal":"e"}, {"literal":"n"}, {"literal":"t"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "functionName$subexpression$1", "symbols": ["functionName$subexpression$1$string$1"]},
-    {"name": "functionName$subexpression$1$string$2", "symbols": [{"literal":"g"}, {"literal":"e"}, {"literal":"t"}, {"literal":"N"}, {"literal":"p"}, {"literal":"c"}, {"literal":"H"}, {"literal":"a"}, {"literal":"p"}, {"literal":"p"}, {"literal":"i"}, {"literal":"n"}, {"literal":"e"}, {"literal":"s"}, {"literal":"s"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "functionName$subexpression$1", "symbols": ["functionName$subexpression$1$string$2"]},
-    {"name": "functionName$subexpression$1$string$3", "symbols": [{"literal":"i"}, {"literal":"s"}, {"literal":"S"}, {"literal":"h"}, {"literal":"i"}, {"literal":"p"}, {"literal":"F"}, {"literal":"a"}, {"literal":"c"}, {"literal":"i"}, {"literal":"n"}, {"literal":"g"}, {"literal":"P"}, {"literal":"l"}, {"literal":"a"}, {"literal":"y"}, {"literal":"e"}, {"literal":"r"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "functionName$subexpression$1", "symbols": ["functionName$subexpression$1$string$3"]},
-    {"name": "functionName$subexpression$1$string$4", "symbols": [{"literal":"d"}, {"literal":"i"}, {"literal":"s"}, {"literal":"t"}, {"literal":"a"}, {"literal":"n"}, {"literal":"c"}, {"literal":"e"}, {"literal":"T"}, {"literal":"o"}, {"literal":"P"}, {"literal":"l"}, {"literal":"a"}, {"literal":"y"}, {"literal":"e"}, {"literal":"r"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "functionName$subexpression$1", "symbols": ["functionName$subexpression$1$string$4"]},
-    {"name": "functionName", "symbols": ["functionName$subexpression$1"], "postprocess": id},
-    {"name": "functionName$subexpression$2$string$1", "symbols": [{"literal":"r"}, {"literal":"o"}, {"literal":"t"}, {"literal":"a"}, {"literal":"t"}, {"literal":"e"}, {"literal":"T"}, {"literal":"o"}, {"literal":"w"}, {"literal":"a"}, {"literal":"r"}, {"literal":"d"}, {"literal":"P"}, {"literal":"l"}, {"literal":"a"}, {"literal":"y"}, {"literal":"e"}, {"literal":"r"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "functionName$subexpression$2", "symbols": ["functionName$subexpression$2$string$1"]},
-    {"name": "functionName$subexpression$2$string$2", "symbols": [{"literal":"d"}, {"literal":"e"}, {"literal":"c"}, {"literal":"e"}, {"literal":"l"}, {"literal":"e"}, {"literal":"r"}, {"literal":"a"}, {"literal":"t"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "functionName$subexpression$2", "symbols": ["functionName$subexpression$2$string$2"]},
-    {"name": "functionName$subexpression$2$string$3", "symbols": [{"literal":"a"}, {"literal":"c"}, {"literal":"c"}, {"literal":"e"}, {"literal":"l"}, {"literal":"e"}, {"literal":"r"}, {"literal":"a"}, {"literal":"t"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "functionName$subexpression$2", "symbols": ["functionName$subexpression$2$string$3"]},
-    {"name": "functionName", "symbols": ["functionName$subexpression$2"], "postprocess": id},
-    {"name": "functionName$subexpression$3$string$1", "symbols": [{"literal":"c"}, {"literal":"r"}, {"literal":"e"}, {"literal":"a"}, {"literal":"t"}, {"literal":"e"}, {"literal":"S"}, {"literal":"h"}, {"literal":"i"}, {"literal":"p"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "functionName$subexpression$3", "symbols": ["functionName$subexpression$3$string$1"]},
-    {"name": "functionName$subexpression$3$string$2", "symbols": [{"literal":"t"}, {"literal":"r"}, {"literal":"i"}, {"literal":"g"}, {"literal":"g"}, {"literal":"e"}, {"literal":"r"}, {"literal":"E"}, {"literal":"v"}, {"literal":"e"}, {"literal":"n"}, {"literal":"t"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "functionName$subexpression$3", "symbols": ["functionName$subexpression$3$string$2"]},
-    {"name": "functionName$subexpression$3$string$3", "symbols": [{"literal":"l"}, {"literal":"i"}, {"literal":"n"}, {"literal":"k"}, {"literal":"T"}, {"literal":"o"}, {"literal":"D"}, {"literal":"i"}, {"literal":"a"}, {"literal":"l"}, {"literal":"o"}, {"literal":"g"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "functionName$subexpression$3", "symbols": ["functionName$subexpression$3$string$3"]},
-    {"name": "functionName$subexpression$3$string$4", "symbols": [{"literal":"c"}, {"literal":"h"}, {"literal":"a"}, {"literal":"n"}, {"literal":"g"}, {"literal":"e"}, {"literal":"N"}, {"literal":"p"}, {"literal":"c"}, {"literal":"H"}, {"literal":"a"}, {"literal":"p"}, {"literal":"p"}, {"literal":"i"}, {"literal":"n"}, {"literal":"e"}, {"literal":"s"}, {"literal":"s"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "functionName$subexpression$3", "symbols": ["functionName$subexpression$3$string$4"]},
-    {"name": "functionName", "symbols": ["functionName$subexpression$3"], "postprocess": id},
-    {"name": "functionName$string$1", "symbols": [{"literal":"f"}, {"literal":"i"}, {"literal":"n"}, {"literal":"i"}, {"literal":"s"}, {"literal":"h"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "functionName", "symbols": ["functionName$string$1"]},
-    {"name": "functionArg$subexpression$1", "symbols": ["functionCall"]},
-    {"name": "functionArg$subexpression$1", "symbols": ["literal"]},
-    {"name": "functionArg$subexpression$1", "symbols": ["block"]},
-    {"name": "functionArg", "symbols": [{"literal":","}, "_", "functionArg$subexpression$1", "_"], "postprocess": makeFunctionArg},
-    {"name": "functionArg$subexpression$2", "symbols": ["functionCall"]},
-    {"name": "functionArg$subexpression$2", "symbols": ["literal"]},
-    {"name": "functionArg$subexpression$2", "symbols": ["block"]},
-    {"name": "functionArg", "symbols": [{"literal":","}, "_", "functionArg$subexpression$2", "_", {"literal":")"}], "postprocess": makeFunctionArg},
-    {"name": "functionArg$subexpression$3", "symbols": ["functionCall"]},
-    {"name": "functionArg$subexpression$3", "symbols": ["literal"]},
-    {"name": "functionArg$subexpression$3", "symbols": ["block"]},
-    {"name": "functionArg", "symbols": [{"literal":"("}, "_", "functionArg$subexpression$3", "_"], "postprocess": makeFunctionArg},
-    {"name": "functionArg$subexpression$4", "symbols": ["functionCall"]},
-    {"name": "functionArg$subexpression$4", "symbols": ["literal"]},
-    {"name": "functionArg$subexpression$4", "symbols": ["block"]},
-    {"name": "functionArg", "symbols": [{"literal":"("}, "_", "functionArg$subexpression$4", "_", {"literal":")"}], "postprocess": makeFunctionArg},
+    {"name": "functionCall", "symbols": ["functionCall$ebnf$1", "functionCall$string$1"], "postprocess": makeFunctionCall},
+    {"name": "functionCall$ebnf$2", "symbols": ["char"]},
+    {"name": "functionCall$ebnf$2", "symbols": ["functionCall$ebnf$2", "char"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
+    {"name": "functionCall", "symbols": ["functionCall$ebnf$2", {"literal":"("}, "functionArg", {"literal":")"}], "postprocess": makeFunctionCall},
+    {"name": "functionArg", "symbols": ["functionArg", {"literal":","}, "_", "functionArgElement"], "postprocess": appendItem(0, 3)},
+    {"name": "functionArg", "symbols": ["functionArgElement"]},
+    {"name": "functionArgElement", "symbols": ["functionCall"], "postprocess": id},
+    {"name": "functionArgElement", "symbols": ["literal"], "postprocess": id},
+    {"name": "functionArgElement", "symbols": ["block"], "postprocess": id},
     {"name": "condition", "symbols": ["expression", {"literal":","}], "postprocess": makeCondition},
     {"name": "condition", "symbols": ["not", "expression", {"literal":","}], "postprocess": makeCondition},
     {"name": "block$ebnf$1", "symbols": []},
@@ -168,7 +143,7 @@ var grammar = {
     {"name": "literal$subexpression$1", "symbols": ["number"]},
     {"name": "literal$subexpression$1", "symbols": ["bool"]},
     {"name": "literal$subexpression$1", "symbols": ["string"]},
-    {"name": "literal", "symbols": ["literal$subexpression$1"], "postprocess": passThrough},
+    {"name": "literal", "symbols": ["literal$subexpression$1"], "postprocess": makeLiteral},
     {"name": "string$ebnf$1", "symbols": []},
     {"name": "string$ebnf$1", "symbols": ["string$ebnf$1", "char"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
     {"name": "string", "symbols": [{"literal":"'"}, "string$ebnf$1", {"literal":"'"}], "postprocess": makeString},
