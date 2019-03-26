@@ -41,6 +41,19 @@ export default class Dialog {
 
 	executeFunctionCall(expression, finishScript) {
 		switch (expression.functionName) {
+			case 'not':
+				debug('handling not function');
+				return !this.executeCondition(expression.args[0], finishScript);
+			case 'if':
+				debug('handling if function');
+				if (this.executeCondition(expression.args[0], finishScript)) {
+					debug('if statement is true');
+					// we call finishScript here to call it on the results of the new statements in the block
+					finishScript(this.executeStatements(expression.args[1].value));
+					return true;
+				}
+				debug('if statement is false');
+				return false;
 			case 'getEvent': {
 				const arg = this.executeExpression(expression.args[0], finishScript);
 				debug('getEvent', arg);
@@ -160,26 +173,6 @@ export default class Dialog {
 		};
 		statements.forEach(statement => {
 			switch (statement.type) {
-				case 'if':
-					debug('handling if statement');
-					if (
-						statement.condition.isInverted &&
-						!this.executeCondition(statement.condition.value, finishScript)
-					) {
-						debug('if statement is true (inverted)');
-						finishScript(this.executeStatements(statement.block.value));
-						break;
-					}
-					if (
-						!statement.condition.isInverted &&
-						this.executeCondition(statement.condition.value, finishScript)
-					) {
-						debug('if statement is true');
-						finishScript(this.executeStatements(statement.block.value));
-						break;
-					}
-					debug('if statement is false');
-					break;
 				case 'functionCall':
 					this.executeFunctionCall(statement, finishScript);
 					break;
