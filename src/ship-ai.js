@@ -1,7 +1,7 @@
 /* @format */
 
 import { adjustRotationForDirection, getAngleBetweenVectors, adjustSpeedForRotation } from './math';
-import { getEvent, getShipDataForId } from './selectors';
+import { getEvent, getShipDataForId, getMovingObjectForId } from './selectors';
 import { createBolt } from './other-ships';
 import debugFactory from './debug';
 
@@ -14,13 +14,14 @@ export default class ShipAi {
 		showDialog,
 		handleAction,
 		shipId,
+		movingObjectId,
 		playerVector,
 		shipVector,
 		changeRotationCallback,
 		rotation,
 		speed,
 		changeSpeedCallback,
-		minFireMs = 2000,
+		minFireMs = 1200,
 		fireDistance = 150,
 		maxDistance = 1000,
 		rotationRate = 0.03,
@@ -31,6 +32,7 @@ export default class ShipAi {
 		this.game = game;
 		this.getState = getState;
 		this.shipId = shipId;
+		this.movingObjectId = movingObjectId;
 		this.showDialog = showDialog; // showDialog is assigned in directly
 		this.handleAction = handleAction;
 		this.fireDistance = fireDistance;
@@ -137,6 +139,25 @@ export default class ShipAi {
 		return timeSinceFire < this.minFireMs;
 	}
 
+	getAgeInMs() {
+		const shipData = getMovingObjectForId(this.getState(), this.movingObjectId);
+		if (!shipData) {
+			throw new Error(`Could not find ship id ${this.shipId} when getting creation date`);
+		}
+		return shipData.createdAt;
+	}
+
+	destroy() {
+		debug('destroying object');
+		const shipData = getMovingObjectForId(this.getState(), this.movingObjectId);
+		this.handleAction({
+			type: 'MOVING_OBJECT_DESTROY',
+			payload: shipData,
+		});
+		// TODO: also destroy sprite and remove sprite from sprite array, probably in moveSprites
+		// We might actually have to remove it from the state there too, to avoid causing chaos if the script is still running and tries to update a non-existent object
+	}
+
 	fire() {
 		if (this.hasFiredRecently()) {
 			debug('fire canceled; has fired recently');
@@ -150,6 +171,38 @@ export default class ShipAi {
 		this.handleAction({ type: 'CHANGE_OTHER_SHIP_DATA', payload });
 		debug(`firing at ${payload.lastFireTime}`);
 		const behavior = [
+			{
+				type: 'functionCall',
+				functionName: 'if',
+				args: [
+					{
+						type: 'comparison',
+						leftSide: {
+							type: 'functionCall',
+							functionName: 'getAgeInMs',
+							args: [],
+						},
+						rightSide: {
+							type: 'number',
+							value: 2000,
+						},
+						comparator: {
+							type: 'comparator',
+							value: '>',
+						},
+					},
+					{
+						type: 'block',
+						value: [
+							{
+								type: 'functionCall',
+								functionName: 'destroy',
+								args: [],
+							},
+						],
+					},
+				],
+			},
 			{
 				type: 'functionCall',
 				functionName: 'accelerate',

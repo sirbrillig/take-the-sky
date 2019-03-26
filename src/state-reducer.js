@@ -84,6 +84,19 @@ function updateObjectInArray(dataArray, objData, idProperty) {
 	return [...dataArrayWithDataRemoved, { ...matchingData, ...objData }];
 }
 
+function removeObjectFromArray(dataArray, objData, idProperty) {
+	const matchingData = dataArray.find(other => other[idProperty] === objData[idProperty]);
+	if (!matchingData) {
+		throw new Error(
+			`Object data not found when trying to remove data for ${idProperty} "${objData[idProperty]}"`
+		);
+	}
+	const dataArrayWithDataRemoved = dataArray.filter(
+		other => other[idProperty] !== objData[idProperty]
+	);
+	return dataArrayWithDataRemoved;
+}
+
 function throwIfNotUnique(objects, newObject, idProperty) {
 	objects.forEach(obj => {
 		if (obj[idProperty] === newObject[idProperty]) {
@@ -96,7 +109,7 @@ function otherShips(state = [], { type, payload }) {
 	switch (type) {
 		case 'OTHER_SHIP_ADD':
 			throwIfNotUnique(state, payload, 'shipId');
-			return [...state, payload];
+			return [...state, { ...payload, createdAt: Date.now() }];
 		case 'CHANGE_OTHER_SHIP_DATA':
 			return updateObjectInArray(state, payload, 'shipId');
 		default:
@@ -108,9 +121,11 @@ function movingObjects(state = [], { type, payload }) {
 	switch (type) {
 		case 'MOVING_OBJECT_CREATE':
 			throwIfNotUnique(state, payload, 'movingObjectId');
-			return [...state, payload];
+			return [...state, { ...payload, createdAt: Date.now() }];
 		case 'MOVING_OBJECT_UPDATE':
 			return updateObjectInArray(state, payload, 'movingObjectId');
+		case 'MOVING_OBJECT_DESTROY':
+			return removeObjectFromArray(state, payload, 'movingObjectId');
 		default:
 			return state;
 	}

@@ -100,6 +100,12 @@ export default class Dialog {
 					throw new Error('Cannot use AI functions without AI');
 				}
 				return this.ai.isShipFacingPlayer();
+			case 'getAgeInMs':
+				debug('getAgeInMs');
+				if (!this.ai) {
+					throw new Error('Cannot use AI functions without AI');
+				}
+				return this.ai.getAgeInMs();
 			case 'triggerEvent':
 				debug('triggerEvent');
 				if (!this.ai) {
@@ -112,6 +118,12 @@ export default class Dialog {
 					throw new Error('Cannot use AI functions without AI');
 				}
 				return this.ai.showDialog(this.executeExpression(expression.args[0], finishScript));
+			case 'destroy':
+				debug('destroy');
+				if (!this.ai) {
+					throw new Error('Cannot use AI functions without AI');
+				}
+				return this.ai.destroy();
 			case 'fire':
 				debug('fire');
 				if (!this.ai) {

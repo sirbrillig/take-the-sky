@@ -424,6 +424,7 @@ function moveObjectForBehavior({
 		getState,
 		showDialog,
 		handleAction,
+		movingObjectId: movingObjectData.movingObjectId,
 		playerVector: new Vector(playerSprite.x, playerSprite.y),
 		shipVector: new Vector(sprite.x, sprite.y),
 		rotation: movingObjectData.rotation,
@@ -431,6 +432,18 @@ function moveObjectForBehavior({
 		maxSpeed: movingObjectData.maxSpeed,
 		accelerationRate: movingObjectData.accelerationRate,
 		changeRotationCallback: radians => {
+			const currentMovingObjectData = getMovingObjectForId(
+				getState(),
+				movingObjectData.movingObjectId
+			);
+			const newObjData = {
+				...currentMovingObjectData,
+				rotation: radians,
+			};
+			handleAction({
+				type: 'MOVING_OBJECT_UPDATE',
+				payload: newObjData,
+			});
 			sprite.rotation = radians;
 		},
 		changeSpeedCallback: newSpeed => {
