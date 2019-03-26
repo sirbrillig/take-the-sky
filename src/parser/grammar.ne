@@ -17,8 +17,8 @@ functionArg -> "," _ (literal|block) _ ")" {% makeFunctionArg %}
 functionArg -> "(" _ (literal|block) _ {% makeFunctionArg %}
 functionArg -> "(" _ (literal|block) _ ")" {% makeFunctionArg %}
 
-condition -> "(" _ expression _ ")" {% makeCondition %}
-condition -> "(" _ not expression _ ")" {% makeCondition %}
+condition -> expression {% makeCondition %}
+condition -> not expression {% makeCondition %}
 block -> "{" statement:* "}" {% makeBlock %}
 block -> "{" __ statement:* "}" {% makeBlock %} # Note that a statement ends with a semi which can have trailing whitespace
 
@@ -58,7 +58,7 @@ function makeNot() {
 }
 
 function makeCondition(value) {
-	value = value.filter(x => x).filter(x => !['(',')'].includes(x));
+	value = value.filter(x => x);
 	const isInverted = value[0] === 'not';
 	return {
 		type: 'condition',

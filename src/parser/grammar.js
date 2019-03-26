@@ -25,7 +25,7 @@ function makeNot() {
 }
 
 function makeCondition(value) {
-	value = value.filter(x => x).filter(x => !['(',')'].includes(x));
+	value = value.filter(x => x);
 	const isInverted = value[0] === 'not';
 	return {
 		type: 'condition',
@@ -151,8 +151,8 @@ var grammar = {
     {"name": "functionArg$subexpression$4", "symbols": ["literal"]},
     {"name": "functionArg$subexpression$4", "symbols": ["block"]},
     {"name": "functionArg", "symbols": [{"literal":"("}, "_", "functionArg$subexpression$4", "_", {"literal":")"}], "postprocess": makeFunctionArg},
-    {"name": "condition", "symbols": [{"literal":"("}, "_", "expression", "_", {"literal":")"}], "postprocess": makeCondition},
-    {"name": "condition", "symbols": [{"literal":"("}, "_", "not", "expression", "_", {"literal":")"}], "postprocess": makeCondition},
+    {"name": "condition", "symbols": ["expression"], "postprocess": makeCondition},
+    {"name": "condition", "symbols": ["not", "expression"], "postprocess": makeCondition},
     {"name": "block$ebnf$1", "symbols": []},
     {"name": "block$ebnf$1", "symbols": ["block$ebnf$1", "statement"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
     {"name": "block", "symbols": [{"literal":"{"}, "block$ebnf$1", {"literal":"}"}], "postprocess": makeBlock},
