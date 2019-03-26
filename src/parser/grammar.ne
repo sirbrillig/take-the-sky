@@ -1,9 +1,9 @@
 statement -> expression semi {% makeStatement %}
+statement -> "if(" _ condition _ block _ ")" semi {% makeIfStatement %}
 
 expression -> literal {% makeExpression %}
 expression -> expression __ comparator __ expression {% makeComparison %}
 expression -> functionCall {% makeExpression %}
-expression -> "if" _ condition _ block {% makeIfStatement %}
 
 functionCall -> functionName "()" {% makeFunctionCall %}
 functionCall -> functionName functionArg:+ {% makeFunctionCall %}
@@ -12,13 +12,13 @@ functionName -> ("rotateTowardPlayer"|"decelerate"|"accelerate") {% id %}
 functionName -> ("createShip"|"triggerEvent"|"linkToDialog"|"changeNpcHappiness") {% id %}
 functionName -> "finish"
 
-functionArg -> "," _ (literal|block) _ {% makeFunctionArg %}
-functionArg -> "," _ (literal|block) _ ")" {% makeFunctionArg %}
-functionArg -> "(" _ (literal|block) _ {% makeFunctionArg %}
-functionArg -> "(" _ (literal|block) _ ")" {% makeFunctionArg %}
+functionArg -> "," _ (functionCall|literal|block) _ {% makeFunctionArg %}
+functionArg -> "," _ (functionCall|literal|block) _ ")" {% makeFunctionArg %}
+functionArg -> "(" _ (functionCall|literal|block) _ {% makeFunctionArg %}
+functionArg -> "(" _ (functionCall|literal|block) _ ")" {% makeFunctionArg %}
 
-condition -> expression {% makeCondition %}
-condition -> not expression {% makeCondition %}
+condition -> expression "," {% makeCondition %}
+condition -> not expression "," {% makeCondition %}
 block -> "{" statement:* "}" {% makeBlock %}
 block -> "{" __ statement:* "}" {% makeBlock %} # Note that a statement ends with a semi which can have trailing whitespace
 
@@ -30,7 +30,7 @@ bool -> ("true"|"false") {% makeBool %}
 number -> "-":? [0-9]:+ {% makeNumber %}
 comparator -> ("="|"<"|">"|">="|"<=") {% makeObjectMaker('comparator') %}
 
-semi -> ";" _
+semi -> ";" _ {% nothing %}
 
 _ -> __:* {% nothing %}
 __ -> [\s] {% nothing %}
@@ -45,7 +45,7 @@ function passThrough([[value]]) {
 }
 
 function makeIfStatement(value) {
-	value = value.filter(x => x);
+	value = value.filter(x => x).filter(x => !['(',')',','].includes(x));
 	return {
 		type: 'if',
 		condition: value[1],

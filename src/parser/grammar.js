@@ -12,7 +12,7 @@ function passThrough([[value]]) {
 }
 
 function makeIfStatement(value) {
-	value = value.filter(x => x);
+	value = value.filter(x => x).filter(x => !['(',')',','].includes(x));
 	return {
 		type: 'if',
 		condition: value[1],
@@ -102,11 +102,11 @@ var grammar = {
     Lexer: undefined,
     ParserRules: [
     {"name": "statement", "symbols": ["expression", "semi"], "postprocess": makeStatement},
+    {"name": "statement$string$1", "symbols": [{"literal":"i"}, {"literal":"f"}, {"literal":"("}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "statement", "symbols": ["statement$string$1", "_", "condition", "_", "block", "_", {"literal":")"}, "semi"], "postprocess": makeIfStatement},
     {"name": "expression", "symbols": ["literal"], "postprocess": makeExpression},
     {"name": "expression", "symbols": ["expression", "__", "comparator", "__", "expression"], "postprocess": makeComparison},
     {"name": "expression", "symbols": ["functionCall"], "postprocess": makeExpression},
-    {"name": "expression$string$1", "symbols": [{"literal":"i"}, {"literal":"f"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "expression", "symbols": ["expression$string$1", "_", "condition", "_", "block"], "postprocess": makeIfStatement},
     {"name": "functionCall$string$1", "symbols": [{"literal":"("}, {"literal":")"}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "functionCall", "symbols": ["functionName", "functionCall$string$1"], "postprocess": makeFunctionCall},
     {"name": "functionCall$ebnf$1", "symbols": ["functionArg"]},
@@ -139,20 +139,24 @@ var grammar = {
     {"name": "functionName", "symbols": ["functionName$subexpression$3"], "postprocess": id},
     {"name": "functionName$string$1", "symbols": [{"literal":"f"}, {"literal":"i"}, {"literal":"n"}, {"literal":"i"}, {"literal":"s"}, {"literal":"h"}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "functionName", "symbols": ["functionName$string$1"]},
+    {"name": "functionArg$subexpression$1", "symbols": ["functionCall"]},
     {"name": "functionArg$subexpression$1", "symbols": ["literal"]},
     {"name": "functionArg$subexpression$1", "symbols": ["block"]},
     {"name": "functionArg", "symbols": [{"literal":","}, "_", "functionArg$subexpression$1", "_"], "postprocess": makeFunctionArg},
+    {"name": "functionArg$subexpression$2", "symbols": ["functionCall"]},
     {"name": "functionArg$subexpression$2", "symbols": ["literal"]},
     {"name": "functionArg$subexpression$2", "symbols": ["block"]},
     {"name": "functionArg", "symbols": [{"literal":","}, "_", "functionArg$subexpression$2", "_", {"literal":")"}], "postprocess": makeFunctionArg},
+    {"name": "functionArg$subexpression$3", "symbols": ["functionCall"]},
     {"name": "functionArg$subexpression$3", "symbols": ["literal"]},
     {"name": "functionArg$subexpression$3", "symbols": ["block"]},
     {"name": "functionArg", "symbols": [{"literal":"("}, "_", "functionArg$subexpression$3", "_"], "postprocess": makeFunctionArg},
+    {"name": "functionArg$subexpression$4", "symbols": ["functionCall"]},
     {"name": "functionArg$subexpression$4", "symbols": ["literal"]},
     {"name": "functionArg$subexpression$4", "symbols": ["block"]},
     {"name": "functionArg", "symbols": [{"literal":"("}, "_", "functionArg$subexpression$4", "_", {"literal":")"}], "postprocess": makeFunctionArg},
-    {"name": "condition", "symbols": ["expression"], "postprocess": makeCondition},
-    {"name": "condition", "symbols": ["not", "expression"], "postprocess": makeCondition},
+    {"name": "condition", "symbols": ["expression", {"literal":","}], "postprocess": makeCondition},
+    {"name": "condition", "symbols": ["not", "expression", {"literal":","}], "postprocess": makeCondition},
     {"name": "block$ebnf$1", "symbols": []},
     {"name": "block$ebnf$1", "symbols": ["block$ebnf$1", "statement"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
     {"name": "block", "symbols": [{"literal":"{"}, "block$ebnf$1", {"literal":"}"}], "postprocess": makeBlock},
@@ -187,7 +191,7 @@ var grammar = {
     {"name": "comparator$subexpression$1$string$2", "symbols": [{"literal":"<"}, {"literal":"="}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "comparator$subexpression$1", "symbols": ["comparator$subexpression$1$string$2"]},
     {"name": "comparator", "symbols": ["comparator$subexpression$1"], "postprocess": makeObjectMaker('comparator')},
-    {"name": "semi", "symbols": [{"literal":";"}, "_"]},
+    {"name": "semi", "symbols": [{"literal":";"}, "_"], "postprocess": nothing},
     {"name": "_$ebnf$1", "symbols": []},
     {"name": "_$ebnf$1", "symbols": ["_$ebnf$1", "__"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
     {"name": "_", "symbols": ["_$ebnf$1"], "postprocess": nothing},

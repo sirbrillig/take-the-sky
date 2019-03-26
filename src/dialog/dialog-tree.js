@@ -15,21 +15,21 @@ export default function getDialogTree() {
 		firstLandingNotDone: {
 			variants: [
 				{
-					condition: "if getNpcHappiness('engineer') >= 0 { finish(true); };",
+					condition: "if(getNpcHappiness('engineer') >= 0, { finish(true); });",
 					text:
 						"Engineer: Captain, we came to this backwater planet because there's a job to be had. Let's not leave before we at least hear them out.",
 					action: { type: 'EVENT_FIRST_LANDING_NOT_DONE' },
 					options: [{ text: 'Continue' }],
 				},
 				{
-					condition: "if getNpcHappiness('engineer') = -1 { finish(true); };",
+					condition: "if(getNpcHappiness('engineer') = -1, { finish(true); });",
 					text:
 						"Engineer: Did you not hear me the first time, Cap? This was a long trip. Let's see what's on that moon.",
 					action: { type: 'EVENT_FIRST_LANDING_NOT_DONE' },
 					options: [{ text: 'Continue' }],
 				},
 				{
-					condition: "if getNpcHappiness('engineer') < -1 { finish(true); };",
+					condition: "if(getNpcHappiness('engineer') < -1, { finish(true); });",
 					text:
 						"Engineer: Oh come on, Captain! Go back to that moon and land there or this ship isn't going another inch.",
 					action: { type: 'EVENT_FIRST_LANDING_NOT_DONE' },
@@ -45,13 +45,13 @@ export default function getDialogTree() {
 		landingPlanetTwist: {
 			variants: [
 				{
-					condition: "if getEvent('firstLanding') = true { finish(true); };",
+					condition: "if(getEvent('firstLanding') = true, { finish(true); });",
 					text:
 						"Not much action any more in Twist's dingy space port. The traffic controller looks up, frowns at you, and returns to her work.",
 					options: [{ text: 'Depart' }],
 				},
 				{
-					condition: "if getEvent('firstLanding') = false { finish(true); };",
+					condition: "if(getEvent('firstLanding') = false, { finish(true); });",
 					text:
 						"In the dingy space port, you are approached by a young woman. She's very confident, but always looking over her shoulder. You don't see anyone other than a drunk and a traffic controller nearby, but on this tiny planet you wouldn't be surprised if someone meant this woman harm.",
 					options: [{ text: 'Continue', link: 'firstLanding2' }],
@@ -80,7 +80,7 @@ export default function getDialogTree() {
 			],
 			action: { type: 'EVENT_FIRST_LANDING' },
 			script:
-				"createShip('cruiser', 'firstCruiser', { if distanceToPlayer() < 150 { rotateTowardPlayer(); decelerate(); if not getEvent('firstCruiserEncounter') { triggerEvent('firstCruiserEncounter'); linkToDialog('firstCruiserEncounter'); }; }; if distanceToPlayer() >= 150 { rotateTowardPlayer(); if isShipFacingPlayer() { accelerate(); }; }; });",
+				"createShip('cruiser', 'firstCruiser', { if(distanceToPlayer() < 150, { rotateTowardPlayer(); decelerate(); if(not getEvent('firstCruiserEncounter'), { triggerEvent('firstCruiserEncounter'); linkToDialog('firstCruiserEncounter'); }); }); if(distanceToPlayer() >= 150, { rotateTowardPlayer(); if(isShipFacingPlayer(), { accelerate(); }); }); });",
 		},
 		firstLanding4: {
 			text:
