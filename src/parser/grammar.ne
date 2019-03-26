@@ -1,8 +1,6 @@
 statement -> expression semi {% makeStatement %}
-statement -> "if(" _ condition _ block _ ")" semi {% makeIfStatement %}
 
 expression -> literal {% makeExpression %}
-expression -> expression __ comparator __ expression {% makeComparison %}
 expression -> functionCall {% makeExpression %}
 
 functionCall -> bareWord "()" {% makeFunctionCall %}
@@ -10,17 +8,14 @@ functionCall -> bareWord "(" functionArg ")" {% makeFunctionCall %}
 
 functionArg -> functionArg "," _ functionArgElement {% appendItem(0, 3) %}
 functionArg -> functionArgElement
+functionArgElement -> functionArgElement __ comparator __ functionArgElement {% makeComparison %}
 functionArgElement -> functionCall {% id %}
 functionArgElement -> literal {% id %}
 functionArgElement -> block {% id %}
 
-condition -> expression "," {% makeCondition %}
-condition -> not expression "," {% makeCondition %}
-
 block -> "{" statement:* "}" {% makeBlock %}
 block -> "{" __ statement:* "}" {% makeBlock %} # Note that a statement ends with a semi which can have trailing whitespace
 
-not -> "not" _ {% makeNot %}
 literal -> (number|bool|string) {% makeLiteral %}
 bareWord -> bareChar:+ {% id %}
 string -> "'" char:* "'" {% makeString %}
@@ -59,20 +54,6 @@ function makeIfStatement(value) {
 		type: 'if',
 		condition: value[1],
 		block: value[2],
-	};
-}
-
-function makeNot() {
-	return 'not';
-}
-
-function makeCondition(value) {
-	value = value.filter(x => x);
-	const isInverted = value[0] === 'not';
-	return {
-		type: 'condition',
-		isInverted,
-		value: isInverted ? value[1] : value[0],
 	};
 }
 
@@ -136,7 +117,7 @@ function makeString(value) {
 }
 
 function makeSymbol(value) {
-	return makeObject('synmbol', [value[0].join('')]);
+	return makeObject('symbol', [value[0].join('')]);
 }
 
 function nothing() {

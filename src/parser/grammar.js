@@ -29,20 +29,6 @@ function makeIfStatement(value) {
 	};
 }
 
-function makeNot() {
-	return 'not';
-}
-
-function makeCondition(value) {
-	value = value.filter(x => x);
-	const isInverted = value[0] === 'not';
-	return {
-		type: 'condition',
-		isInverted,
-		value: isInverted ? value[1] : value[0],
-	};
-}
-
 function makeBlock(value) {
 	value = value.filter(x => x).filter(x => !['{','}'].includes(x));
 	return {
@@ -103,7 +89,7 @@ function makeString(value) {
 }
 
 function makeSymbol(value) {
-	return makeObject('synmbol', [value[0].join('')]);
+	return makeObject('symbol', [value[0].join('')]);
 }
 
 function nothing() {
@@ -113,29 +99,23 @@ var grammar = {
     Lexer: undefined,
     ParserRules: [
     {"name": "statement", "symbols": ["expression", "semi"], "postprocess": makeStatement},
-    {"name": "statement$string$1", "symbols": [{"literal":"i"}, {"literal":"f"}, {"literal":"("}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "statement", "symbols": ["statement$string$1", "_", "condition", "_", "block", "_", {"literal":")"}, "semi"], "postprocess": makeIfStatement},
     {"name": "expression", "symbols": ["literal"], "postprocess": makeExpression},
-    {"name": "expression", "symbols": ["expression", "__", "comparator", "__", "expression"], "postprocess": makeComparison},
     {"name": "expression", "symbols": ["functionCall"], "postprocess": makeExpression},
     {"name": "functionCall$string$1", "symbols": [{"literal":"("}, {"literal":")"}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "functionCall", "symbols": ["bareWord", "functionCall$string$1"], "postprocess": makeFunctionCall},
     {"name": "functionCall", "symbols": ["bareWord", {"literal":"("}, "functionArg", {"literal":")"}], "postprocess": makeFunctionCall},
     {"name": "functionArg", "symbols": ["functionArg", {"literal":","}, "_", "functionArgElement"], "postprocess": appendItem(0, 3)},
     {"name": "functionArg", "symbols": ["functionArgElement"]},
+    {"name": "functionArgElement", "symbols": ["functionArgElement", "__", "comparator", "__", "functionArgElement"], "postprocess": makeComparison},
     {"name": "functionArgElement", "symbols": ["functionCall"], "postprocess": id},
     {"name": "functionArgElement", "symbols": ["literal"], "postprocess": id},
     {"name": "functionArgElement", "symbols": ["block"], "postprocess": id},
-    {"name": "condition", "symbols": ["expression", {"literal":","}], "postprocess": makeCondition},
-    {"name": "condition", "symbols": ["not", "expression", {"literal":","}], "postprocess": makeCondition},
     {"name": "block$ebnf$1", "symbols": []},
     {"name": "block$ebnf$1", "symbols": ["block$ebnf$1", "statement"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
     {"name": "block", "symbols": [{"literal":"{"}, "block$ebnf$1", {"literal":"}"}], "postprocess": makeBlock},
     {"name": "block$ebnf$2", "symbols": []},
     {"name": "block$ebnf$2", "symbols": ["block$ebnf$2", "statement"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
     {"name": "block", "symbols": [{"literal":"{"}, "__", "block$ebnf$2", {"literal":"}"}], "postprocess": makeBlock},
-    {"name": "not$string$1", "symbols": [{"literal":"n"}, {"literal":"o"}, {"literal":"t"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "not", "symbols": ["not$string$1", "_"], "postprocess": makeNot},
     {"name": "literal$subexpression$1", "symbols": ["number"]},
     {"name": "literal$subexpression$1", "symbols": ["bool"]},
     {"name": "literal$subexpression$1", "symbols": ["string"]},
