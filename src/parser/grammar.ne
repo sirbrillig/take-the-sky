@@ -5,8 +5,8 @@ expression -> literal {% makeExpression %}
 expression -> expression __ comparator __ expression {% makeComparison %}
 expression -> functionCall {% makeExpression %}
 
-functionCall -> char:+ "()" {% makeFunctionCall %}
-functionCall -> char:+ "(" functionArg ")" {% makeFunctionCall %}
+functionCall -> bareWord "()" {% makeFunctionCall %}
+functionCall -> bareWord "(" functionArg ")" {% makeFunctionCall %}
 
 functionArg -> functionArg "," _ functionArgElement {% appendItem(0, 3) %}
 functionArg -> functionArgElement
@@ -22,7 +22,9 @@ block -> "{" __ statement:* "}" {% makeBlock %} # Note that a statement ends wit
 
 not -> "not" _ {% makeNot %}
 literal -> (number|bool|string) {% makeLiteral %}
+bareWord -> bareChar:+ {% id %}
 string -> "'" char:* "'" {% makeString %}
+bareChar -> [a-zA-Z] {% id %}
 char -> [^\\'\n] {% id %}
 bool -> ("true"|"false") {% makeBool %}
 number -> "-":? [0-9]:+ {% makeNumber %}
