@@ -1,6 +1,6 @@
 /* @format */
 
-import { adjustSpeedForRotation, clampNumber, clampRadians } from './math';
+import { adjustSpeedForRotation, clampNumber } from './math';
 import { getEvent, getPlayerPosition, getHealthAmount } from './selectors';
 import {
 	isShipTouchingStar,
@@ -68,7 +68,6 @@ export default function renderGame(game, sprites, state, actions, moveSprites) {
 
 	if (isShipTouchingStar(sprites) && !getEvent(getState(), 'starsAreHot')) {
 		changeSpeed({ x: 0, y: 0 });
-		sprites.player.rotation = clampRadians(sprites.player.rotation + Math.PI);
 		showDialog('starsAreHot');
 		return;
 	}
