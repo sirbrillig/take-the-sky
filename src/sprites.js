@@ -14,9 +14,15 @@ import {
 	getPlayerPosition,
 	getHealthAmount,
 	getShipDataForId,
+	getMovingObjectForId,
 } from './selectors';
 import Dialog from './dialog/index';
-import { getOtherShipsToCreate, getShipSpriteForType } from './other-ships';
+import {
+	getOtherShipsToCreate,
+	getShipSpriteForType,
+	getMovingObjectSpriteForType,
+	getMovingObjectsToCreate,
+} from './other-ships';
 import ShipAi from './ship-ai';
 import Vector from './vector';
 
@@ -85,6 +91,24 @@ export function createAndPlaceOtherShips(game, shipDataObjects, playerPosition) 
 		);
 		game.mainContainer.addChild(ship);
 		return ship;
+	});
+}
+
+export function createAndPlaceMovingObjects(game, objDataObjects, playerPosition) {
+	return objDataObjects.map(objData => {
+		const sprite = game.sprite(getMovingObjectSpriteForType(objData.type));
+		sprite.movingObjectId = objData.movingObjectId;
+		sprite.zIndex = 10;
+		sprite.rotation = objData.rotation;
+		sprite.pivot.set(0.5, 0.5);
+		sprite.anchor.set(0.5, 0.5);
+		sprite.positionInSpace = objData.positionInSpace;
+		setSpritePosition(
+			sprite,
+			getScreenPositionFromSpacePosition(objData.positionInSpace, playerPosition)
+		);
+		game.mainContainer.addChild(sprite);
+		return sprite;
 	});
 }
 
@@ -386,6 +410,59 @@ export function isShipTouchingGate({ gates, player }) {
 	return gates && gates.find(gate => doSpritesOverlap(player, gate));
 }
 
+function moveObjectForBehavior({
+	game,
+	getState,
+	showDialog,
+	sprite,
+	movingObjectData,
+	playerSprite,
+	handleAction,
+}) {
+	const ai = new ShipAi({
+		game,
+		getState,
+		showDialog,
+		handleAction,
+		playerVector: new Vector(playerSprite.x, playerSprite.y),
+		shipVector: new Vector(sprite.x, sprite.y),
+		rotation: movingObjectData.rotation,
+		speed: movingObjectData.speed,
+		maxSpeed: movingObjectData.maxSpeed,
+		accelerationRate: movingObjectData.accelerationRate,
+		changeRotationCallback: radians => {
+			sprite.rotation = radians;
+		},
+		changeSpeedCallback: newSpeed => {
+			const currentMovingObjectData = getMovingObjectForId(
+				getState(),
+				movingObjectData.movingObjectId
+			);
+			const newPosition = {
+				x: currentMovingObjectData.positionInSpace.x - newSpeed.x,
+				y: currentMovingObjectData.positionInSpace.y - newSpeed.y,
+			};
+			if (
+				areVectorsSame(newPosition, currentMovingObjectData.positionInSpace) &&
+				areVectorsSame(newSpeed, currentMovingObjectData.speed)
+			) {
+				return;
+			}
+			const newObjData = {
+				...currentMovingObjectData,
+				positionInSpace: newPosition,
+				speed: newSpeed,
+			};
+			handleAction({
+				type: 'MOVING_OBJECT_UPDATE',
+				payload: newObjData,
+			});
+		},
+	});
+	const dialog = new Dialog({ getState, handleAction, ai });
+	dialog.executeStatements(movingObjectData.behavior);
+}
+
 function moveOtherShipForBehavior({
 	game,
 	getState,
@@ -400,26 +477,29 @@ function moveOtherShipForBehavior({
 		getState,
 		showDialog,
 		handleAction,
+		shipId: shipData.shipId,
 		playerVector: new Vector(playerSprite.x, playerSprite.y),
 		shipVector: new Vector(shipSprite.x, shipSprite.y),
 		rotation: shipSprite.rotation,
+		speed: shipData.speed,
 		changeRotationCallback: radians => {
 			shipSprite.rotation = radians;
 		},
 		changeSpeedCallback: newSpeed => {
+			const currentShipData = getShipDataForId(getState(), shipData.shipId);
 			// move ship based on speed; we have to subtract because the ship is moving toward the player I guess
 			const newPosition = {
-				x: shipData.positionInSpace.x - newSpeed.x,
-				y: shipData.positionInSpace.y - newSpeed.y,
+				x: currentShipData.positionInSpace.x - newSpeed.x,
+				y: currentShipData.positionInSpace.y - newSpeed.y,
 			};
 			if (
-				areVectorsSame(newPosition, shipData.positionInSpace) &&
-				areVectorsSame(newSpeed, shipData.speed)
+				areVectorsSame(newPosition, currentShipData.positionInSpace) &&
+				areVectorsSame(newSpeed, currentShipData.speed)
 			) {
 				return;
 			}
 			const newShipData = {
-				...shipData,
+				...currentShipData,
 				positionInSpace: newPosition,
 				speed: newSpeed,
 			};
@@ -428,7 +508,6 @@ function moveOtherShipForBehavior({
 				payload: newShipData,
 			});
 		},
-		speed: shipData.speed,
 	});
 	const dialog = new Dialog({ getState, handleAction, ai });
 	dialog.executeStatements(shipData.behavior);
@@ -482,6 +561,11 @@ export function getSpriteMover(game) {
 			sprites.playerEngineOn.rotation = sprites.player.rotation;
 			sprites.playerEngineOn.visible = true;
 			sprites.playerEngineOn.play();
+		}
+		if (isDialogVisible()) {
+			sprites.player.visible = true;
+			sprites.playerEngineOn.visible = false;
+			sprites.playerEngineOn.stop();
 		}
 		if (!isDialogVisible() && getControlMode() === 'pilot' && !pressing.up) {
 			sprites.player.visible = true;
@@ -581,6 +665,39 @@ export function getSpriteMover(game) {
 				other.positionInSpace = shipData.positionInSpace;
 			});
 			moveSpritesForPlayerPosition(sprites.ships, playerPosition);
+		}
+
+		// render other moving objects
+		const movingObjectsToCreate = getMovingObjectsToCreate(
+			sprites.movingObjects,
+			getState(),
+			'movingObjectId'
+		);
+		if (movingObjectsToCreate.length) {
+			debug('creating moving objects', movingObjectsToCreate);
+			sprites.movingObjects = [
+				...sprites.movingObjects,
+				...createAndPlaceMovingObjects(game, movingObjectsToCreate, playerPosition),
+			];
+		}
+		if (!isDialogVisible()) {
+			sprites.movingObjects.forEach(other => {
+				const movingObjectData = getMovingObjectForId(getState(), other.movingObjectId);
+				if (!movingObjectData) {
+					throw new Error(`No data found when moving object id "${other.movingObjectId}"`);
+				}
+				moveObjectForBehavior({
+					game,
+					getState,
+					showDialog,
+					sprite: other,
+					movingObjectData,
+					playerSprite: sprites.player,
+					handleAction,
+				});
+				other.positionInSpace = movingObjectData.positionInSpace;
+			});
+			moveSpritesForPlayerPosition(sprites.movingObjects, playerPosition);
 		}
 
 		// render background

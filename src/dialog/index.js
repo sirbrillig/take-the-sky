@@ -112,6 +112,12 @@ export default class Dialog {
 					throw new Error('Cannot use AI functions without AI');
 				}
 				return this.ai.showDialog(this.executeExpression(expression.args[0], finishScript));
+			case 'fire':
+				debug('fire');
+				if (!this.ai) {
+					throw new Error('Cannot use AI functions without AI');
+				}
+				return this.ai.fire();
 			case 'rotateTowardPlayer':
 				debug('rotateTowardPlayer');
 				if (!this.ai) {

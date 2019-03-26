@@ -32,3 +32,11 @@ export function getShips(state) {
 export function getShipDataForId(state, id) {
 	return getShips(state).find(ship => ship.shipId === id);
 }
+
+export function getMovingObjects(state) {
+	return state.movingObjects;
+}
+
+export function getMovingObjectForId(state, id) {
+	return getMovingObjects(state).find(ship => ship.movingObjectId === id);
+}

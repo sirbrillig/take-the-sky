@@ -71,23 +71,23 @@ function shipHealth(state = 100, { type, payload }) {
 	}
 }
 
-function updateShipInArray(dataArray, shipData) {
-	const matchingShipData = dataArray.find(otherShip => otherShip.shipId === shipData.shipId);
-	if (!matchingShipData) {
+function updateObjectInArray(dataArray, objData, idProperty) {
+	const matchingData = dataArray.find(other => other[idProperty] === objData[idProperty]);
+	if (!matchingData) {
 		throw new Error(
-			`Ship data not found when trying to change ship data for id ${shipData.shipId}`
+			`Object data not found when trying to change data for ${idProperty} "${objData[idProperty]}"`
 		);
 	}
 	const dataArrayWithDataRemoved = dataArray.filter(
-		otherShip => otherShip.shipId !== shipData.shipId
+		other => other[idProperty] !== objData[idProperty]
 	);
-	return [...dataArrayWithDataRemoved, { ...matchingShipData, ...shipData }];
+	return [...dataArrayWithDataRemoved, { ...matchingData, ...objData }];
 }
 
-function throwIfOtherShipExists(ships, newShip) {
-	ships.forEach(ship => {
-		if (ship.shipId === newShip.shipId) {
-			throw new Error(`Ship with id "${newShip.shipId}" already exists."`);
+function throwIfNotUnique(objects, newObject, idProperty) {
+	objects.forEach(obj => {
+		if (obj[idProperty] === newObject[idProperty]) {
+			throw new Error(`Object with ${idProperty} "${newObject[idProperty]}" already exists."`);
 		}
 	});
 }
@@ -95,11 +95,22 @@ function throwIfOtherShipExists(ships, newShip) {
 function otherShips(state = [], { type, payload }) {
 	switch (type) {
 		case 'OTHER_SHIP_ADD':
-			throwIfOtherShipExists(state, payload);
+			throwIfNotUnique(state, payload, 'shipId');
 			return [...state, payload];
-		case 'CHANGE_OTHER_SHIP_DATA': {
-			return updateShipInArray(state, payload);
-		}
+		case 'CHANGE_OTHER_SHIP_DATA':
+			return updateObjectInArray(state, payload, 'shipId');
+		default:
+			return state;
+	}
+}
+
+function movingObjects(state = [], { type, payload }) {
+	switch (type) {
+		case 'MOVING_OBJECT_CREATE':
+			throwIfNotUnique(state, payload, 'movingObjectId');
+			return [...state, payload];
+		case 'MOVING_OBJECT_UPDATE':
+			return updateObjectInArray(state, payload, 'movingObjectId');
 		default:
 			return state;
 	}
@@ -113,6 +124,7 @@ export default function reducer(state = {}, action) {
 		currentSystem: currentSystem(state.currentSystem, action),
 		shipHealth: shipHealth(state.shipHealth, action),
 		otherShips: otherShips(state.otherShips, action),
+		movingObjects: movingObjects(state.movingObjects, action),
 	};
 	debug(state, action, updated);
 	return updated;

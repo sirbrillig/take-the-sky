@@ -28,6 +28,7 @@ const filesToLoad = [
 	'assets/star-field.png',
 	'assets/nav-ring.png',
 	'assets/pointer.png',
+	'assets/bolt-red.png',
 	'assets/explosion.json',
 ];
 
@@ -39,6 +40,7 @@ function initSprites(game, state) {
 		player: createAndPlacePlayer(game, getPlayerPosition(getState())),
 		ring: createAndPlaceNavigationRing(game, getPlayerPosition(getState())),
 		ships: [],
+		movingObjects: [],
 		healthMeter: createAndPlaceHealthMeter(game),
 		chargeMeter: createAndPlaceChargeMeter(game),
 		modeControls: createAndPlaceModeControls(game),

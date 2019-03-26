@@ -1,7 +1,8 @@
 /* @format */
 
 import { adjustRotationForDirection, getAngleBetweenVectors, adjustSpeedForRotation } from './math';
-import { getEvent } from './selectors';
+import { getEvent, getShipDataForId } from './selectors';
+import { createBolt } from './other-ships';
 import debugFactory from './debug';
 
 const debug = debugFactory('sky:ai');
@@ -12,12 +13,14 @@ export default class ShipAi {
 		getState,
 		showDialog,
 		handleAction,
+		shipId,
 		playerVector,
 		shipVector,
 		changeRotationCallback,
 		rotation,
 		speed,
 		changeSpeedCallback,
+		minFireMs = 2000,
 		fireDistance = 150,
 		maxDistance = 1000,
 		rotationRate = 0.03,
@@ -27,9 +30,11 @@ export default class ShipAi {
 	}) {
 		this.game = game;
 		this.getState = getState;
+		this.shipId = shipId;
 		this.showDialog = showDialog; // showDialog is assigned in directly
 		this.handleAction = handleAction;
 		this.fireDistance = fireDistance;
+		this.minFireMs = minFireMs;
 		this.maxDistance = maxDistance;
 		this.playerVector = playerVector;
 		this.shipVector = shipVector;
@@ -116,5 +121,44 @@ export default class ShipAi {
 
 	isEventComplete(key) {
 		return getEvent(this.getState(), key);
+	}
+
+	hasFiredRecently() {
+		const shipData = getShipDataForId(this.getState(), this.shipId);
+		if (!shipData) {
+			throw new Error(`Could not find ship id ${this.shipId} when checking for recent firing`);
+		}
+		if (!shipData.lastFireTime) {
+			return false;
+		}
+		debug(`last fired at ${shipData.lastFireTime}`);
+		const now = Date.now();
+		const timeSinceFire = now - shipData.lastFireTime;
+		return timeSinceFire < this.minFireMs;
+	}
+
+	fire() {
+		if (this.hasFiredRecently()) {
+			debug('fire canceled; has fired recently');
+			return;
+		}
+		const shipData = getShipDataForId(this.getState(), this.shipId);
+		if (!shipData) {
+			throw new Error(`Could not find ship id ${this.shipId} when updating firing date`);
+		}
+		const payload = { ...shipData, lastFireTime: Date.now() };
+		this.handleAction({ type: 'CHANGE_OTHER_SHIP_DATA', payload });
+		debug(`firing at ${payload.lastFireTime}`);
+		const behavior = [
+			{
+				type: 'functionCall',
+				functionName: 'accelerate',
+				args: [],
+			},
+		];
+		this.handleAction({
+			type: 'MOVING_OBJECT_CREATE',
+			payload: createBolt(this.rotation, shipData.positionInSpace, behavior),
+		});
 	}
 }
