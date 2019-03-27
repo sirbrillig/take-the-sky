@@ -711,6 +711,23 @@ export function getSpriteMover(game) {
 				other.positionInSpace = movingObjectData.positionInSpace;
 			});
 			moveSpritesForPlayerPosition(sprites.movingObjects, playerPosition);
+			sprites.movingObjects = sprites.movingObjects.filter(sprite => {
+				const movingObjectData = getMovingObjectForId(getState(), sprite.movingObjectId);
+				if (!movingObjectData) {
+					throw new Error(
+						`No data found when checking object id "${sprite.movingObjectId}" for deletion`
+					);
+				}
+				if (movingObjectData.deleted) {
+					sprite.destroy();
+					handleAction({
+						type: 'MOVING_OBJECT_DESTROY',
+						payload: movingObjectData,
+					});
+					return false;
+				}
+				return true;
+			});
 		}
 
 		// render background

@@ -144,18 +144,17 @@ export default class ShipAi {
 		if (!shipData) {
 			throw new Error(`Could not find ship id ${this.shipId} when getting creation date`);
 		}
-		return shipData.createdAt;
+		const now = Date.now();
+		return now - shipData.createdAt;
 	}
 
 	destroy() {
 		debug('destroying object');
 		const shipData = getMovingObjectForId(this.getState(), this.movingObjectId);
 		this.handleAction({
-			type: 'MOVING_OBJECT_DESTROY',
-			payload: shipData,
+			type: 'MOVING_OBJECT_UPDATE',
+			payload: { ...shipData, deleted: true },
 		});
-		// TODO: also destroy sprite and remove sprite from sprite array, probably in moveSprites
-		// We might actually have to remove it from the state there too, to avoid causing chaos if the script is still running and tries to update a non-existent object
 	}
 
 	fire() {
@@ -184,7 +183,7 @@ export default class ShipAi {
 						},
 						rightSide: {
 							type: 'number',
-							value: 2000,
+							value: 5000,
 						},
 						comparator: {
 							type: 'comparator',

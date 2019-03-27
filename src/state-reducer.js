@@ -84,7 +84,7 @@ function updateObjectInArray(dataArray, objData, idProperty) {
 	return [...dataArrayWithDataRemoved, { ...matchingData, ...objData }];
 }
 
-function removeObjectFromArray(dataArray, objData, idProperty) {
+export function removeObjectFromArray(dataArray, objData, idProperty) {
 	const matchingData = dataArray.find(other => other[idProperty] === objData[idProperty]);
 	if (!matchingData) {
 		throw new Error(
