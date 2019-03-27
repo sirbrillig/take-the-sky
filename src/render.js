@@ -5,7 +5,6 @@ import { getEvent, getPlayerPosition, getHealthAmount } from './selectors';
 import {
 	isShipTouchingStar,
 	getPlanetTouchingShip,
-	isShipTouchingGate,
 	isChargeMeterFull,
 	explodeShip,
 } from './sprites';
@@ -86,19 +85,6 @@ export default function renderGame(game, sprites, state, actions, moveSprites) {
 		setChargeMeterAmount(0);
 		changeSpeed({ x: 0, y: 0 });
 		showDialog(`landingPlanet${touchingPlanet.planetData.name}`);
-	}
-
-	if (
-		getControlMode() === 'jump' &&
-		isChargeMeterFull(getChargeMeterAmount()) &&
-		isShipTouchingGate(sprites)
-	) {
-		setChargeMeterAmount(0);
-		if (getEvent(getState(), 'firstLanding')) {
-			changeCurrentSystem('Betan');
-		} else {
-			showDialog('firstLandingNotDone');
-		}
 	}
 
 	if (pressing.up && getControlMode() === 'pilot') {

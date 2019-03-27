@@ -1,7 +1,7 @@
 /* @format */
 
 import debugFactory, { debugTextFactory } from './debug';
-import { getPlanetsInSystem, getStarsInSystem, getGatesInSystem } from './planets';
+import { getPlanetsInSystem, getStarsInSystem } from './planets';
 import { getTurningDirectionFromPressingState } from './controls';
 import {
 	areVectorsSame,
@@ -66,15 +66,6 @@ function createAndPlacePlanet(game, planetData) {
 	planetSprite.planetData = planetData;
 	setSpritePosition(planetSprite, { x: planetData.position.x, y: planetData.position.y });
 	return planetSprite;
-}
-
-function createAndPlaceGate(game, gateData) {
-	const gate = game.sprite('assets/gate.png');
-	gate.zIndex = 5;
-	gate.anchor.set(0.5, 0.5);
-	gate.positionInSpace = gateData.position;
-	setSpritePosition(gate, { x: gateData.position.x, y: gateData.position.y });
-	return gate;
 }
 
 export function createAndPlaceOtherShips(game, shipDataObjects, playerPosition) {
@@ -406,10 +397,6 @@ export function getPlanetTouchingShip({ planets, player }) {
 	return planets && planets.find(planet => doSpritesOverlap(player, planet));
 }
 
-export function isShipTouchingGate({ gates, player }) {
-	return gates && gates.find(gate => doSpritesOverlap(player, gate));
-}
-
 function moveObjectForBehavior({
 	game,
 	getState,
@@ -594,9 +581,6 @@ export function getSpriteMover(game) {
 		if (lastShownDialog !== getDialogKey() && isDialogVisible()) {
 			const dialog = new Dialog({ getState, handleAction });
 			const currentDialogObject = dialog.getDialogObjectForKey(getDialogKey());
-			if (currentDialogObject.action) {
-				handleAction(currentDialogObject.action);
-			}
 			if (currentDialogObject.script) {
 				dialog.executeScript(currentDialogObject.script);
 			}
@@ -617,7 +601,7 @@ export function getSpriteMover(game) {
 		}
 		lastShownDialog = getDialogKey();
 
-		// render planets, stars, and gates
+		// render planets, stars
 		if (getCurrentSystem(getState()) !== lastRenderedSystem) {
 			if (sprites.planets) {
 				sprites.planets.map(sprite => game.mainContainer.removeChild(sprite));
@@ -636,20 +620,11 @@ export function getSpriteMover(game) {
 			);
 			sprites.stars.map(sprite => game.mainContainer.addChild(sprite));
 
-			if (sprites.gates) {
-				sprites.gates.map(gate => game.mainContainer.removeChild(gate));
-			}
-			sprites.gates = getGatesInSystem(currentSystem).map(gateData =>
-				createAndPlaceGate(game, gateData)
-			);
-			sprites.gates.map(sprite => game.mainContainer.addChild(sprite));
-
 			sortSpritesByZIndex(game);
 		}
 		lastRenderedSystem = getCurrentSystem(getState());
 		moveSpritesForPlayerPosition(sprites.planets, playerPosition);
 		moveSpritesForPlayerPosition(sprites.stars, playerPosition);
-		moveSpritesForPlayerPosition(sprites.gates, playerPosition);
 
 		// render other ships
 		const otherShipsToCreate = getOtherShipsToCreate(sprites.ships, getState());

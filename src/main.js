@@ -20,7 +20,6 @@ import renderGame from './render';
 const canvasWidth = 800;
 const canvasHeight = 600;
 const filesToLoad = [
-	'assets/gate.png',
 	'assets/player-idle.png',
 	'assets/cruiser.png',
 	'assets/sun.png',
@@ -45,12 +44,6 @@ function initSprites(game, state) {
 		chargeMeter: createAndPlaceChargeMeter(game),
 		modeControls: createAndPlaceModeControls(game),
 	};
-}
-
-function setUpGameObjects(game, state, actions) {
-	const sprites = initSprites(game, state);
-	setUpKeyboardControls(game, state, actions);
-	return sprites;
 }
 
 function initGame() {
@@ -93,7 +86,8 @@ function initGame() {
 		changeDialogSelection,
 	};
 	const setupCallback = game => {
-		const sprites = setUpGameObjects(game, state, actions);
+		const sprites = initSprites(game, state);
+		setUpKeyboardControls(game, state, actions);
 		const moveSprites = getSpriteMover(game);
 		game.ticker.add(() => renderGame(game, sprites, state, actions, moveSprites));
 	};

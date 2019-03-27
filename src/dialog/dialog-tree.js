@@ -4,38 +4,13 @@ export default function getDialogTree() {
 	return {
 		explodedShip: {
 			text: "As the ship's hull tears apart, you reflect that at least, at the end, you were free.",
-			action: { type: 'EVENT_GAME_OVER' },
+			script: "triggerEvent('gameOver');",
 			options: [{ text: 'Oh well' }],
 		},
 		starsAreHot: {
 			text: "Engineer: Captain, that star is millions of degrees. Let's try to avoid it, ok?",
-			action: { type: 'EVENT_TRIGGER', payload: 'starsAreHot' },
+			script: "triggerEvent('starsAreHot');",
 			options: [{ text: 'Continue' }],
-		},
-		firstLandingNotDone: {
-			variants: [
-				{
-					condition: "if(getNpcHappiness('engineer') >= 0, { finish(true); });",
-					text:
-						"Engineer: Captain, we came to this backwater planet because there's a job to be had. Let's not leave before we at least hear them out.",
-					action: { type: 'EVENT_FIRST_LANDING_NOT_DONE' },
-					options: [{ text: 'Continue' }],
-				},
-				{
-					condition: "if(getNpcHappiness('engineer') = -1, { finish(true); });",
-					text:
-						"Engineer: Did you not hear me the first time, Cap? This was a long trip. Let's see what's on that moon.",
-					action: { type: 'EVENT_FIRST_LANDING_NOT_DONE' },
-					options: [{ text: 'Continue' }],
-				},
-				{
-					condition: "if(getNpcHappiness('engineer') < -1, { finish(true); });",
-					text:
-						"Engineer: Oh come on, Captain! Go back to that moon and land there or this ship isn't going another inch.",
-					action: { type: 'EVENT_FIRST_LANDING_NOT_DONE' },
-					options: [{ text: 'Continue' }],
-				},
-			],
 		},
 		landingPlanetBeta: {
 			text:
@@ -78,7 +53,6 @@ export default function getDialogTree() {
 					link: 'firstLanding5',
 				},
 			],
-			action: { type: 'EVENT_FIRST_LANDING' },
 			script:
 				"createShip('cruiser', 'firstCruiser', { rotateTowardPlayer(); if(distanceToPlayer() < 800, { if(getEvent('firstCruiserEncounter'), { fire(); }); }); if(distanceToPlayer() < 150, { decelerate(); if(not(getEvent('firstCruiserEncounter')), { triggerEvent('firstCruiserEncounter'); linkToDialog('firstCruiserEncounter'); }); }); if(distanceToPlayer() >= 150, { if(isShipFacingPlayer(), { accelerate(); }); }); });",
 		},
