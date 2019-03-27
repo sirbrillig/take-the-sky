@@ -192,6 +192,11 @@ class Background extends SpaceThing {
 		this.sprite.zIndex = 0;
 		game.mainContainer.addChild(this.sprite);
 	}
+
+	update() {
+		this.sprite.tilePosition.x = this.game.gameSpace.position.x;
+		this.sprite.tilePosition.y = this.game.gameSpace.position.y;
+	}
 }
 
 function initThings(game) {
@@ -232,6 +237,16 @@ function sortSpritesByZIndex(container) {
 	});
 }
 
+function centerCamera({ gameSpace, playerPosition }) {
+	const currentPosition = new Vector(gameSpace.position.x, gameSpace.position.y);
+	const distanceMoved = playerPosition.sub(currentPosition);
+	const gameSpacePosition = currentPosition
+		.add(distanceMoved)
+		.invert()
+		.add(new Vector(400, 300));
+	gameSpace.position.set(gameSpacePosition.x, gameSpacePosition.y);
+}
+
 function initGame() {
 	const setupCallback = game => {
 		const gameSpace = game.group();
@@ -245,18 +260,10 @@ function initGame() {
 		sortSpritesByZIndex(game.gameSpace);
 		const getInput = initInput();
 		const input = getInput();
-		let lastPlayerPosition = player.physics.position.clone();
 		game.ticker.add(() => {
 			handleInput([background, ...things, player], input);
 			update([background, ...things, player]);
-			// TODO: can we simplify or encapsulate this logic?
-			const currentPosition = new Vector(gameSpace.position.x, gameSpace.position.y);
-			const distanceMoved = player.physics.position.sub(lastPlayerPosition);
-			const gameSpacePosition = currentPosition.sub(distanceMoved);
-			lastPlayerPosition = player.physics.position.clone();
-			gameSpace.position.set(gameSpacePosition.x, gameSpacePosition.y);
-			// TODO: can we move this to the Background update?
-			background.sprite.tilePosition.set(gameSpacePosition.x, gameSpacePosition.y);
+			centerCamera({ gameSpace, playerPosition: player.physics.position });
 		});
 	};
 	createGame({ canvasWidth, canvasHeight, filesToLoad, setupCallback });
