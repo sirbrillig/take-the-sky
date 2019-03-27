@@ -185,8 +185,17 @@ class Player extends SpaceThing {
 	}
 }
 
+class Background extends SpaceThing {
+	constructor({ game }) {
+		super({ game });
+		this.sprite = game.tilingSprite('assets/star-field.png', game.canvasWidth, game.canvasHeight);
+		this.sprite.zIndex = 0;
+		game.gameSpace.addChild(this.sprite);
+	}
+}
+
 function initThings(game) {
-	return [new Player({ game })];
+	return [new Player({ game }), new Background({ game })];
 }
 
 function update(things) {
@@ -214,12 +223,22 @@ function initInput() {
 	};
 }
 
+function sortSpritesByZIndex(container) {
+	// sort sprites by zorder
+	container.children.sort((a, b) => {
+		a.zIndex = a.zIndex || 0;
+		b.zIndex = b.zIndex || 0;
+		return a.zIndex > b.zIndex ? 1 : -1;
+	});
+}
+
 function initGame() {
 	const setupCallback = game => {
 		const gameSpace = game.group();
 		game.mainContainer.addChild(gameSpace);
 		game.gameSpace = gameSpace;
 		const things = initThings(game);
+		sortSpritesByZIndex(game.gameSpace);
 		const getInput = initInput();
 		game.ticker.add(() => {
 			const input = getInput();
