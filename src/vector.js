@@ -144,4 +144,8 @@ export default class Vector {
 		const bSq = this.y * this.y;
 		return Math.sqrt(aSq + bSq);
 	}
+
+	toString() {
+		return `(${this.x},${this.y})`;
+	}
 }

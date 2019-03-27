@@ -16,6 +16,7 @@ import {
 	getSpriteMover,
 } from './sprites';
 import renderGame from './render';
+import { adjustRotationForDirection } from './math';
 
 const canvasWidth = 800;
 const canvasHeight = 600;
@@ -43,6 +44,103 @@ function initSprites(game, state) {
 		healthMeter: createAndPlaceHealthMeter(game),
 		chargeMeter: createAndPlaceChargeMeter(game),
 		modeControls: createAndPlaceModeControls(game),
+	};
+}
+
+class Input {
+	constructor({ currentKeyDown, currentKeyUp }) {
+		this.currentKeyDown = currentKeyDown;
+		this.currentKeyUp = currentKeyUp;
+	}
+}
+
+class SpaceThing {
+	constructor({ game }) {
+		this.game = game;
+		this.id = null;
+		this.sprite = null;
+		this.position = null;
+		this.rotation = null;
+		this.isDestroyed = false;
+		this.state = null;
+	}
+
+	handleInput(input) {
+		if (!this.state) {
+			return;
+		}
+		const newState = this.state.handleInput(this, input);
+		if (newState) {
+			this.state = newState;
+		}
+	}
+
+	update() {
+		this.state && this.state.update(this);
+	}
+}
+
+class Player extends SpaceThing {
+	constructor(props) {
+		super(props);
+		this.state = new DriftingState();
+	}
+}
+
+class AcceleratingState {
+	handleInput() {}
+
+	update() {}
+}
+
+class DriftingState {
+	handleInput(thing, input) {
+		if (input.currentKeyDown.code === 'KeyW') {
+			return new AcceleratingState();
+		}
+		if (input.currentKeyDown.code === 'KeyD') {
+			thing.rotation = adjustRotationForDirection(thing.rotation, 'clockwise', thing.rotationRate);
+			return;
+		}
+		if (input.currentKeyDown.code === 'KeyA') {
+			thing.rotation = adjustRotationForDirection(
+				thing.rotation,
+				'counterclockwise',
+				thing.rotationRate
+			);
+		}
+	}
+
+	update(thing) {
+		thing.sprite.rotation = thing.rotation;
+	}
+}
+
+class Background extends SpaceThing {}
+
+function initThings(game) {
+	return [new Player({ game }), new Background({ game })];
+}
+
+function update(things) {
+	things.map(thing => thing.update());
+}
+
+function handleInput(things, input) {
+	things.map(thing => thing.handleInput(input));
+}
+
+function initInput() {
+	let currentKeyDown = null;
+	let currentKeyUp = null;
+	const onKeyDown = event => (currentKeyDown = event); // eslint-disable-line no-return-assign
+	const onKeyUp = event => (currentKeyUp = event); // eslint-disable-line no-return-assign
+
+	window.document.addEventListener('keydown', onKeyDown); // eslint-disable-line no-undef
+	window.document.addEventListener('keyup', onKeyUp); // eslint-disable-line no-undef
+
+	return function getInput() {
+		return new Input({ currentKeyDown, currentKeyUp });
 	};
 }
 
@@ -86,10 +184,13 @@ function initGame() {
 		changeDialogSelection,
 	};
 	const setupCallback = game => {
-		const sprites = initSprites(game, state);
-		setUpKeyboardControls(game, state, actions);
-		const moveSprites = getSpriteMover(game);
-		game.ticker.add(() => renderGame(game, sprites, state, actions, moveSprites));
+		const things = initThings(game);
+		const getInput = initInput();
+		game.ticker.add(() => {
+			const input = getInput();
+			handleInput(things, input);
+			update(things);
+		});
 	};
 	createGame({ canvasWidth, canvasHeight, filesToLoad, setupCallback });
 }
