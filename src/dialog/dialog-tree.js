@@ -80,7 +80,7 @@ export default function getDialogTree() {
 			],
 			action: { type: 'EVENT_FIRST_LANDING' },
 			script:
-				"createShip('cruiser', 'firstCruiser', { rotateTowardPlayer(); if(distanceToPlayer() < 200, { if(getEvent('firstCruiserEncounter'), { fire(); }); }); if(distanceToPlayer() < 150, { decelerate(); if(not(getEvent('firstCruiserEncounter')), { triggerEvent('firstCruiserEncounter'); linkToDialog('firstCruiserEncounter'); }); }); if(distanceToPlayer() >= 150, { if(isShipFacingPlayer(), { accelerate(); }); }); });",
+				"createShip('cruiser', 'firstCruiser', { rotateTowardPlayer(); if(distanceToPlayer() < 800, { if(getEvent('firstCruiserEncounter'), { fire(); }); }); if(distanceToPlayer() < 150, { decelerate(); if(not(getEvent('firstCruiserEncounter')), { triggerEvent('firstCruiserEncounter'); linkToDialog('firstCruiserEncounter'); }); }); if(distanceToPlayer() >= 150, { if(isShipFacingPlayer(), { accelerate(); }); }); });",
 		},
 		firstLanding4: {
 			text:
