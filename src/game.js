@@ -228,7 +228,18 @@ class PlanetPhysics extends Physics {
 		this.name = name;
 		this.size = size;
 		this.position.set(position.x, position.y);
-		this.hitBox = new Vector(size);
+		this.hitBox = new Vector(size, size);
+	}
+}
+
+class StarPhysics extends Physics {
+	constructor({ position, name, size }) {
+		super();
+		this.name = name;
+		this.size = size;
+		this.position.set(position.x, position.y);
+		// The star sprite has wide transparent edges so we make the hitBox smaller
+		this.hitBox = new Vector(size / 1.5, size / 1.5);
 	}
 }
 
@@ -276,8 +287,18 @@ class Planet extends SpaceThing {
 class Star extends SpaceThing {
 	constructor({ game, position, size, name }) {
 		super({ game });
-		this.physics = new PlanetPhysics({ position, size, name });
+		this.physics = new StarPhysics({ position, size, name });
 		this.sprite = new StarSprite(game, this.physics);
+		this.showHitBox = true;
+
+		if (this.showHitBox) {
+			const box = game.rectangle(this.physics.hitBox.x, this.physics.hitBox.y, 0xff0000);
+			box.position.set(
+				this.physics.position.x - box.width / 2,
+				this.physics.position.y - box.height / 2
+			);
+			this.game.gameSpace.addChild(box);
+		}
 	}
 
 	update() {
