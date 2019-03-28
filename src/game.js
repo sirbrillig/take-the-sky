@@ -199,18 +199,6 @@ class Background extends SpaceThing {
 	}
 }
 
-function initThings(game) {
-	return [];
-}
-
-function update(things) {
-	things.map(thing => thing.update());
-}
-
-function handleInput(things, input) {
-	things.map(thing => thing.handleInput(input));
-}
-
 function initInput() {
 	const keyMap = {};
 	const onKeyDown = event => {
@@ -223,9 +211,7 @@ function initInput() {
 	window.document.addEventListener('keydown', onKeyDown); // eslint-disable-line no-undef
 	window.document.addEventListener('keyup', onKeyUp); // eslint-disable-line no-undef
 
-	return function getInput() {
-		return new Input(keyMap);
-	};
+	return new Input(keyMap);
 }
 
 function sortSpritesByZIndex(container) {
@@ -237,34 +223,57 @@ function sortSpritesByZIndex(container) {
 	});
 }
 
-function centerCamera({ gameSpace, playerPosition }) {
-	const currentPosition = new Vector(gameSpace.position.x, gameSpace.position.y);
-	const distanceMoved = playerPosition.sub(currentPosition);
-	const gameSpacePosition = currentPosition
-		.add(distanceMoved)
-		.invert()
-		.add(new Vector(400, 300));
-	gameSpace.position.set(gameSpacePosition.x, gameSpacePosition.y);
+class GameController {
+	constructor({ game }) {
+		this.game = game;
+
+		// The gameSpace holds all objects which exist on the map (eg: ships)
+		game.gameSpace = game.group();
+		game.gameSpace.position.set(0, 0);
+		// The mainContainer holds all objects which exist outside the map (eg: health)
+		game.mainContainer.addChild(game.gameSpace);
+
+		this.player = new Player({ game });
+		this.background = new Background({ game });
+
+		sortSpritesByZIndex(game.mainContainer);
+		sortSpritesByZIndex(game.gameSpace);
+
+		this.input = initInput();
+	}
+
+	tick() {
+		this.handleInput([this.background, this.player], this.input);
+		this.update([this.background, this.player]);
+		this.centerCamera({
+			gameSpace: this.game.gameSpace,
+			playerPosition: this.player.physics.position,
+		});
+	}
+
+	update(things) {
+		things.map(thing => thing.update && thing.update());
+	}
+
+	handleInput(things, input) {
+		things.map(thing => thing.handleInput && thing.handleInput(input));
+	}
+
+	centerCamera({ gameSpace, playerPosition }) {
+		const currentPosition = new Vector(gameSpace.position.x, gameSpace.position.y);
+		const distanceMoved = playerPosition.sub(currentPosition);
+		const gameSpacePosition = currentPosition
+			.add(distanceMoved)
+			.invert()
+			.add(new Vector(400, 300));
+		gameSpace.position.set(gameSpacePosition.x, gameSpacePosition.y);
+	}
 }
 
 function initGame() {
 	const setupCallback = game => {
-		const gameSpace = game.group();
-		gameSpace.position.set(0, 0);
-		game.mainContainer.addChild(gameSpace);
-		game.gameSpace = gameSpace;
-		const things = initThings(game);
-		const player = new Player({ game });
-		const background = new Background({ game });
-		sortSpritesByZIndex(game.mainContainer);
-		sortSpritesByZIndex(game.gameSpace);
-		const getInput = initInput();
-		const input = getInput();
-		game.ticker.add(() => {
-			handleInput([background, ...things, player], input);
-			update([background, ...things, player]);
-			centerCamera({ gameSpace, playerPosition: player.physics.position });
-		});
+		const controller = new GameController({ game });
+		game.ticker.add(() => controller.tick());
 	};
 	createGame({ canvasWidth, canvasHeight, filesToLoad, setupCallback });
 }
