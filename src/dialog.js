@@ -1,11 +1,11 @@
 /* @format */
 
 import nearley from 'nearley';
-import grammar from '../parser/grammar';
-import getDialogTree from './dialog-tree';
-import debugFactory from '../debug';
-import { getNpcHappiness, getEvent } from '../selectors';
-import { makeShipData } from '../other-ships';
+import grammar from './parser/grammar';
+import getDialogTree from './dialog/dialog-tree';
+import debugFactory from './debug';
+import { getNpcHappiness, getEvent } from './selectors';
+import { makeShipData } from './other-ships';
 
 const debug = debugFactory('sky:dialog');
 
@@ -16,7 +16,6 @@ export default class Dialog {
 		this.ai = ai;
 	}
 
-	// eslint-disable-next-line class-methods-use-this
 	executeComparison(comparator, leftSide, rightSide) {
 		debug('comparing', leftSide, comparator, rightSide);
 		if (rightSide === false && comparator === '=') {
