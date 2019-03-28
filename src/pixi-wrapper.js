@@ -1,12 +1,12 @@
 /* @format */
 /* globals window, PIXI */
 
-export default function createGame({ canvasWidth, canvasHeight, setupCallback, filesToLoad }) {
-	const app = new PIXI.Application({ width: canvasWidth, height: canvasHeight });
+export default function createGame({ gameWidth, gameHeight, setupCallback, filesToLoad }) {
+	const app = new PIXI.Application({ width: gameWidth, height: gameHeight });
 	window.document.body.appendChild(app.view);
 
-	app.canvasWidth = canvasWidth;
-	app.canvasHeight = canvasHeight;
+	app.gameWidth = gameWidth;
+	app.gameHeight = gameHeight;
 
 	app.renderer.backgroundColor = 0x000000;
 	app.renderer.view.style.position = 'absolute';
@@ -14,9 +14,9 @@ export default function createGame({ canvasWidth, canvasHeight, setupCallback, f
 
 	app.mainContainer = new PIXI.Container();
 	app.stage.addChild(app.mainContainer);
-	const scaleFactor = Math.min(window.innerWidth / canvasWidth, window.innerHeight / canvasHeight);
-	const newWidth = Math.ceil(canvasWidth * scaleFactor);
-	const newHeight = Math.ceil(canvasHeight * scaleFactor);
+	const scaleFactor = Math.min(window.innerWidth / gameWidth, window.innerHeight / gameHeight);
+	const newWidth = Math.ceil(gameWidth * scaleFactor);
+	const newHeight = Math.ceil(gameHeight * scaleFactor);
 	app.renderer.view.style.width = `${newWidth}px`;
 	app.renderer.view.style.height = `${newHeight}px`;
 	app.renderer.resize(newWidth, newHeight);

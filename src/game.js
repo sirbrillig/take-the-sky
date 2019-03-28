@@ -10,8 +10,8 @@ import reducer from './state-reducer';
 
 const debug = debugFactory('sky:game');
 
-const canvasWidth = 800;
-const canvasHeight = 600;
+const gameWidth = 800;
+const gameHeight = 600;
 const filesToLoad = [
 	'assets/player-idle.png',
 	'assets/cruiser.png',
@@ -90,7 +90,7 @@ class Physics {
 class PlayerPhysics extends Physics {
 	constructor() {
 		super();
-		this.position.set(400, 300);
+		this.position.set(gameWidth / 2, gameHeight / 2);
 		this.accelerationRate = 0.04;
 		this.rotationRate = 0.06;
 		this.maxVelocity = 3;
@@ -257,7 +257,7 @@ class Player extends SpaceThing {
 class Background extends SpaceThing {
 	constructor({ game }) {
 		super({ game });
-		this.sprite = game.tilingSprite('assets/star-field.png', game.canvasWidth, game.canvasHeight);
+		this.sprite = game.tilingSprite('assets/star-field.png', game.gameWidth, game.gameHeight);
 		this.sprite.zIndex = 0;
 		game.mainContainer.addChild(this.sprite);
 	}
@@ -389,7 +389,7 @@ class HealthBar extends SpaceThing {
 		meter.innerBar = innerBar;
 		meter.outerBar = outerBar;
 		const padding = 20;
-		meter.position.set(canvasWidth - outerBar.width - padding, 16);
+		meter.position.set(gameWidth - outerBar.width - padding, 16);
 		meter.zIndex = 15;
 		this.meter = meter;
 		game.mainContainer.addChild(meter);
@@ -521,7 +521,7 @@ class GameController {
 		const gameSpacePosition = currentPosition
 			.add(distanceMoved)
 			.invert()
-			.add(new Vector(400, 300));
+			.add(new Vector(gameWidth / 2, gameHeight / 2));
 		gameSpace.position.set(gameSpacePosition.x, gameSpacePosition.y);
 	}
 }
@@ -531,7 +531,7 @@ function initGame() {
 		const controller = new GameController({ game });
 		game.ticker.add(() => controller.tick());
 	};
-	createGame({ canvasWidth, canvasHeight, filesToLoad, setupCallback });
+	createGame({ gameWidth, gameHeight, filesToLoad, setupCallback });
 }
 
 initGame();
