@@ -171,20 +171,6 @@ class PlayerSprite extends Sprite {
 		if (!this.alive) {
 			return;
 		}
-		// TODO should this be in update?
-		if (player.health.getHealthAsPercent() === 0) {
-			this.sprite.visible = false;
-			this.sprite = this.explosion;
-			this.sprite.onComplete = () => {
-				this.explosion.visible = false;
-				// TODO: when animation finishes, trigger gameEnd event
-			};
-			this.sprite.position.set(this.physics.position.x, this.physics.position.y);
-			this.sprite.visible = true;
-			this.sprite.play();
-			this.alive = false;
-			return;
-		}
 		if (input.isKeyDown('KeyW') === true) {
 			this.sprite.visible = false;
 			this.sprite = this.moving;
@@ -200,9 +186,22 @@ class PlayerSprite extends Sprite {
 		this.sprite.visible = true;
 	}
 
-	update() {
+	update({ player }) {
 		if (!this.alive) {
 			this.physics.velocity = new Vector(0, 0);
+			return;
+		}
+		if (player.health.getHealthAsPercent() === 0) {
+			this.sprite.visible = false;
+			this.sprite = this.explosion;
+			this.sprite.onComplete = () => {
+				this.explosion.visible = false;
+				// TODO: when animation finishes, trigger gameEnd event
+			};
+			this.sprite.position.set(this.physics.position.x, this.physics.position.y);
+			this.sprite.visible = true;
+			this.sprite.play();
+			this.alive = false;
 			return;
 		}
 		this.sprite.rotation = this.physics.rotation;
@@ -223,9 +222,9 @@ class Player extends SpaceThing {
 		this.sprite.handleInput(this, input);
 	}
 
-	update(currentMap) {
+	update({ currentMap }) {
 		this.physics.update(this);
-		this.sprite.update(this);
+		this.sprite.update({ currentMap, player: this });
 		if (
 			currentMap.stars.find(star =>
 				// TODO: make a version of this function which can take physics instances
@@ -340,7 +339,7 @@ class Star extends SpaceThing {
 		super({ game });
 		this.physics = new StarPhysics({ position, size, name });
 		this.sprite = new StarSprite(game, this.physics);
-		this.showHitBox = true;
+		this.showHitBox = false; // for debugging
 
 		if (this.showHitBox) {
 			const box = game.rectangle(this.physics.hitBox.x, this.physics.hitBox.y, 0xff0000);
@@ -432,7 +431,9 @@ class GameController {
 	}
 
 	update(things) {
-		things.map(thing => thing.update && thing.update(this.currentMap));
+		things.map(
+			thing => thing.update && thing.update({ currentMap: this.currentMap, player: this.player })
+		);
 	}
 
 	handleInput(things, input) {
