@@ -42,6 +42,15 @@ class SpaceThing {
 	handleInput() {}
 
 	update() {}
+
+	renderHitBox() {
+		const box = this.game.rectangle(this.physics.hitBox.x, this.physics.hitBox.y, 0xff0000);
+		box.position.set(
+			this.physics.position.x - box.width / 2,
+			this.physics.position.y - box.height / 2
+		);
+		this.game.gameSpace.addChild(box);
+	}
 }
 
 class Health {
@@ -339,16 +348,6 @@ class Star extends SpaceThing {
 		super({ game });
 		this.physics = new StarPhysics({ position, size, name });
 		this.sprite = new StarSprite(game, this.physics);
-		this.showHitBox = false; // for debugging
-
-		if (this.showHitBox) {
-			const box = game.rectangle(this.physics.hitBox.x, this.physics.hitBox.y, 0xff0000);
-			box.position.set(
-				this.physics.position.x - box.width / 2,
-				this.physics.position.y - box.height / 2
-			);
-			this.game.gameSpace.addChild(box);
-		}
 	}
 }
 
