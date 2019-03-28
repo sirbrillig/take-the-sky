@@ -3,6 +3,7 @@
 import createGame from './pixi-wrapper';
 import { adjustSpeedForRotation, adjustRotationForDirection, makeUniqueId } from './math';
 import Vector from './vector';
+import { getPlanetsInSystem, getStarsInSystem } from './planets';
 import debugFactory from './debug';
 
 const debug = debugFactory('sky:game');
@@ -56,8 +57,7 @@ class Physics {
 		this.accelerationRate = 0.04;
 		this.rotationRate = 0.06;
 		this.maxVelocity = 3;
-		this.width = 0;
-		this.height = 0;
+		this.hitBox = new Vector();
 	}
 
 	handleInput() {}
@@ -72,8 +72,7 @@ class PlayerPhysics extends Physics {
 		this.accelerationRate = 0.04;
 		this.rotationRate = 0.06;
 		this.maxVelocity = 3;
-		this.width = 64;
-		this.height = 64;
+		this.hitBox = new Vector();
 	}
 
 	handleInput(player, input) {
@@ -223,6 +222,81 @@ function sortSpritesByZIndex(container) {
 	});
 }
 
+class PlanetPhysics extends Physics {
+	constructor({ position, name, size }) {
+		super();
+		this.name = name;
+		this.size = size;
+		this.position.set(position.x, position.y);
+		this.hitBox = new Vector(size);
+	}
+}
+
+class PlanetSprite extends Sprite {
+	constructor(game, physics) {
+		super(game, physics);
+		this.sprite = game.sprite('assets/planet-1.png');
+		this.sprite.pivot.set(0.5, 0.5);
+		this.sprite.anchor.set(0.5, 0.5);
+		this.sprite.width = physics.size;
+		this.sprite.height = physics.size;
+		this.sprite.position.set(physics.position.x, physics.position.y);
+		this.sprite.zIndex = 8;
+		game.gameSpace.addChild(this.sprite);
+	}
+}
+
+class StarSprite extends Sprite {
+	constructor(game, physics) {
+		super(game, physics);
+		this.sprite = game.sprite('assets/sun.png');
+		this.sprite.pivot.set(0.5, 0.5);
+		this.sprite.anchor.set(0.5, 0.5);
+		this.sprite.width = physics.size;
+		this.sprite.height = physics.size;
+		this.sprite.position.set(physics.position.x, physics.position.y);
+		this.sprite.zIndex = 8;
+		game.gameSpace.addChild(this.sprite);
+	}
+}
+
+class Planet extends SpaceThing {
+	constructor({ game, position, size, name }) {
+		super({ game });
+		this.physics = new PlanetPhysics({ position, size, name });
+		this.sprite = new PlanetSprite(game, this.physics);
+	}
+
+	update() {
+		this.physics.update(this);
+		this.sprite.update(this);
+	}
+}
+
+class Star extends SpaceThing {
+	constructor({ game, position, size, name }) {
+		super({ game });
+		this.physics = new PlanetPhysics({ position, size, name });
+		this.sprite = new StarSprite(game, this.physics);
+	}
+
+	update() {
+		this.physics.update(this);
+		this.sprite.update(this);
+	}
+}
+
+class SystemMap {
+	constructor({ game, systemName }) {
+		this.planets = getPlanetsInSystem(systemName).map(
+			({ position, size, name }) => new Planet({ game, position, size, name })
+		);
+		this.stars = getStarsInSystem(systemName).map(
+			({ position, size, name }) => new Star({ game, position, size, name })
+		);
+	}
+}
+
 class GameController {
 	constructor({ game }) {
 		this.game = game;
@@ -236,10 +310,12 @@ class GameController {
 		this.player = new Player({ game });
 		this.background = new Background({ game });
 
+		this.input = initInput();
+
+		this.currentMap = new SystemMap({ game, systemName: 'Algol' });
+
 		sortSpritesByZIndex(game.mainContainer);
 		sortSpritesByZIndex(game.gameSpace);
-
-		this.input = initInput();
 	}
 
 	tick() {

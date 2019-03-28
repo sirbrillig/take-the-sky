@@ -1,15 +1,5 @@
 /* @format */
 
-export function makePlanet({ name, description, position, color, size }) {
-	return {
-		name,
-		description,
-		position,
-		color,
-		size,
-	};
-}
-
 export function getAllSystems() {
 	return {
 		Algol: {
@@ -20,10 +10,7 @@ export function getAllSystems() {
 			planets: [
 				{
 					name: 'Twist',
-					description:
-						"Not much of a tourist destination. Or any kind of destination at all, really. The Empire tout it as a settler's paradise. Mostly it's just a lot of mud.",
 					position: { x: 25, y: 75 },
-					color: 0xff0000,
 					size: 100,
 				},
 			],
@@ -36,10 +23,7 @@ export function getAllSystems() {
 			planets: [
 				{
 					name: 'Beta',
-					description:
-						'Home to many researchers and medical professionals. Expensive tech. Folks are overworked, mostly.',
 					position: { x: 80, y: 200 },
-					color: 0x0000ff,
 					size: 40,
 				},
 			],
