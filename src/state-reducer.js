@@ -36,10 +36,22 @@ function events(state = {}, { type, payload }) {
 	}
 }
 
+function dialog(state = null, { type, payload }) {
+	switch (type) {
+		case 'DIALOG_TRIGGER':
+			return payload;
+		case 'DIALOG_HIDE':
+			return null;
+		default:
+			return state;
+	}
+}
+
 export default function reducer(state = {}, action) {
 	const updated = {
 		npcs: npcs(state.npcs, action),
 		events: events(state.events, action),
+		dialog: dialog(state.dialog, action),
 	};
 	debug(state, action, updated);
 	return updated;

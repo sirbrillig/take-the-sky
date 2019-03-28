@@ -7,6 +7,7 @@ import { getPlanetsInSystem, getStarsInSystem } from './planets';
 import { doSpritesOverlap } from './sprites';
 import debugFactory from './debug';
 import reducer from './state-reducer';
+import Dialog from './dialog';
 
 const debug = debugFactory('sky:game');
 
@@ -206,7 +207,7 @@ class PlayerSprite extends Sprite {
 			this.sprite = this.explosion;
 			this.sprite.onComplete = () => {
 				this.explosion.visible = false;
-				player.triggerEvent({ type: 'EVENT_TRIGGER', payload: 'gameOver' });
+				player.dispatchAction({ type: 'EVENT_TRIGGER', payload: 'gameOver' });
 			};
 			this.sprite.position.set(this.physics.position.x, this.physics.position.y);
 			this.sprite.visible = true;
@@ -228,8 +229,8 @@ class Player extends SpaceThing {
 		this.eventState = eventState;
 	}
 
-	triggerEvent(event) {
-		this.eventState.triggerEvent(event);
+	dispatchAction(event) {
+		this.eventState.dispatchAction(event);
 	}
 
 	handleInput(input) {
@@ -408,31 +409,32 @@ class GameState {
 	constructor(stateName) {
 		this.stateName = stateName;
 	}
+
+	handleInput() {}
+
+	update() {}
 }
 
 class FlyingState extends GameState {
-	constructor({ player, background, gameInterface, input, currentMap, eventState }) {
+	constructor() {
 		super('flying');
-		this.player = player;
-		this.background = background;
-		this.gameInterface = gameInterface;
-		this.input = input;
-		this.currentMap = currentMap;
-		this.eventState = eventState;
 	}
 
-	update() {
-		if (this.eventState.getEvent('gameOver')) {
+	update({ eventState, player, background, gameInterface, currentMap }) {
+		if (eventState.getDialog()) {
+			return new DialogState();
+		}
+		if (eventState.getEvent('gameOver')) {
 			return new GameOverState();
 		}
-		[this.background, this.player, ...this.gameInterface].map(
-			thing => thing.update && thing.update({ currentMap: this.currentMap, player: this.player })
+		[background, player, ...gameInterface].map(
+			thing => thing.update && thing.update({ currentMap, player })
 		);
 	}
 
-	handleInput() {
-		[this.background, this.player, ...this.gameInterface].map(
-			thing => thing.handleInput && thing.handleInput(this.input)
+	handleInput({ input, background, player, gameInterface }) {
+		[background, player, ...gameInterface].map(
+			thing => thing.handleInput && thing.handleInput(input)
 		);
 	}
 }
@@ -440,7 +442,122 @@ class FlyingState extends GameState {
 class GameOverState extends GameState {
 	constructor() {
 		super('gameOver');
-		// TODO: display game over stuff
+	}
+
+	update({ eventState }) {
+		eventState.dispatchAction({ type: 'DIALOG_TRIGGER', payload: 'gameOver' });
+		if (eventState.getDialog()) {
+			return new DialogState();
+		}
+	}
+}
+
+class DialogState extends GameState {
+	constructor() {
+		super('dialog');
+		this.currentDialog = null;
+	}
+
+	// TODO: move all this dialog stuff to a SpaceThing
+	createDialog(game) {
+		const boxPadding = 10;
+		const box = game.rectangle(gameWidth - 40, 250, 0x00335a, 0x0f95ff, 2);
+
+		const dialogText = this.createTextAreaForDialog(game, box, boxPadding);
+		box.addChild(dialogText);
+
+		box.optionArea = game.group();
+		const optionAreaHeight = 90;
+		box.optionArea.position.set(boxPadding, box.height - optionAreaHeight);
+		box.addChild(box.optionArea);
+
+		box.zIndex = 15;
+		box.position.set(20, gameHeight - box.height - 10);
+		box.visible = false;
+		box.textArea = dialogText;
+		box.boxPadding = boxPadding;
+		game.mainContainer.addChild(box);
+		return box;
+	}
+
+	createTextAreaForDialog(game, box, boxPadding) {
+		// See formatting options: https://pixijs.io/pixi-text-style/#
+		const dialogText = game.text('', {
+			fontFamily: 'Arial',
+			fontSize: 24,
+			fill: 'white',
+			wordWrap: true,
+			wordWrapWidth: box.width - boxPadding * 2,
+		});
+		dialogText.zIndex = 16;
+		dialogText.position.set(boxPadding, boxPadding);
+		return dialogText;
+	}
+
+	createDialogOption(game, option, index) {
+		const dialogText = game.text(option.text, {
+			fontFamily: 'Arial',
+			fontSize: 24,
+			fill: 'white',
+		});
+		const paddingForArrow = 28;
+		const textHeight = 35;
+		dialogText.position.set(paddingForArrow, index * textHeight);
+		return dialogText;
+	}
+
+	createDialogOptions(game, dialog, currentDialogObject) {
+		dialog.optionArea.removeChildren();
+
+		currentDialogObject.options.map((option, index) => {
+			const optionTextArea = this.createDialogOption(game, option, index);
+			dialog.optionArea.addChild(optionTextArea);
+			return optionTextArea;
+		});
+
+		const arrow = game.sprite('assets/pointer.png');
+		arrow.anchor.set(0.5, 0.5);
+		arrow.position.set(10, arrow.height);
+		dialog.optionArea.addChild(arrow);
+
+		const textHeight = 32;
+		dialog.changeSelectedOption = index => {
+			arrow.y = arrow.height + index * textHeight;
+		};
+
+		arrow.visible = !!currentDialogObject.options.length;
+	}
+
+	update({ game, eventState }) {
+		if (!this.dialogSprite) {
+			this.dialogSprite = this.createDialog(game);
+		}
+		if (eventState.getDialog() !== this.currentDialog) {
+			const dialog = new Dialog({
+				getState: eventState.getState,
+				handleAction: eventState.dispatchAction,
+			});
+			const currentDialogObject = dialog.getDialogObjectForKey(eventState.getDialog());
+			if (currentDialogObject.script) {
+				dialog.executeScript(currentDialogObject.script);
+			}
+			if (currentDialogObject.text) {
+				this.dialogSprite.textArea.text = currentDialogObject.text;
+				this.createDialogOptions(game, this.dialogSprite, currentDialogObject);
+				this.dialogSprite.visible = true;
+			}
+			if (!currentDialogObject.text) {
+				eventState.dispatchAction({ type: 'DIALOG_HIDE' });
+			}
+		}
+		if (this.dialogSprite.visible && !eventState.getDialog()) {
+			this.dialogSprite.visible = false;
+		}
+		// TODO: whatever this does
+		// if (eventState.getDialog()) {
+		// 	this.dialogSprite.changeSelectedOption(getDialogSelection());
+		// }
+		this.currentDialog = eventState.getDialog();
 	}
 }
 
@@ -449,7 +566,7 @@ class EventState {
 		this.stateTree = reducer(undefined, { type: 'INIT' });
 	}
 
-	triggerEvent(event) {
+	dispatchAction(event) {
 		this.stateTree = reducer(this.stateTree, event);
 	}
 
@@ -459,6 +576,10 @@ class EventState {
 
 	getEvent(key) {
 		return this.stateTree.events[key];
+	}
+
+	getDialog() {
+		return this.stateTree.dialog;
 	}
 }
 
@@ -472,27 +593,20 @@ class GameController {
 		// The mainContainer holds all objects which exist outside the map (eg: health)
 		game.mainContainer.addChild(game.gameSpace);
 
-		const eventState = new EventState();
+		this.eventState = new EventState();
 
-		this.player = new Player({ game, eventState });
-		const background = new Background({ game });
-		const gameInterface = [new HealthBar({ game, health: this.player.health })];
+		this.player = new Player({ game, eventState: this.eventState });
+		this.background = new Background({ game });
+		this.gameInterface = [new HealthBar({ game, health: this.player.health })];
 
-		const input = initInput();
+		this.input = initInput();
 
-		const currentMap = new SystemMap({ game, systemName: 'Algol' });
+		this.currentMap = new SystemMap({ game, systemName: 'Algol' });
 
 		sortSpritesByZIndex(game.mainContainer);
 		sortSpritesByZIndex(game.gameSpace);
 
-		this.state = new FlyingState({
-			player: this.player,
-			background,
-			gameInterface,
-			input,
-			currentMap,
-			eventState,
-		});
+		this.state = new FlyingState();
 	}
 
 	tick() {
@@ -505,14 +619,29 @@ class GameController {
 	}
 
 	update() {
-		const newState = this.state.update();
+		const newState = this.state.update({
+			player: this.player,
+			background: this.background,
+			gameInterface: this.gameInterface,
+			input: this.input,
+			currentMap: this.currentMap,
+			eventState: this.eventState,
+			game: this.game,
+		});
 		if (newState) {
 			this.state = newState;
 		}
 	}
 
 	handleInput() {
-		this.state.handleInput();
+		this.state.handleInput({
+			player: this.player,
+			background: this.background,
+			gameInterface: this.gameInterface,
+			input: this.input,
+			currentMap: this.currentMap,
+			eventState: this.eventState,
+		});
 	}
 
 	centerCamera({ gameSpace, playerPosition }) {
