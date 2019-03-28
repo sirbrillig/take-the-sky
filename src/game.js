@@ -182,7 +182,7 @@ class Player extends SpaceThing {
 		super({ game });
 		this.physics = new PlayerPhysics();
 		this.sprite = new PlayerSprite(game, this.physics);
-		this.health = new Health(500);
+		this.health = new Health(1000);
 	}
 
 	handleInput(input) {
@@ -331,6 +331,42 @@ class SystemMap {
 	}
 }
 
+class HealthBar extends SpaceThing {
+	constructor({ game, health }) {
+		super({ game });
+		this.health = health;
+
+		this.maxBarWidth = 164;
+		const outerBar = game.rectangle(this.maxBarWidth, 24, 0x000000, 0x008000, 2);
+		const innerBar = game.rectangle(this.maxBarWidth, 24, 0x008000);
+		const meterLabel = game.text('Hull strength', {
+			fontFamily: 'Arial',
+			fontSize: 20,
+			fill: 0xffffff,
+		});
+		const meter = game.group();
+		meter.addChild(outerBar);
+		meter.addChild(innerBar);
+		meter.addChild(meterLabel);
+		meterLabel.position.set(-120, 0);
+		meter.innerBar = innerBar;
+		meter.outerBar = outerBar;
+		const padding = 20;
+		meter.position.set(canvasWidth - outerBar.width - padding, 16);
+		meter.zIndex = 15;
+		this.meter = meter;
+		game.mainContainer.addChild(meter);
+	}
+
+	convertPercentToBarWidth(percent) {
+		return this.maxBarWidth * (percent / 100);
+	}
+
+	update() {
+		this.meter.innerBar.width = this.convertPercentToBarWidth(this.health.getHealthAsPercent());
+	}
+}
+
 class GameController {
 	constructor({ game }) {
 		this.game = game;
@@ -343,6 +379,7 @@ class GameController {
 
 		this.player = new Player({ game });
 		this.background = new Background({ game });
+		this.gameInterface = [new HealthBar({ game, health: this.player.health })];
 
 		this.input = initInput();
 
@@ -353,8 +390,8 @@ class GameController {
 	}
 
 	tick() {
-		this.handleInput([this.background, this.player], this.input);
-		this.update([this.background, this.player]);
+		this.handleInput([this.background, this.player, ...this.gameInterface], this.input);
+		this.update([this.background, this.player, ...this.gameInterface]);
 		this.centerCamera({
 			gameSpace: this.game.gameSpace,
 			playerPosition: this.player.physics.position,
