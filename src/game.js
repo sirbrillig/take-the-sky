@@ -132,6 +132,8 @@ class Sprite {
 class PlayerSprite extends Sprite {
 	constructor(game, physics) {
 		super(game, physics);
+		this.alive = true;
+
 		this.idle = game.sprite('assets/player-idle.png');
 		this.idle.rotation = physics.rotation;
 		this.idle.pivot.set(0.5, 0.5);
@@ -152,10 +154,37 @@ class PlayerSprite extends Sprite {
 		this.moving.visible = false;
 		game.gameSpace.addChild(this.moving);
 
+		this.explosion = game.animatedSpriteFromSpriteSheet('assets/explosion.json');
+		this.explosion.position.set(physics.position.x, physics.position.y);
+		this.explosion.animationSpeed = 0.6;
+		this.explosion.loop = false;
+		this.explosion.pivot.set(0.5, 0.5);
+		this.explosion.anchor.set(0.5, 0.5);
+		this.explosion.zIndex = 10;
+		this.explosion.visible = false;
+		game.gameSpace.addChild(this.explosion);
+
 		this.sprite = this.idle;
 	}
 
 	handleInput(player, input) {
+		if (!this.alive) {
+			return;
+		}
+		// TODO should this be in update?
+		if (player.health.getHealthAsPercent() === 0) {
+			this.sprite.visible = false;
+			this.sprite = this.explosion;
+			this.sprite.onComplete = () => {
+				this.explosion.visible = false;
+				// TODO: when animation finishes, trigger gameEnd event
+			};
+			this.sprite.position.set(this.physics.position.x, this.physics.position.y);
+			this.sprite.visible = true;
+			this.sprite.play();
+			this.alive = false;
+			return;
+		}
 		if (input.isKeyDown('KeyW') === true) {
 			this.sprite.visible = false;
 			this.sprite = this.moving;
@@ -172,6 +201,10 @@ class PlayerSprite extends Sprite {
 	}
 
 	update() {
+		if (!this.alive) {
+			this.physics.velocity = new Vector(0, 0);
+			return;
+		}
 		this.sprite.rotation = this.physics.rotation;
 		this.sprite.position.set(this.physics.position.x, this.physics.position.y);
 	}
