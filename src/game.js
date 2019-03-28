@@ -4,6 +4,7 @@ import createGame from './pixi-wrapper';
 import { adjustSpeedForRotation, adjustRotationForDirection, makeUniqueId } from './math';
 import Vector from './vector';
 import { getPlanetsInSystem, getStarsInSystem } from './planets';
+import { doSpritesOverlap } from './sprites';
 import debugFactory from './debug';
 
 const debug = debugFactory('sky:game');
@@ -46,6 +47,18 @@ class SpaceThing {
 class Health {
 	constructor(totalHealth) {
 		this.totalHealth = totalHealth;
+		this.current = totalHealth;
+	}
+
+	decrease(amount) {
+		this.current -= amount;
+		if (this.current < 0) {
+			this.current = 0;
+		}
+	}
+
+	getHealthAsPercent() {
+		return (this.current / this.totalHealth) * 100;
 	}
 }
 
@@ -57,7 +70,6 @@ class Physics {
 		this.accelerationRate = 0.04;
 		this.rotationRate = 0.06;
 		this.maxVelocity = 3;
-		this.hitBox = new Vector();
 	}
 
 	handleInput() {}
@@ -72,7 +84,7 @@ class PlayerPhysics extends Physics {
 		this.accelerationRate = 0.04;
 		this.rotationRate = 0.06;
 		this.maxVelocity = 3;
-		this.hitBox = new Vector();
+		this.hitBox = new Vector(64, 64);
 	}
 
 	handleInput(player, input) {
@@ -178,9 +190,20 @@ class Player extends SpaceThing {
 		this.sprite.handleInput(this, input);
 	}
 
-	update() {
+	update(currentMap) {
 		this.physics.update(this);
 		this.sprite.update(this);
+		if (
+			currentMap.stars.find(star =>
+				// TODO: make a version of this function which can take physics instances
+				doSpritesOverlap(
+					{ x: star.physics.position.x, y: star.physics.position.y, hitBox: star.physics.hitBox },
+					{ x: this.physics.position.x, y: this.physics.position.y, hitBox: this.physics.hitBox }
+				)
+			)
+		) {
+			this.health.decrease(4);
+		}
 	}
 }
 
@@ -339,7 +362,7 @@ class GameController {
 	}
 
 	update(things) {
-		things.map(thing => thing.update && thing.update());
+		things.map(thing => thing.update && thing.update(this.currentMap));
 	}
 
 	handleInput(things, input) {

@@ -16,7 +16,7 @@ import {
 	getShipDataForId,
 	getMovingObjectForId,
 } from './selectors';
-import Dialog from './dialog/index';
+import Dialog from './dialog';
 import {
 	getOtherShipsToCreate,
 	getShipSpriteForType,
