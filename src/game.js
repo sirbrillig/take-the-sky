@@ -6,6 +6,7 @@ import Vector from './vector';
 import { getPlanetsInSystem, getStarsInSystem } from './planets';
 import { doSpritesOverlap } from './sprites';
 import debugFactory from './debug';
+import reducer from './state-reducer';
 
 const debug = debugFactory('sky:game');
 
@@ -205,7 +206,7 @@ class PlayerSprite extends Sprite {
 			this.sprite = this.explosion;
 			this.sprite.onComplete = () => {
 				this.explosion.visible = false;
-				// TODO: when animation finishes, trigger gameEnd event
+				player.triggerEvent({ type: 'EVENT_TRIGGER', payload: 'gameOver' });
 			};
 			this.sprite.position.set(this.physics.position.x, this.physics.position.y);
 			this.sprite.visible = true;
@@ -219,11 +220,16 @@ class PlayerSprite extends Sprite {
 }
 
 class Player extends SpaceThing {
-	constructor({ game }) {
+	constructor({ game, eventState }) {
 		super({ game });
 		this.physics = new PlayerPhysics();
 		this.sprite = new PlayerSprite(game, this.physics);
 		this.health = new Health(1000);
+		this.eventState = eventState;
+	}
+
+	triggerEvent(event) {
+		this.eventState.triggerEvent(event);
 	}
 
 	handleInput(input) {
@@ -405,16 +411,20 @@ class GameState {
 }
 
 class FlyingState extends GameState {
-	constructor({ player, background, gameInterface, input, currentMap }) {
+	constructor({ player, background, gameInterface, input, currentMap, eventState }) {
 		super('flying');
 		this.player = player;
 		this.background = background;
 		this.gameInterface = gameInterface;
 		this.input = input;
 		this.currentMap = currentMap;
+		this.eventState = eventState;
 	}
 
 	update() {
+		if (this.eventState.getEvent('gameOver')) {
+			return new GameOverState();
+		}
 		[this.background, this.player, ...this.gameInterface].map(
 			thing => thing.update && thing.update({ currentMap: this.currentMap, player: this.player })
 		);
@@ -424,6 +434,31 @@ class FlyingState extends GameState {
 		[this.background, this.player, ...this.gameInterface].map(
 			thing => thing.handleInput && thing.handleInput(this.input)
 		);
+	}
+}
+
+class GameOverState extends GameState {
+	constructor() {
+		super('gameOver');
+		// TODO: display game over stuff
+	}
+}
+
+class EventState {
+	constructor() {
+		this.stateTree = reducer(undefined, { type: 'INIT' });
+	}
+
+	triggerEvent(event) {
+		this.stateTree = reducer(this.stateTree, event);
+	}
+
+	getState() {
+		return this.stateTree;
+	}
+
+	getEvent(key) {
+		return this.stateTree.events[key];
 	}
 }
 
@@ -437,7 +472,9 @@ class GameController {
 		// The mainContainer holds all objects which exist outside the map (eg: health)
 		game.mainContainer.addChild(game.gameSpace);
 
-		this.player = new Player({ game });
+		const eventState = new EventState();
+
+		this.player = new Player({ game, eventState });
 		const background = new Background({ game });
 		const gameInterface = [new HealthBar({ game, health: this.player.health })];
 
@@ -454,6 +491,7 @@ class GameController {
 			gameInterface,
 			input,
 			currentMap,
+			eventState,
 		});
 	}
 
@@ -467,7 +505,10 @@ class GameController {
 	}
 
 	update() {
-		this.state.update();
+		const newState = this.state.update();
+		if (newState) {
+			this.state = newState;
+		}
 	}
 
 	handleInput() {
