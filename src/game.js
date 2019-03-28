@@ -277,11 +277,6 @@ class Planet extends SpaceThing {
 		this.physics = new PlanetPhysics({ position, size, name });
 		this.sprite = new PlanetSprite(game, this.physics);
 	}
-
-	update() {
-		this.physics.update(this);
-		this.sprite.update(this);
-	}
 }
 
 class Star extends SpaceThing {
@@ -299,11 +294,6 @@ class Star extends SpaceThing {
 			);
 			this.game.gameSpace.addChild(box);
 		}
-	}
-
-	update() {
-		this.physics.update(this);
-		this.sprite.update(this);
 	}
 }
 
