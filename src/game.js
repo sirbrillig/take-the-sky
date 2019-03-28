@@ -398,6 +398,35 @@ class HealthBar extends SpaceThing {
 	}
 }
 
+class GameState {
+	constructor(stateName) {
+		this.stateName = stateName;
+	}
+}
+
+class FlyingState extends GameState {
+	constructor({ player, background, gameInterface, input, currentMap }) {
+		super('flying');
+		this.player = player;
+		this.background = background;
+		this.gameInterface = gameInterface;
+		this.input = input;
+		this.currentMap = currentMap;
+	}
+
+	update() {
+		[this.background, this.player, ...this.gameInterface].map(
+			thing => thing.update && thing.update({ currentMap: this.currentMap, player: this.player })
+		);
+	}
+
+	handleInput() {
+		[this.background, this.player, ...this.gameInterface].map(
+			thing => thing.handleInput && thing.handleInput(this.input)
+		);
+	}
+}
+
 class GameController {
 	constructor({ game }) {
 		this.game = game;
@@ -409,34 +438,40 @@ class GameController {
 		game.mainContainer.addChild(game.gameSpace);
 
 		this.player = new Player({ game });
-		this.background = new Background({ game });
-		this.gameInterface = [new HealthBar({ game, health: this.player.health })];
+		const background = new Background({ game });
+		const gameInterface = [new HealthBar({ game, health: this.player.health })];
 
-		this.input = initInput();
+		const input = initInput();
 
-		this.currentMap = new SystemMap({ game, systemName: 'Algol' });
+		const currentMap = new SystemMap({ game, systemName: 'Algol' });
 
 		sortSpritesByZIndex(game.mainContainer);
 		sortSpritesByZIndex(game.gameSpace);
+
+		this.state = new FlyingState({
+			player: this.player,
+			background,
+			gameInterface,
+			input,
+			currentMap,
+		});
 	}
 
 	tick() {
-		this.handleInput([this.background, this.player, ...this.gameInterface], this.input);
-		this.update([this.background, this.player, ...this.gameInterface]);
+		this.handleInput();
+		this.update();
 		this.centerCamera({
 			gameSpace: this.game.gameSpace,
 			playerPosition: this.player.physics.position,
 		});
 	}
 
-	update(things) {
-		things.map(
-			thing => thing.update && thing.update({ currentMap: this.currentMap, player: this.player })
-		);
+	update() {
+		this.state.update();
 	}
 
-	handleInput(things, input) {
-		things.map(thing => thing.handleInput && thing.handleInput(input));
+	handleInput() {
+		this.state.handleInput();
 	}
 
 	centerCamera({ gameSpace, playerPosition }) {
