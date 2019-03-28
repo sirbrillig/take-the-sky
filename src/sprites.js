@@ -346,6 +346,9 @@ function sortSpritesByZIndex(game) {
  *
  * Each sprite object must have a width and a height property, as well as an x
  * and a y property. The x and y properties MUST be the center of each sprite.
+ *
+ * If either object has a hitBox property, that will be used in place of
+ * width/height.
  */
 export function doSpritesOverlap(r1, r2) {
 	// Find the center points of each sprite
@@ -354,11 +357,17 @@ export function doSpritesOverlap(r1, r2) {
 	const r2CenterX = r2.x;
 	const r2CenterY = r2.y;
 
+	// Allow using hitBox property instead of width/height if it exists
+	const r1Width = r1.hitBox ? r1.hitBox.x : r1.width;
+	const r2Width = r2.hitBox ? r2.hitBox.x : r2.width;
+	const r1Height = r1.hitBox ? r1.hitBox.y : r1.height;
+	const r2Height = r2.hitBox ? r2.hitBox.y : r2.height;
+
 	// Find the half-widths and half-heights of each sprite
-	const r1HalfWidth = r1.width / 2;
-	const r1HalfHeight = r1.height / 2;
-	const r2HalfWidth = r2.width / 2;
-	const r2HalfHeight = r2.height / 2;
+	const r1HalfWidth = r1Width / 2;
+	const r1HalfHeight = r1Height / 2;
+	const r2HalfWidth = r2Width / 2;
+	const r2HalfHeight = r2Height / 2;
 
 	// Calculate the distance vector between the sprites
 	const vx = r1CenterX - r2CenterX;
