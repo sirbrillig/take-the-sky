@@ -46,6 +46,17 @@ class Input {
 	isKeyDown(keyCode) {
 		return this.keyMap[keyCode] === true;
 	}
+
+	/**
+	 * Unsets the key if it is down
+	 */
+	isKeyDownOnce(keyCode) {
+		if (this.keyMap[keyCode] === true) {
+			this.keyMap[keyCode] = null;
+			return true;
+		}
+		return false;
+	}
 }
 
 class SpaceThing {
@@ -608,7 +619,7 @@ class DialogState extends GameState {
 				currentDialogObject.options.length - 1
 			);
 		}
-		if (input.isKeyDown('Space') === true) {
+		if (input.isKeyDownOnce('Space') === true) {
 			const selectedOption = currentDialogObject.options[this.currentOption];
 			if (!selectedOption) {
 				return;
