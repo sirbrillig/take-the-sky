@@ -30,8 +30,17 @@ const filesToLoad = [
 ];
 
 class Input {
-	constructor(keyMap) {
-		this.keyMap = keyMap;
+	constructor() {
+		this.keyMap = {};
+		const onKeyDown = event => {
+			this.keyMap[event.code] = true;
+		};
+		const onKeyUp = event => {
+			this.keyMap[event.code] = null;
+		};
+
+		window.document.addEventListener('keydown', onKeyDown); // eslint-disable-line no-undef
+		window.document.addEventListener('keyup', onKeyUp); // eslint-disable-line no-undef
 	}
 
 	isKeyDown(keyCode) {
@@ -143,7 +152,7 @@ class PlayerPhysics extends Physics {
 		this.hitBox = new Vector(64, 64);
 	}
 
-	handleInput(player, input) {
+	handleInput({ input, currentMap, eventState }) {
 		if (input.isKeyDown('KeyW') === true) {
 			this.velocity = adjustSpeedForRotation(
 				this.rotation,
@@ -164,6 +173,15 @@ class PlayerPhysics extends Physics {
 				this.rotationRate
 			);
 			debug(`rotating player counterclockwise to ${this.rotation}`);
+		}
+		if (input.isKeyDown('KeyL') === true) {
+			const touchingPlanet = currentMap.planets.find(planet => this.isTouching(planet.physics));
+			if (touchingPlanet) {
+				eventState.dispatchAction({
+					type: 'DIALOG_TRIGGER',
+					payload: `landingPlanet${touchingPlanet.name}`,
+				});
+			}
 		}
 	}
 
@@ -223,7 +241,7 @@ class PlayerSprite extends Sprite {
 		this.sprite = this.idle;
 	}
 
-	handleInput(player, input) {
+	handleInput({ input }) {
 		if (!this.alive) {
 			return;
 		}
@@ -243,6 +261,7 @@ class PlayerSprite extends Sprite {
 	}
 
 	update({ player }) {
+		// TODO: stop any animations if the GameState has changed!
 		if (!this.alive) {
 			this.physics.velocity = new Vector(0, 0);
 			return;
@@ -278,9 +297,9 @@ class Player extends SpaceThing {
 		this.eventState.dispatchAction(event);
 	}
 
-	handleInput(input) {
-		this.physics.handleInput(this, input);
-		this.sprite.handleInput(this, input);
+	handleInput({ input, currentMap, eventState }) {
+		this.physics.handleInput({ player: this, input, currentMap, eventState });
+		this.sprite.handleInput({ player: this, input, currentMap, eventState });
 	}
 
 	update({ currentMap }) {
@@ -306,21 +325,6 @@ class Background extends SpaceThing {
 	}
 }
 
-function initInput() {
-	const keyMap = {};
-	const onKeyDown = event => {
-		keyMap[event.code] = true;
-	};
-	const onKeyUp = event => {
-		keyMap[event.code] = null;
-	};
-
-	window.document.addEventListener('keydown', onKeyDown); // eslint-disable-line no-undef
-	window.document.addEventListener('keyup', onKeyUp); // eslint-disable-line no-undef
-
-	return new Input(keyMap);
-}
-
 function sortSpritesByZIndex(container) {
 	// sort sprites by zorder
 	container.children.sort((a, b) => {
@@ -331,9 +335,8 @@ function sortSpritesByZIndex(container) {
 }
 
 class PlanetPhysics extends Physics {
-	constructor({ position, name, size }) {
+	constructor({ position, size }) {
 		super();
-		this.name = name;
 		this.size = size;
 		this.position.set(position.x, position.y);
 		this.hitBox = new Vector(size, size);
@@ -382,6 +385,7 @@ class StarSprite extends Sprite {
 class Planet extends SpaceThing {
 	constructor({ game, position, size, name }) {
 		super({ game });
+		this.name = name;
 		this.physics = new PlanetPhysics({ position, size, name });
 		this.sprite = new PlanetSprite(game, this.physics);
 	}
@@ -462,13 +466,13 @@ class FlyingState extends GameState {
 			return new DialogState();
 		}
 		[background, player, ...gameInterface].map(
-			thing => thing.update && thing.update({ currentMap, player })
+			thing => thing.update && thing.update({ currentMap, player, eventState })
 		);
 	}
 
-	handleInput({ input, background, player, gameInterface }) {
+	handleInput({ input, background, player, gameInterface, currentMap, eventState }) {
 		[background, player, ...gameInterface].map(
-			thing => thing.handleInput && thing.handleInput(input)
+			thing => thing.handleInput && thing.handleInput({ input, currentMap, eventState })
 		);
 	}
 }
@@ -624,6 +628,9 @@ class DialogState extends GameState {
 class EventState {
 	constructor() {
 		this.stateTree = reducer(undefined, { type: 'INIT' });
+		this.getState = this.getState.bind(this);
+		this.getEvent = this.getEvent.bind(this);
+		this.getDialog = this.getDialog.bind(this);
 	}
 
 	dispatchAction(event) {
@@ -659,7 +666,7 @@ class GameController {
 		this.background = new Background({ game });
 		this.gameInterface = [new HealthBar({ game, health: this.player.health })];
 
-		this.input = initInput();
+		this.input = new Input();
 
 		this.currentMap = new SystemMap({ game, systemName: 'Algol' });
 
