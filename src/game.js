@@ -1,7 +1,12 @@
 /* @format */
 
 import createGame from './pixi-wrapper';
-import { adjustSpeedForRotation, adjustRotationForDirection, makeUniqueId } from './math';
+import {
+	clampNumber,
+	adjustSpeedForRotation,
+	adjustRotationForDirection,
+	makeUniqueId,
+} from './math';
 import Vector from './vector';
 import { getPlanetsInSystem, getStarsInSystem } from './planets';
 import { doSpritesOverlap } from './sprites';
@@ -207,7 +212,7 @@ class PlayerSprite extends Sprite {
 			this.sprite = this.explosion;
 			this.sprite.onComplete = () => {
 				this.explosion.visible = false;
-				player.dispatchAction({ type: 'EVENT_TRIGGER', payload: 'gameOver' });
+				player.dispatchAction({ type: 'DIALOG_TRIGGER', payload: 'explodedShip' });
 			};
 			this.sprite.position.set(this.physics.position.x, this.physics.position.y);
 			this.sprite.visible = true;
@@ -424,9 +429,6 @@ class FlyingState extends GameState {
 		if (eventState.getDialog()) {
 			return new DialogState();
 		}
-		if (eventState.getEvent('gameOver')) {
-			return new GameOverState();
-		}
 		[background, player, ...gameInterface].map(
 			thing => thing.update && thing.update({ currentMap, player })
 		);
@@ -436,19 +438,6 @@ class FlyingState extends GameState {
 		[background, player, ...gameInterface].map(
 			thing => thing.handleInput && thing.handleInput(input)
 		);
-	}
-}
-
-class GameOverState extends GameState {
-	constructor() {
-		super('gameOver');
-	}
-
-	update({ eventState }) {
-		eventState.dispatchAction({ type: 'DIALOG_TRIGGER', payload: 'gameOver' });
-		if (eventState.getDialog()) {
-			return new DialogState();
-		}
 	}
 }
 
@@ -529,6 +518,11 @@ class DialogState extends GameState {
 	}
 
 	update({ game, eventState }) {
+		if (!eventState.getDialog()) {
+			this.dialogSprite && this.dialogSprite.destroy();
+			this.dialogSprite = null;
+			return new FlyingState();
+		}
 		if (!this.dialogSprite) {
 			this.dialogSprite = this.createDialog(game);
 		}
@@ -544,20 +538,54 @@ class DialogState extends GameState {
 			if (currentDialogObject.text) {
 				this.dialogSprite.textArea.text = currentDialogObject.text;
 				this.createDialogOptions(game, this.dialogSprite, currentDialogObject);
+				this.currentOption = 0;
 				this.dialogSprite.visible = true;
 			}
 			if (!currentDialogObject.text) {
 				eventState.dispatchAction({ type: 'DIALOG_HIDE' });
 			}
 		}
-		if (this.dialogSprite.visible && !eventState.getDialog()) {
-			this.dialogSprite.visible = false;
-		}
-		// TODO: whatever this does
-		// if (eventState.getDialog()) {
-		// 	this.dialogSprite.changeSelectedOption(getDialogSelection());
-		// }
+		this.dialogSprite.changeSelectedOption(this.currentOption);
 		this.currentDialog = eventState.getDialog();
+	}
+
+	handleInput({ input, eventState }) {
+		const dialog = new Dialog({
+			getState: eventState.getState,
+			handleAction: eventState.dispatchAction,
+		});
+		const currentDialogObject = dialog.getDialogObjectForKey(eventState.getDialog());
+		if (!currentDialogObject) {
+			return;
+		}
+		if (input.isKeyDown('KeyW') === true) {
+			this.currentOption = clampNumber(
+				this.currentOption - 1,
+				0,
+				currentDialogObject.options.length - 1
+			);
+		}
+		if (input.isKeyDown('KeyS') === true) {
+			this.currentOption = clampNumber(
+				this.currentOption + 1,
+				0,
+				currentDialogObject.options.length - 1
+			);
+		}
+		if (input.isKeyDown('Space') === true) {
+			const selectedOption = currentDialogObject.options[this.currentOption];
+			if (!selectedOption) {
+				return;
+			}
+			if (selectedOption.link) {
+				eventState.dispatchAction({
+					type: 'DIALOG_TRIGGER',
+					payload: selectedOption.link,
+				});
+			} else {
+				eventState.dispatchAction({ type: 'DIALOG_HIDE' });
+			}
+		}
 	}
 }
 
