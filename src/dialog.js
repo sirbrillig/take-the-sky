@@ -107,16 +107,18 @@ export default class Dialog {
 				return this.ai.getAgeInMs();
 			case 'triggerEvent':
 				debug('triggerEvent');
-				if (!this.ai) {
-					throw new Error('Cannot use AI functions without AI');
-				}
-				return this.ai.triggerEvent(this.executeExpression(expression.args[0], finishScript));
+				this.handleAction({
+					type: 'EVENT_TRIGGER',
+					payload: this.executeExpression(expression.args[0], finishScript),
+				});
+				return true;
 			case 'linkToDialog':
 				debug('linkToDialog');
-				if (!this.ai) {
-					throw new Error('Cannot use AI functions without AI');
-				}
-				return this.ai.showDialog(this.executeExpression(expression.args[0], finishScript));
+				this.handleAction({
+					type: 'DIALOG_TRIGGER',
+					payload: this.executeExpression(expression.args[0], finishScript),
+				});
+				return true;
 			case 'destroy':
 				debug('destroy');
 				if (!this.ai) {

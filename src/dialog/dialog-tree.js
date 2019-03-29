@@ -7,6 +7,7 @@ export default function getDialogTree() {
 		},
 		explodedShip: {
 			text: "As the ship's hull tears apart, you reflect that at least, at the end, you were free.",
+			script: "triggerEvent('gameOver');",
 			options: [{ text: 'Oh well', link: 'gameOver' }],
 		},
 		starsAreHot: {
