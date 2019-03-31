@@ -2,14 +2,14 @@
 
 import nearley from 'nearley';
 import grammar from './parser/grammar';
-import getDialogTree from './dialog/dialog-tree';
+import getDialogTree from './dialog-tree';
 import debugFactory from './debug';
 import { getNpcHappiness, getEvent } from './selectors';
 import { makeShipData } from './other-ships';
 
 const debug = debugFactory('sky:dialog');
 
-export default class Dialog {
+export default class DialogManager {
 	constructor({ getState, handleAction, ai = null }) {
 		this.getState = getState;
 		this.handleAction = handleAction;

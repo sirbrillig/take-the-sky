@@ -11,7 +11,7 @@ import Vector from './vector';
 import { getPlanetsInSystem, getStarsInSystem } from './planets';
 import debugFactory from './debug';
 import reducer from './state-reducer';
-import Dialog from './dialog';
+import DialogManager from './dialog-manager';
 
 const debug = debugFactory('sky:game');
 
@@ -655,7 +655,7 @@ class DialogState extends GameState {
 			this.dialogSprite = this.createDialog(game);
 		}
 		if (eventState.getDialog() !== this.currentDialog) {
-			const dialog = new Dialog({
+			const dialog = new DialogManager({
 				getState: eventState.getState,
 				handleAction: eventState.dispatchAction,
 			});
@@ -678,7 +678,7 @@ class DialogState extends GameState {
 	}
 
 	handleInput({ input, eventState }) {
-		const dialog = new Dialog({
+		const dialog = new DialogManager({
 			getState: eventState.getState,
 			handleAction: eventState.dispatchAction,
 		});
