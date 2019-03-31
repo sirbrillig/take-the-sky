@@ -601,11 +601,12 @@ class DialogState extends GameState {
 			getState: eventState.getState,
 			handleAction: eventState.dispatchAction,
 		});
-		const currentDialogObject = dialog.getDialogObjectForKey(eventState.getDialog());
-		if (!currentDialogObject) {
+		const currentDialog = eventState.getDialog();
+		if (!currentDialog) {
 			return;
 		}
 		if (input.isKeyDown('KeyW') === true) {
+			const currentDialogObject = dialog.getDialogObjectForKey(currentDialog);
 			this.currentOption = clampNumber(
 				this.currentOption - 1,
 				0,
@@ -613,6 +614,7 @@ class DialogState extends GameState {
 			);
 		}
 		if (input.isKeyDown('KeyS') === true) {
+			const currentDialogObject = dialog.getDialogObjectForKey(currentDialog);
 			this.currentOption = clampNumber(
 				this.currentOption + 1,
 				0,
@@ -620,16 +622,21 @@ class DialogState extends GameState {
 			);
 		}
 		if (input.isKeyDownOnce('Space') === true) {
+			const currentDialogObject = dialog.getDialogObjectForKey(currentDialog);
 			const selectedOption = currentDialogObject.options[this.currentOption];
 			if (!selectedOption) {
 				return;
+			}
+			if (selectedOption.script) {
+				dialog.executeScript(selectedOption.script);
 			}
 			if (selectedOption.link) {
 				eventState.dispatchAction({
 					type: 'DIALOG_TRIGGER',
 					payload: selectedOption.link,
 				});
-			} else {
+			}
+			if (!selectedOption.link) {
 				eventState.dispatchAction({ type: 'DIALOG_HIDE' });
 			}
 		}
