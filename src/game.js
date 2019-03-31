@@ -271,7 +271,7 @@ class PlayerSprite extends Sprite {
 		this.sprite.visible = true;
 	}
 
-	update({ player }) {
+	update({ player, eventState }) {
 		// TODO: stop any animations if the GameState has changed!
 		if (!this.alive) {
 			this.physics.velocity = new Vector(0, 0);
@@ -282,7 +282,7 @@ class PlayerSprite extends Sprite {
 			this.sprite = this.explosion;
 			this.sprite.onComplete = () => {
 				this.explosion.visible = false;
-				player.dispatchAction({ type: 'DIALOG_TRIGGER', payload: 'explodedShip' });
+				eventState.dispatchAction({ type: 'DIALOG_TRIGGER', payload: 'explodedShip' });
 			};
 			this.sprite.position.set(this.physics.position.x, this.physics.position.y);
 			this.sprite.visible = true;
@@ -296,16 +296,11 @@ class PlayerSprite extends Sprite {
 }
 
 class Player extends SpaceThing {
-	constructor({ game, eventState }) {
+	constructor({ game }) {
 		super({ game });
 		this.physics = new PlayerPhysics();
 		this.sprite = new PlayerSprite(game, this.physics);
 		this.health = new Health(1000);
-		this.eventState = eventState;
-	}
-
-	dispatchAction(event) {
-		this.eventState.dispatchAction(event);
 	}
 
 	handleInput({ input, currentMap, eventState }) {
@@ -313,9 +308,9 @@ class Player extends SpaceThing {
 		this.sprite.handleInput({ player: this, input, currentMap, eventState });
 	}
 
-	update({ currentMap }) {
+	update({ currentMap, eventState }) {
 		this.physics.update(this);
-		this.sprite.update({ currentMap, player: this });
+		this.sprite.update({ eventState, currentMap, player: this });
 		if (currentMap.stars.find(star => this.physics.isTouching(star.physics))) {
 			this.health.decrease(4);
 		}
@@ -680,7 +675,7 @@ class GameController {
 
 		this.eventState = new EventState();
 
-		this.player = new Player({ game, eventState: this.eventState });
+		this.player = new Player({ game });
 		this.background = new Background({ game });
 		this.gameInterface = [new HealthBar({ game, health: this.player.health })];
 

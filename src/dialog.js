@@ -84,6 +84,7 @@ export default class Dialog {
 				const behavior = expression.args[2].value;
 				debug('createShip', type, name, behavior);
 				const shipData = makeShipData(type, name, behavior);
+				// TODO: this is no longer a way to create ships
 				this.handleAction({ type: 'OTHER_SHIP_ADD', payload: shipData });
 				return true;
 			}
