@@ -203,6 +203,24 @@ class PlayerPhysics extends Physics {
 	}
 }
 
+class ShipPhysics extends Physics {
+	constructor() {
+		super();
+		// TODO: set these from the constructor
+		this.position.set(gameWidth / 2, gameHeight / 2);
+		this.accelerationRate = 0.04;
+		this.rotationRate = 0.06;
+		this.maxVelocity = 3;
+		this.hitBox = new Vector(64, 64);
+	}
+
+	update() {
+		// The grid is upside down (0,0 is top left) so we subtract
+		this.position = this.position.sub(this.velocity);
+		debug(`moving ship ${this.id} to ${this.position}`);
+	}
+}
+
 class Sprite {
 	constructor(game, physics) {
 		this.physics = physics;
@@ -295,6 +313,56 @@ class PlayerSprite extends Sprite {
 	}
 }
 
+class ShipSprite extends Sprite {
+	constructor(game, physics) {
+		super(game, physics);
+		this.alive = true;
+
+		// TODO: set sprite from constructor
+		this.normal = game.sprite('assets/cruiser.png');
+		this.normal.rotation = physics.rotation;
+		this.normal.pivot.set(0.5, 0.5);
+		this.normal.anchor.set(0.5, 0.5);
+		this.normal.position.set(physics.position.x, physics.position.y);
+		this.normal.zIndex = 10;
+		this.normal.visible = false;
+		game.gameSpace.addChild(this.normal);
+
+		this.explosion = game.animatedSpriteFromSpriteSheet('assets/explosion.json');
+		this.explosion.position.set(physics.position.x, physics.position.y);
+		this.explosion.animationSpeed = 0.6;
+		this.explosion.loop = false;
+		this.explosion.pivot.set(0.5, 0.5);
+		this.explosion.anchor.set(0.5, 0.5);
+		this.explosion.zIndex = 10;
+		this.explosion.visible = false;
+		game.gameSpace.addChild(this.explosion);
+
+		this.sprite = this.normal;
+	}
+
+	update({ health }) {
+		if (!this.alive) {
+			this.physics.velocity = new Vector(0, 0);
+			return;
+		}
+		if (health.getHealthAsPercent() === 0) {
+			this.sprite.visible = false;
+			this.sprite = this.explosion;
+			this.sprite.onComplete = () => {
+				this.explosion.visible = false;
+			};
+			this.sprite.position.set(this.physics.position.x, this.physics.position.y);
+			this.sprite.visible = true;
+			this.sprite.play();
+			this.alive = false;
+			return;
+		}
+		this.sprite.rotation = this.physics.rotation;
+		this.sprite.position.set(this.physics.position.x, this.physics.position.y);
+	}
+}
+
 class Player extends SpaceThing {
 	constructor({ game }) {
 		super({ game });
@@ -311,6 +379,24 @@ class Player extends SpaceThing {
 	update({ currentMap, eventState }) {
 		this.physics.update(this);
 		this.sprite.update({ eventState, currentMap, player: this });
+		if (currentMap.stars.find(star => this.physics.isTouching(star.physics))) {
+			this.health.decrease(4);
+		}
+	}
+}
+
+class Ship extends SpaceThing {
+	constructor({ game }) {
+		super({ game });
+		this.physics = new ShipPhysics();
+		this.sprite = new ShipSprite(game, this.physics);
+		// TODO: set this in constructor
+		this.health = new Health(400);
+	}
+
+	update({ currentMap, eventState }) {
+		this.physics.update(this);
+		this.sprite.update({ eventState, currentMap, health: this.health });
 		if (currentMap.stars.find(star => this.physics.isTouching(star.physics))) {
 			this.health.decrease(4);
 		}
@@ -678,6 +764,8 @@ class GameController {
 		this.player = new Player({ game });
 		this.background = new Background({ game });
 		this.gameInterface = [new HealthBar({ game, health: this.player.health })];
+		this.ships = [];
+		// TODO: how do we add a ship to be tracked/updated?
 
 		this.input = new Input();
 
