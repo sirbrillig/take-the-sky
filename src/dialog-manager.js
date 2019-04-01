@@ -4,6 +4,7 @@ import nearley from 'nearley';
 import grammar from './parser/grammar';
 import getDialogTree from './dialog-tree';
 import {
+	adjustSpeedForRotation,
 	getRadiansNeededToRotateTowardPlayer,
 	adjustRotationForDirection,
 	getRotationDirection,
@@ -163,11 +164,13 @@ export default class DialogManager {
 			}
 			case 'accelerate':
 				debug('accelerate');
+				this.ship.physics.velocity = adjustSpeedForRotation(
+					this.ship.physics.rotation,
+					this.ship.physics.velocity,
+					this.ship.physics.accelerationRate,
+					this.ship.physics.maxVelocity
+				);
 				return true;
-				if (!this.ai) {
-					throw new Error('Cannot use AI functions without AI');
-				}
-				return this.ai.accelerate();
 			case 'decelerate':
 				debug('decelerate');
 				return true;
