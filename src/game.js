@@ -436,17 +436,29 @@ class ShipManager {
 	}
 }
 
+class Behavior {
+	constructor({ behaviorTokens }) {
+		this.behaviorTokens = behaviorTokens;
+	}
+
+	update({ ship, player }) {
+		// TODO: execute behavior script and apply changes to Ship
+	}
+}
+
 class Ship extends SpaceThing {
 	constructor({ game, type, name, behavior, player }) {
 		super({ game });
 		this.id = name;
+		this.player = player;
 		this.physics = new ShipPhysics({ player });
 		this.sprite = new ShipSprite({ game, physics: this.physics, type });
 		this.health = new Health(400);
-		// this.behavior = new Behavior({ behavior });
+		this.behavior = new Behavior({ behaviorTokens: behavior });
 	}
 
 	update({ currentMap, eventState }) {
+		this.behavior.update({ ship: this, currentMap, eventState, player: this.player });
 		this.physics.update(this);
 		this.sprite.update({ eventState, currentMap, health: this.health });
 		debug(`moving ship ${this.id} to ${this.physics.position}`);
