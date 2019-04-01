@@ -27,9 +27,11 @@
     "serve": "http-server public",
     "build": "rollup --config rollup.config.js",
     "watch": "rollup --watch --config rollup.config.js",
+    "lint": "eslint src",
     "compile-grammar": "nearleyc src/parser/grammar.ne -o src/parser/grammar.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "eslintIgnore": ["src/parser/*"],
   "author": "Payton Swick <payton@foolord.com>",
   "license": "MIT"
 }
