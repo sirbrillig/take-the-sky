@@ -628,6 +628,7 @@ class FlyingState extends GameState {
 
 	update({ eventState, player, background, gameInterface, currentMap, shipManager }) {
 		if (eventState.getDialog()) {
+			debug('switching to DialogState');
 			return new DialogState();
 		}
 		const ships = shipManager.getShips();
@@ -724,6 +725,7 @@ class DialogState extends GameState {
 		if (!eventState.getDialog()) {
 			this.dialogSprite && this.dialogSprite.destroy();
 			this.dialogSprite = null;
+			debug('switching to FlyingState');
 			return new FlyingState();
 		}
 		if (!this.dialogSprite) {
@@ -807,6 +809,7 @@ class EventState {
 		this.getState = this.getState.bind(this);
 		this.getEvent = this.getEvent.bind(this);
 		this.getDialog = this.getDialog.bind(this);
+		this.dispatchAction = this.dispatchAction.bind(this);
 	}
 
 	dispatchAction(event) {
