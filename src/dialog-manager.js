@@ -83,8 +83,7 @@ export default class DialogManager {
 				const name = this.executeExpression(expression.args[1], finishScript);
 				const behavior = expression.args[2].value;
 				debug('createShip', type, name, behavior);
-				// TODO: pass in data
-				this.shipManager.createShip();
+				this.shipManager.createShip({ type, name, behavior });
 				return true;
 			}
 			case 'distanceToPlayer':

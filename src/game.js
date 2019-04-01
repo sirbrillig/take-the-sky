@@ -212,14 +212,35 @@ class PlayerPhysics extends Physics {
 }
 
 class ShipPhysics extends Physics {
-	constructor() {
+	constructor({ player }) {
 		super();
-		// TODO: set these from the constructor
-		this.position.set(gameWidth / 2, gameHeight / 2);
+		const [x, y] = this.getOffScreenPositionFromPlayer(player);
+		debug('Setting ship position', x, y);
+		this.position.set(x, y);
 		this.accelerationRate = 0.04;
 		this.rotationRate = 0.06;
 		this.maxVelocity = 3;
 		this.hitBox = new Vector(64, 64);
+	}
+
+	getOffScreenPositionFromPlayer(player) {
+		const sides = ['top', 'left', 'right', 'bottom'];
+		const offScreenSide = sides[Math.floor(Math.random() * Math.floor(sides.length))];
+		const margin = 100;
+		const halfWidth = gameWidth / 2 + margin;
+		const halfHeight = gameHeight / 2 + margin;
+		switch (offScreenSide) {
+			case 'left':
+				return [player.physics.position.x - halfWidth, player.physics.position.y];
+			case 'right':
+				return [player.physics.position.x + halfWidth, player.physics.position.y];
+			case 'top':
+				return [player.physics.position.x, player.physics.position.y - halfHeight];
+			case 'bottom':
+				return [player.physics.position.x, player.physics.position.y + halfHeight];
+			default:
+				throw new Error(`Unknown offscreen direction ${offScreenSide}`);
+		}
 	}
 
 	update() {
@@ -321,12 +342,11 @@ class PlayerSprite extends Sprite {
 }
 
 class ShipSprite extends Sprite {
-	constructor(game, physics) {
+	constructor({ game, physics, type }) {
 		super(game, physics);
 		this.alive = true;
 
-		// TODO: set sprite from constructor
-		this.normal = game.sprite('assets/cruiser.png');
+		this.normal = game.sprite(this.getSpriteFromType(type));
 		this.normal.rotation = physics.rotation;
 		this.normal.pivot.set(0.5, 0.5);
 		this.normal.anchor.set(0.5, 0.5);
@@ -346,6 +366,13 @@ class ShipSprite extends Sprite {
 		game.gameSpace.addChild(this.explosion);
 
 		this.sprite = this.normal;
+	}
+
+	getSpriteFromType(type) {
+		if (type === 'cruiser') {
+			return 'assets/cruiser.png';
+		}
+		throw new Error(`Unknown ship type ${type}`);
 	}
 
 	update({ health }) {
@@ -393,15 +420,15 @@ class Player extends SpaceThing {
 }
 
 class ShipManager {
-	constructor({ game }) {
+	constructor({ game, player }) {
 		this.game = game;
+		this.player = player;
 		this.ships = [];
 	}
 
-	createShip() {
-		debug('Creating new ship');
-		// TODO pass in data
-		this.ships.push(new Ship({ game: this.game }));
+	createShip({ type, name, behavior }) {
+		debug('Creating new ship', type, name, behavior);
+		this.ships.push(new Ship({ game: this.game, type, name, behavior, player: this.player }));
 	}
 
 	getShips() {
@@ -410,12 +437,13 @@ class ShipManager {
 }
 
 class Ship extends SpaceThing {
-	constructor({ game }) {
+	constructor({ game, type, name, behavior, player }) {
 		super({ game });
-		this.physics = new ShipPhysics();
-		this.sprite = new ShipSprite(game, this.physics);
-		// TODO: set this in constructor
+		this.id = name;
+		this.physics = new ShipPhysics({ player });
+		this.sprite = new ShipSprite({ game, physics: this.physics, type });
 		this.health = new Health(400);
+		// this.behavior = new Behavior({ behavior });
 	}
 
 	update({ currentMap, eventState }) {
@@ -794,7 +822,7 @@ class GameController {
 		this.player = new Player({ game });
 		this.background = new Background({ game });
 		this.gameInterface = [new HealthBar({ game, health: this.player.health })];
-		this.shipManager = new ShipManager({ game });
+		this.shipManager = new ShipManager({ game, player: this.player });
 
 		this.input = new Input();
 
