@@ -146,6 +146,9 @@ export default class DialogManager {
 					shipVector: this.ship.physics.position,
 					rotation: this.ship.physics.rotation,
 				});
+				if (!radiansNeededToRotate) {
+					throw new Error(`Cannot determine radiansNeededToRotate toward player`);
+				}
 				const radiansToRotate =
 					Math.abs(radiansNeededToRotate) < this.ship.physics.rotationRate
 						? radiansNeededToRotate
@@ -171,13 +174,18 @@ export default class DialogManager {
 					this.ship.physics.maxVelocity
 				);
 				return true;
-			case 'decelerate':
+			case 'decelerate': {
 				debug('decelerate');
+				const drag = this.ship.physics.accelerationRate * 1.5;
+				this.ship.physics.velocity = adjustSpeedForRotation(
+					this.ship.physics.rotation,
+					this.ship.physics.velocity,
+					0, // accelerationRate
+					this.ship.physics.maxVelocity,
+					drag
+				);
 				return true;
-				if (!this.ai) {
-					throw new Error('Cannot use AI functions without AI');
-				}
-				return this.ai.decelerate();
+			}
 			default:
 				throw new Error(`Unknown function "${expression.functionName}"`);
 		}
