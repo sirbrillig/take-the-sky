@@ -3,17 +3,23 @@
 import nearley from 'nearley';
 import grammar from './parser/grammar';
 import getDialogTree from './dialog-tree';
+import {
+	getRadiansNeededToRotateTowardPlayer,
+	adjustRotationForDirection,
+	getRotationDirection,
+} from './math';
 import debugFactory from './debug';
 import { getNpcHappiness, getEvent } from './selectors';
 
 const debug = debugFactory('sky:dialog');
 
 export default class DialogManager {
-	constructor({ getState, handleAction, shipManager, ai = null }) {
+	constructor({ getState, handleAction, shipManager, player, ship }) {
 		this.getState = getState;
 		this.handleAction = handleAction;
 		this.shipManager = shipManager;
-		this.ai = ai;
+		this.player = player;
+		this.ship = ship;
 	}
 
 	executeComparison(comparator, leftSide, rightSide) {
@@ -88,16 +94,18 @@ export default class DialogManager {
 			}
 			case 'distanceToPlayer':
 				debug('distanceToPlayer');
-				if (!this.ai) {
-					throw new Error('Cannot use AI functions without AI');
-				}
-				return this.ai.distanceToPlayer();
+				return this.player.physics.position.sub(this.ship.physics.position).magnitude();
 			case 'isShipFacingPlayer':
 				debug('isShipFacingPlayer');
-				if (!this.ai) {
-					throw new Error('Cannot use AI functions without AI');
-				}
-				return this.ai.isShipFacingPlayer();
+				return (
+					Math.abs(
+						getRadiansNeededToRotateTowardPlayer({
+							playerVector: this.player.physics.position,
+							shipVector: this.ship.physics.position,
+							rotation: this.ship.physics.rotation,
+						})
+					) < 0.1
+				);
 			case 'getAgeInMs':
 				debug('getAgeInMs');
 				if (!this.ai) {
@@ -130,20 +138,39 @@ export default class DialogManager {
 					throw new Error('Cannot use AI functions without AI');
 				}
 				return this.ai.fire();
-			case 'rotateTowardPlayer':
+			case 'rotateTowardPlayer': {
 				debug('rotateTowardPlayer');
-				if (!this.ai) {
-					throw new Error('Cannot use AI functions without AI');
+				const radiansNeededToRotate = getRadiansNeededToRotateTowardPlayer({
+					playerVector: this.player.physics.position,
+					shipVector: this.ship.physics.position,
+					rotation: this.ship.physics.rotation,
+				});
+				const radiansToRotate =
+					Math.abs(radiansNeededToRotate) < this.ship.physics.rotationRate
+						? radiansNeededToRotate
+						: this.ship.physics.rotationRate;
+				debug('radians to player', radiansNeededToRotate, 'radians to rotate', radiansToRotate);
+				const minRotationRate = 0.02; // Helps prevent jitter
+				if (radiansToRotate < minRotationRate) {
+					return;
 				}
-				return this.ai.rotateTowardPlayer();
+				this.ship.physics.rotation = adjustRotationForDirection(
+					this.ship.physics.rotation,
+					getRotationDirection(radiansNeededToRotate),
+					radiansToRotate
+				);
+				return true;
+			}
 			case 'accelerate':
 				debug('accelerate');
+				return true;
 				if (!this.ai) {
 					throw new Error('Cannot use AI functions without AI');
 				}
 				return this.ai.accelerate();
 			case 'decelerate':
 				debug('decelerate');
+				return true;
 				if (!this.ai) {
 					throw new Error('Cannot use AI functions without AI');
 				}

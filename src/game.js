@@ -441,8 +441,15 @@ class Behavior {
 		this.behaviorTokens = behaviorTokens;
 	}
 
-	update({ ship, player }) {
-		// TODO: execute behavior script and apply changes to Ship
+	update({ ship, player, eventState, shipManager }) {
+		const dialog = new DialogManager({
+			getState: eventState.getState,
+			handleAction: eventState.dispatchAction,
+			shipManager,
+			player,
+			ship,
+		});
+		dialog.executeStatements(this.behaviorTokens);
 	}
 }
 
@@ -457,8 +464,8 @@ class Ship extends SpaceThing {
 		this.behavior = new Behavior({ behaviorTokens: behavior });
 	}
 
-	update({ currentMap, eventState }) {
-		this.behavior.update({ ship: this, currentMap, eventState, player: this.player });
+	update({ currentMap, eventState, shipManager }) {
+		this.behavior.update({ ship: this, currentMap, eventState, shipManager, player: this.player });
 		this.physics.update(this);
 		this.sprite.update({ eventState, currentMap, health: this.health });
 		debug(`moving ship ${this.id} to ${this.physics.position}`);

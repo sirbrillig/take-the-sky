@@ -141,3 +141,18 @@ export function makeUniqueId() {
 		.toString(36)
 		.substr(2, 9)}`;
 }
+
+export function getRadiansNeededToRotateTowardPlayer({ playerVector, shipVector, rotation }) {
+	const targetAngleCounterclockwise = getAngleBetweenVectors(playerVector, shipVector);
+	const targetAngleClockwise = 2 * Math.PI + targetAngleCounterclockwise;
+	// sprite rotation is clockwise
+	const radiansNeededToRotateClockwise = rotation - targetAngleClockwise;
+	const radiansNeededToRotateCounterclockwise = radiansNeededToRotateClockwise + 2 * Math.PI;
+	return Math.abs(radiansNeededToRotateClockwise) < Math.abs(radiansNeededToRotateCounterclockwise)
+		? radiansNeededToRotateClockwise
+		: radiansNeededToRotateCounterclockwise;
+}
+
+export function getRotationDirection(radiansNeededToRotate) {
+	return radiansNeededToRotate < 0 ? 'clockwise' : 'counterclockwise';
+}
