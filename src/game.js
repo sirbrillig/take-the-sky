@@ -77,6 +77,10 @@ class SpaceThing {
 		);
 		this.game.gameSpace.addChild(box);
 	}
+
+	toString() {
+		return `SpaceThing id ${this.id}`;
+	}
 }
 
 class Health {
@@ -94,6 +98,10 @@ class Health {
 
 	getHealthAsPercent() {
 		return (this.current / this.totalHealth) * 100;
+	}
+
+	toString() {
+		return `Health ${this.getHealthAsPercent()}%`;
 	}
 }
 
@@ -217,7 +225,6 @@ class ShipPhysics extends Physics {
 	update() {
 		// The grid is upside down (0,0 is top left) so we subtract
 		this.position = this.position.sub(this.velocity);
-		debug(`moving ship ${this.id} to ${this.position}`);
 	}
 }
 
@@ -325,7 +332,7 @@ class ShipSprite extends Sprite {
 		this.normal.anchor.set(0.5, 0.5);
 		this.normal.position.set(physics.position.x, physics.position.y);
 		this.normal.zIndex = 10;
-		this.normal.visible = false;
+		this.normal.visible = true;
 		game.gameSpace.addChild(this.normal);
 
 		this.explosion = game.animatedSpriteFromSpriteSheet('assets/explosion.json');
@@ -385,6 +392,23 @@ class Player extends SpaceThing {
 	}
 }
 
+class ShipManager {
+	constructor({ game }) {
+		this.game = game;
+		this.ships = [];
+	}
+
+	createShip() {
+		debug('Creating new ship');
+		// TODO pass in data
+		this.ships.push(new Ship({ game: this.game }));
+	}
+
+	getShips() {
+		return this.ships;
+	}
+}
+
 class Ship extends SpaceThing {
 	constructor({ game }) {
 		super({ game });
@@ -397,8 +421,10 @@ class Ship extends SpaceThing {
 	update({ currentMap, eventState }) {
 		this.physics.update(this);
 		this.sprite.update({ eventState, currentMap, health: this.health });
+		debug(`moving ship ${this.id} to ${this.physics.position}`);
 		if (currentMap.stars.find(star => this.physics.isTouching(star.physics))) {
 			this.health.decrease(4);
+			debug(`sun damaging ship ${this.id} to ${this.health}`);
 		}
 	}
 }
@@ -553,17 +579,19 @@ class FlyingState extends GameState {
 		super('flying');
 	}
 
-	update({ eventState, player, background, gameInterface, currentMap }) {
+	update({ eventState, player, background, gameInterface, currentMap, shipManager }) {
 		if (eventState.getDialog()) {
 			return new DialogState();
 		}
-		[background, player, ...gameInterface].map(
+		const ships = shipManager.getShips();
+		[background, player, ...gameInterface, ...ships].map(
 			thing => thing.update && thing.update({ currentMap, player, eventState })
 		);
 	}
 
-	handleInput({ input, background, player, gameInterface, currentMap, eventState }) {
-		[background, player, ...gameInterface].map(
+	handleInput({ input, background, player, gameInterface, currentMap, eventState, shipManager }) {
+		const ships = shipManager.getShips();
+		[background, player, ...gameInterface, ...ships].map(
 			thing => thing.handleInput && thing.handleInput({ input, currentMap, eventState })
 		);
 	}
@@ -645,7 +673,7 @@ class DialogState extends GameState {
 		arrow.visible = !!currentDialogObject.options.length;
 	}
 
-	update({ game, eventState }) {
+	update({ game, eventState, shipManager }) {
 		if (!eventState.getDialog()) {
 			this.dialogSprite && this.dialogSprite.destroy();
 			this.dialogSprite = null;
@@ -658,6 +686,7 @@ class DialogState extends GameState {
 			const dialog = new DialogManager({
 				getState: eventState.getState,
 				handleAction: eventState.dispatchAction,
+				shipManager,
 			});
 			const currentDialogObject = dialog.getDialogObjectForKey(eventState.getDialog());
 			if (currentDialogObject.script) {
@@ -677,10 +706,11 @@ class DialogState extends GameState {
 		this.currentDialog = eventState.getDialog();
 	}
 
-	handleInput({ input, eventState }) {
+	handleInput({ input, eventState, shipManager }) {
 		const dialog = new DialogManager({
 			getState: eventState.getState,
 			handleAction: eventState.dispatchAction,
+			shipManager,
 		});
 		const currentDialog = eventState.getDialog();
 		if (!currentDialog) {
@@ -764,8 +794,7 @@ class GameController {
 		this.player = new Player({ game });
 		this.background = new Background({ game });
 		this.gameInterface = [new HealthBar({ game, health: this.player.health })];
-		this.ships = [];
-		// TODO: how do we add a ship to be tracked/updated?
+		this.shipManager = new ShipManager({ game });
 
 		this.input = new Input();
 
@@ -795,6 +824,7 @@ class GameController {
 			currentMap: this.currentMap,
 			eventState: this.eventState,
 			game: this.game,
+			shipManager: this.shipManager,
 		});
 		if (newState) {
 			this.state = newState;
@@ -809,6 +839,7 @@ class GameController {
 			input: this.input,
 			currentMap: this.currentMap,
 			eventState: this.eventState,
+			shipManager: this.shipManager,
 		});
 	}
 

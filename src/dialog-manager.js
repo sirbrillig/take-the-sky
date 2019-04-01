@@ -5,14 +5,14 @@ import grammar from './parser/grammar';
 import getDialogTree from './dialog-tree';
 import debugFactory from './debug';
 import { getNpcHappiness, getEvent } from './selectors';
-import { makeShipData } from './other-ships';
 
 const debug = debugFactory('sky:dialog');
 
 export default class DialogManager {
-	constructor({ getState, handleAction, ai = null }) {
+	constructor({ getState, handleAction, shipManager, ai = null }) {
 		this.getState = getState;
 		this.handleAction = handleAction;
+		this.shipManager = shipManager;
 		this.ai = ai;
 	}
 
@@ -83,9 +83,8 @@ export default class DialogManager {
 				const name = this.executeExpression(expression.args[1], finishScript);
 				const behavior = expression.args[2].value;
 				debug('createShip', type, name, behavior);
-				const shipData = makeShipData(type, name, behavior);
-				// TODO: this is no longer a way to create ships
-				this.handleAction({ type: 'OTHER_SHIP_ADD', payload: shipData });
+				// TODO: pass in data
+				this.shipManager.createShip();
 				return true;
 			}
 			case 'distanceToPlayer':
