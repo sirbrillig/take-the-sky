@@ -132,9 +132,6 @@ export default class DialogManager {
 					shipVector: this.ship.physics.position,
 					rotation: this.ship.physics.rotation,
 				});
-				if (!radiansNeededToRotate) {
-					throw new Error(`Cannot determine radiansNeededToRotate toward player`);
-				}
 				const radiansToRotate =
 					Math.abs(radiansNeededToRotate) < this.ship.physics.rotationRate
 						? radiansNeededToRotate
