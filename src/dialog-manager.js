@@ -135,10 +135,8 @@ export default class DialogManager {
 				return this.ai.destroy();
 			case 'fire':
 				debug('fire');
-				if (!this.ai) {
-					throw new Error('Cannot use AI functions without AI');
-				}
-				return this.ai.fire();
+				this.ship.fire();
+				return true;
 			case 'rotateTowardPlayer': {
 				debug('rotateTowardPlayer');
 				const radiansNeededToRotate = getRadiansNeededToRotateTowardPlayer({
