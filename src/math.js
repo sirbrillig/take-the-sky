@@ -65,6 +65,31 @@ export function getCenter(o, dimension, axis) {
 	return dimension;
 }
 
+export function preventBackwardsVelocity(rotation, velocity) {
+	const newVelocity = { x: velocity.x, y: velocity.y };
+	if (rotation > Math.PI && newVelocity.y > 0) {
+		// if facing down, y must be negative
+		newVelocity.y = 0;
+	}
+	if (rotation < Math.PI && newVelocity.y < 0) {
+		// if facing up, y must be positive
+		newVelocity.y = 0;
+	}
+	if (rotation < Math.PI / 2 && newVelocity.x < 0) {
+		// if in quadrant 1, x must be positive
+		newVelocity.x = 0;
+	}
+	if (rotation > Math.PI + Math.PI / 2 && newVelocity.x < 0) {
+		// if in quadrant 4, x must be positive
+		newVelocity.x = 0;
+	}
+	if (rotation > Math.PI / 2 && rotation < Math.PI + Math.PI / 2 && newVelocity.x > 0) {
+		// if facing right, x must be negative
+		newVelocity.x = 0;
+	}
+	return newVelocity;
+}
+
 export function clampRadians(rotation) {
 	const adjustForNegative = angle => (angle < 0 ? angle + Math.PI * 2 : angle);
 	const adjustForMax = angle => (angle > Math.PI * 2 ? angle - Math.PI * 2 : angle);

@@ -8,6 +8,7 @@ import {
 	getRadiansNeededToRotateTowardPlayer,
 	adjustRotationForDirection,
 	getRotationDirection,
+	preventBackwardsVelocity,
 } from './math';
 import debugFactory from './debug';
 import { getNpcHappiness, getEvent } from './selectors';
@@ -160,12 +161,16 @@ export default class DialogManager {
 			case 'decelerate': {
 				debug('decelerate');
 				const drag = this.ship.physics.accelerationRate * 1.5;
-				this.ship.physics.velocity = adjustSpeedForRotation(
+				const newVelocity = adjustSpeedForRotation(
 					this.ship.physics.rotation,
 					this.ship.physics.velocity,
 					0, // accelerationRate
 					this.ship.physics.maxVelocity,
 					drag
+				);
+				this.ship.physics.velocity = preventBackwardsVelocity(
+					this.ship.physics.rotation,
+					newVelocity
 				);
 				return true;
 			}
