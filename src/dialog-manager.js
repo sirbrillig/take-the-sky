@@ -107,12 +107,6 @@ export default class DialogManager {
 						})
 					) < 0.1
 				);
-			case 'getAgeInMs':
-				debug('getAgeInMs');
-				if (!this.ai) {
-					throw new Error('Cannot use AI functions without AI');
-				}
-				return this.ai.getAgeInMs();
 			case 'triggerEvent':
 				debug('triggerEvent');
 				this.handleAction({
@@ -127,12 +121,6 @@ export default class DialogManager {
 					payload: this.executeExpression(expression.args[0], finishScript),
 				});
 				return true;
-			case 'destroy':
-				debug('destroy');
-				if (!this.ai) {
-					throw new Error('Cannot use AI functions without AI');
-				}
-				return this.ai.destroy();
 			case 'fire':
 				debug('fire');
 				this.ship.fire();
