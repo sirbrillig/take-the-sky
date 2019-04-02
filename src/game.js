@@ -196,6 +196,7 @@ class PlayerPhysics extends Physics {
 		if (input.isKeyDown('KeyL') === true) {
 			const touchingPlanet = currentMap.planets.find(planet => this.isTouching(planet.physics));
 			if (touchingPlanet) {
+				this.velocity = new Vector(0, 0);
 				eventState.dispatchAction({
 					type: 'DIALOG_TRIGGER',
 					payload: `landingPlanet${touchingPlanet.name}`,
