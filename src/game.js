@@ -342,9 +342,10 @@ class PlayerSprite extends Sprite {
 }
 
 class ShipSprite extends Sprite {
-	constructor({ game, physics, type }) {
+	constructor({ game, physics, type, ship }) {
 		super(game, physics);
 		this.alive = true;
+		this.ship = ship;
 
 		this.normal = game.sprite(this.getSpriteFromType(type));
 		this.normal.rotation = physics.rotation;
@@ -375,12 +376,12 @@ class ShipSprite extends Sprite {
 		throw new Error(`Unknown ship type ${type}`);
 	}
 
-	update({ health }) {
+	update() {
 		if (!this.alive) {
 			this.physics.velocity = new Vector(0, 0);
 			return;
 		}
-		if (health.getHealthAsPercent() === 0) {
+		if (this.ship.isExploding) {
 			this.sprite.visible = false;
 			this.sprite = this.explosion;
 			this.sprite.onComplete = () => {
@@ -459,9 +460,12 @@ class Ship extends SpaceThing {
 		this.id = name;
 		this.player = player;
 		this.physics = new ShipPhysics({ player });
-		this.sprite = new ShipSprite({ game, physics: this.physics, type });
-		this.health = new Health(400);
+		this.sprite = new ShipSprite({ game, physics: this.physics, type, ship: this });
+		this.health = new Health(100);
 		this.behavior = new Behavior({ behaviorTokens: behavior });
+
+		this.alive = true;
+		this.isExploding = false;
 
 		this.bolts = [];
 		this.fire = this.fire.bind(this);
@@ -470,13 +474,26 @@ class Ship extends SpaceThing {
 	}
 
 	update({ currentMap, eventState, shipManager }) {
-		this.behavior.update({ ship: this, currentMap, eventState, shipManager, player: this.player });
-		this.physics.update(this);
-		this.sprite.update({ eventState, currentMap, health: this.health });
-		debug(`moving ship ${this.id} to ${this.physics.position}`);
-		if (currentMap.stars.find(star => this.physics.isTouching(star.physics))) {
-			this.health.decrease(4);
-			debug(`sun damaging ship ${this.id} to ${this.health}`);
+		if (this.alive && !this.isExploding) {
+			this.behavior.update({
+				ship: this,
+				currentMap,
+				eventState,
+				shipManager,
+				player: this.player,
+			});
+			this.physics.update(this);
+			debug(`moving ship ${this.id} to ${this.physics.position}`);
+		}
+		if (this.alive) {
+			this.sprite.update({ eventState, currentMap, health: this.health });
+			if (currentMap.stars.find(star => this.physics.isTouching(star.physics))) {
+				this.health.decrease(4);
+				debug(`sun damaging ship ${this.id} to ${this.health}`);
+			}
+			if (this.health.getHealthAsPercent() === 0) {
+				this.isExploding = true;
+			}
 		}
 		this.bolts = this.bolts.filter(bolt => {
 			bolt.update({ ship: this, player: this.player, eventState, currentMap, shipManager });
