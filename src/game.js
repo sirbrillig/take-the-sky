@@ -370,6 +370,11 @@ class ShipSprite extends Sprite {
 		this.sprite = this.normal;
 	}
 
+	remove() {
+		this.normal.destroy();
+		this.explosion.destroy();
+	}
+
 	getSpriteFromType(type) {
 		if (type === 'cruiser') {
 			return 'assets/cruiser.png';
@@ -482,6 +487,9 @@ class Ship extends SpaceThing {
 			bolt.update({ ship: this, player: this.player, eventState, currentMap });
 			return bolt.alive;
 		});
+		if (!this.alive) {
+			this.sprite.remove();
+		}
 	}
 
 	fire() {
@@ -715,7 +723,10 @@ class SystemMap {
 	}
 
 	update({ player, eventState }) {
-		this.ships.map(thing => thing.update && thing.update({ currentMap: this, player, eventState }));
+		this.ships = this.ships.filter(ship => {
+			ship.update({ currentMap: this, player, eventState });
+			return ship.alive;
+		});
 	}
 }
 
