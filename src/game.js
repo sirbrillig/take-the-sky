@@ -513,14 +513,16 @@ class Bolt extends SpaceThing {
 	}
 
 	update() {
+		if (!this.alive) {
+			return;
+		}
 		this.physics.update(this);
 		this.sprite.update(this);
 		if (this.isExploding && this.physics.isTouching(this.player.physics) && !this.hasDealtDamage) {
 			this.player.health.decrease(100);
 			this.hasDealtDamage = true;
 		}
-		if (this.physics.isTouching(this.player.physics) && !this.sprite.alive) {
-			this.sprite.remove();
+		if (!this.sprite.alive) {
 			this.alive = false;
 		}
 	}
@@ -599,11 +601,15 @@ class BoltSprite extends Sprite {
 	}
 
 	update() {
+		if (!this.alive) {
+			return;
+		}
 		if (this.bolt.isExploding) {
 			this.sprite.visible = false;
 			this.sprite = this.explosion;
 			this.sprite.onComplete = () => {
 				this.explosion.visible = false;
+				this.remove();
 				this.alive = false;
 			};
 			this.sprite.position.set(this.physics.position.x, this.physics.position.y);
