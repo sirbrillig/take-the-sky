@@ -714,8 +714,8 @@ class SystemMap {
 		this.ships.push(new Ship({ game: this.game, type, name, behavior, player: this.player }));
 	}
 
-	getShips() {
-		return this.ships;
+	update({ player, eventState }) {
+		this.ships.map(thing => thing.update && thing.update({ currentMap: this, player, eventState }));
 	}
 }
 
@@ -775,15 +775,13 @@ class FlyingState extends GameState {
 			debug('switching to DialogState');
 			return new DialogState();
 		}
-		const ships = currentMap.getShips();
-		[background, player, ...gameInterface, ...ships].map(
+		[background, player, ...gameInterface, currentMap].map(
 			thing => thing.update && thing.update({ currentMap, player, eventState })
 		);
 	}
 
 	handleInput({ input, background, player, gameInterface, currentMap, eventState }) {
-		const ships = currentMap.getShips();
-		[background, player, ...gameInterface, ...ships].map(
+		[background, player, ...gameInterface, currentMap].map(
 			thing => thing.handleInput && thing.handleInput({ input, currentMap, eventState })
 		);
 	}
