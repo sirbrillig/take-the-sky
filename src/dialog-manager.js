@@ -15,10 +15,10 @@ import { getNpcHappiness, getEvent } from './selectors';
 const debug = debugFactory('sky:dialog');
 
 export default class DialogManager {
-	constructor({ getState, handleAction, shipManager, player, ship }) {
+	constructor({ getState, handleAction, currentMap, player, ship }) {
 		this.getState = getState;
 		this.handleAction = handleAction;
-		this.shipManager = shipManager;
+		this.currentMap = currentMap;
 		this.player = player;
 		this.ship = ship;
 	}
@@ -90,7 +90,7 @@ export default class DialogManager {
 				const name = this.executeExpression(expression.args[1], finishScript);
 				const behavior = expression.args[2].value;
 				debug('createShip', type, name, behavior);
-				this.shipManager.createShip({ type, name, behavior });
+				this.currentMap.createShip({ type, name, behavior });
 				return true;
 			}
 			case 'distanceToPlayer':

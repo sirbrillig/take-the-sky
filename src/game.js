@@ -421,33 +421,16 @@ class Player extends SpaceThing {
 	}
 }
 
-class ShipManager {
-	constructor({ game, player }) {
-		this.game = game;
-		this.player = player;
-		this.ships = [];
-	}
-
-	createShip({ type, name, behavior }) {
-		debug('Creating new ship', type, name, behavior);
-		this.ships.push(new Ship({ game: this.game, type, name, behavior, player: this.player }));
-	}
-
-	getShips() {
-		return this.ships;
-	}
-}
-
 class Behavior {
 	constructor({ behaviorTokens }) {
 		this.behaviorTokens = behaviorTokens;
 	}
 
-	update({ ship, player, eventState, shipManager }) {
+	update({ ship, player, eventState, currentMap }) {
 		const dialog = new DialogManager({
 			getState: eventState.getState,
 			handleAction: eventState.dispatchAction,
-			shipManager,
+			currentMap,
 			player,
 			ship,
 		});
@@ -474,13 +457,12 @@ class Ship extends SpaceThing {
 		this.minFireWait = 2000;
 	}
 
-	update({ currentMap, eventState, shipManager }) {
+	update({ currentMap, eventState }) {
 		if (this.alive && !this.isExploding) {
 			this.behavior.update({
 				ship: this,
 				currentMap,
 				eventState,
-				shipManager,
 				player: this.player,
 			});
 			this.physics.update(this);
@@ -497,7 +479,7 @@ class Ship extends SpaceThing {
 			}
 		}
 		this.bolts = this.bolts.filter(bolt => {
-			bolt.update({ ship: this, player: this.player, eventState, currentMap, shipManager });
+			bolt.update({ ship: this, player: this.player, eventState, currentMap });
 			return bolt.alive;
 		});
 	}
@@ -715,13 +697,25 @@ class Star extends SpaceThing {
 }
 
 class SystemMap {
-	constructor({ game, systemName }) {
+	constructor({ game, systemName, player }) {
+		this.game = game;
+		this.player = player;
 		this.planets = getPlanetsInSystem(systemName).map(
 			({ position, size, name }) => new Planet({ game, position, size, name })
 		);
 		this.stars = getStarsInSystem(systemName).map(
 			({ position, size, name }) => new Star({ game, position, size, name })
 		);
+		this.ships = [];
+	}
+
+	createShip({ type, name, behavior }) {
+		debug('Creating new ship', type, name, behavior);
+		this.ships.push(new Ship({ game: this.game, type, name, behavior, player: this.player }));
+	}
+
+	getShips() {
+		return this.ships;
 	}
 }
 
@@ -776,19 +770,19 @@ class FlyingState extends GameState {
 		super('flying');
 	}
 
-	update({ eventState, player, background, gameInterface, currentMap, shipManager }) {
+	update({ eventState, player, background, gameInterface, currentMap }) {
 		if (eventState.getDialog()) {
 			debug('switching to DialogState');
 			return new DialogState();
 		}
-		const ships = shipManager.getShips();
+		const ships = currentMap.getShips();
 		[background, player, ...gameInterface, ...ships].map(
 			thing => thing.update && thing.update({ currentMap, player, eventState })
 		);
 	}
 
-	handleInput({ input, background, player, gameInterface, currentMap, eventState, shipManager }) {
-		const ships = shipManager.getShips();
+	handleInput({ input, background, player, gameInterface, currentMap, eventState }) {
+		const ships = currentMap.getShips();
 		[background, player, ...gameInterface, ...ships].map(
 			thing => thing.handleInput && thing.handleInput({ input, currentMap, eventState })
 		);
@@ -871,7 +865,7 @@ class DialogState extends GameState {
 		arrow.visible = !!currentDialogObject.options.length;
 	}
 
-	update({ game, eventState, shipManager }) {
+	update({ game, eventState, currentMap }) {
 		if (!eventState.getDialog()) {
 			this.dialogSprite && this.dialogSprite.destroy();
 			this.dialogSprite = null;
@@ -885,7 +879,7 @@ class DialogState extends GameState {
 			const dialog = new DialogManager({
 				getState: eventState.getState,
 				handleAction: eventState.dispatchAction,
-				shipManager,
+				currentMap,
 			});
 			const currentDialogObject = dialog.getDialogObjectForKey(eventState.getDialog());
 			if (currentDialogObject.script) {
@@ -905,11 +899,11 @@ class DialogState extends GameState {
 		this.currentDialog = eventState.getDialog();
 	}
 
-	handleInput({ input, eventState, shipManager }) {
+	handleInput({ input, eventState, currentMap }) {
 		const dialog = new DialogManager({
 			getState: eventState.getState,
 			handleAction: eventState.dispatchAction,
-			shipManager,
+			currentMap,
 		});
 		const currentDialog = eventState.getDialog();
 		if (!currentDialog) {
@@ -994,11 +988,10 @@ class GameController {
 		this.player = new Player({ game });
 		this.background = new Background({ game });
 		this.gameInterface = [new HealthBar({ game, health: this.player.health })];
-		this.shipManager = new ShipManager({ game, player: this.player });
 
 		this.input = new Input();
 
-		this.currentMap = new SystemMap({ game, systemName: 'Algol' });
+		this.currentMap = new SystemMap({ game, systemName: 'Algol', player: this.player });
 
 		sortSpritesByZIndex(game.mainContainer);
 		sortSpritesByZIndex(game.gameSpace);
@@ -1024,7 +1017,6 @@ class GameController {
 			currentMap: this.currentMap,
 			eventState: this.eventState,
 			game: this.game,
-			shipManager: this.shipManager,
 		});
 		if (newState) {
 			this.state = newState;
@@ -1039,7 +1031,6 @@ class GameController {
 			input: this.input,
 			currentMap: this.currentMap,
 			eventState: this.eventState,
-			shipManager: this.shipManager,
 		});
 	}
 
