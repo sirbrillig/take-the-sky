@@ -116,7 +116,7 @@ class ShipPhysics extends Physics {
 		this.position.set(x, y);
 		this.accelerationRate = 0.04;
 		this.rotationRate = 0.06;
-		this.maxVelocity = 3;
+		this.maxVelocity = 4;
 		this.hitBox = new Vector(64, 64);
 	}
 
@@ -435,8 +435,8 @@ class BoltPhysics extends Physics {
 		this.startingPosition = ship.physics.position.clone();
 		this.position.set(ship.physics.position.x, ship.physics.position.y); // TODO: move this to the ship's nose
 		this.rotation = ship.physics.rotation;
-		this.maxVelocity = 9;
-		this.accelerationRate = 3;
+		this.maxVelocity = 10;
+		this.accelerationRate = 10;
 		this.hitBox = new Vector(32, 32);
 	}
 

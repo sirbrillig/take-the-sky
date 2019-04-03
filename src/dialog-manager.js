@@ -138,7 +138,7 @@ export default class DialogManager {
 						? radiansNeededToRotate
 						: this.ship.physics.rotationRate;
 				debug('radians to player', radiansNeededToRotate, 'radians to rotate', radiansToRotate);
-				const minRotationRate = 0.02; // Helps prevent jitter
+				const minRotationRate = 0.01; // Helps prevent jitter
 				if (radiansToRotate < minRotationRate) {
 					return;
 				}
