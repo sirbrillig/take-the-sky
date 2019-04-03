@@ -47,11 +47,21 @@ function dialog(state = null, { type, payload }) {
 	}
 }
 
+function systemName(state = 'Algol', { type, payload }) {
+	switch (type) {
+		case 'SYSTEM_CHANGE':
+			return payload;
+		default:
+			return state;
+	}
+}
+
 export default function reducer(state = {}, action) {
 	const updated = {
 		npcs: npcs(state.npcs, action),
 		events: events(state.events, action),
 		dialog: dialog(state.dialog, action),
+		systemName: systemName(state.systemName, action),
 	};
 	debug(state, action, updated);
 	return updated;

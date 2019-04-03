@@ -11,6 +11,7 @@ export default class SystemMap {
 	constructor({ game, systemName, player }) {
 		this.game = game;
 		this.player = player;
+		this.systemName = systemName;
 		this.planets = getPlanetsInSystem(systemName).map(
 			({ position, size, name }) => new Planet({ game, position, size, name })
 		);
@@ -39,14 +40,5 @@ export default class SystemMap {
 		this.stars = [];
 		this.ships.forEach(ship => ship.sprite.sprite.destroy());
 		this.ships = [];
-	}
-
-	handleInput({ game, input, player }) {
-		if (input.isKeyDownOnce('KeyJ') === true) {
-			debug('jump');
-			this.remove();
-			// TODO: figure out next system name
-			return new SystemMap({ game, systemName: 'Betan', player });
-		}
 	}
 }

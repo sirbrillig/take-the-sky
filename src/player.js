@@ -80,6 +80,13 @@ class PlayerPhysics extends Physics {
 				});
 			}
 		}
+		if (input.isKeyDownOnce('KeyJ') === true) {
+			debug('jump');
+			// TODO: require touching quantum cloud
+			// TODO: require charging jump meter
+			// TODO: prompt for target system
+			eventState.dispatchAction({ type: 'SYSTEM_CHANGE', payload: 'Betan' });
+		}
 	}
 
 	update() {

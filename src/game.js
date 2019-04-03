@@ -122,6 +122,10 @@ class EventState {
 	getDialog() {
 		return this.stateTree.dialog;
 	}
+
+	getSystemName() {
+		return this.stateTree.systemName;
+	}
 }
 
 class GameController {
@@ -172,7 +176,14 @@ class GameController {
 		if (newState) {
 			this.state = newState;
 		}
-		this.currentMap.update({ player: this.player, eventState: this.eventState });
+		if (this.eventState.getSystemName() !== this.currentMap.systemName) {
+			this.currentMap.remove();
+			this.currentMap = new SystemMap({
+				game: this.game,
+				systemName: this.eventState.getSystemName(),
+				player: this.player,
+			});
+		}
 	}
 
 	handleInput() {
@@ -184,16 +195,6 @@ class GameController {
 			currentMap: this.currentMap,
 			eventState: this.eventState,
 		});
-		const newMap = this.currentMap.handleInput({
-			game: this.game,
-			input: this.input,
-			player: this.player,
-		});
-		if (newMap) {
-			this.currentMap = newMap;
-			sortSpritesByZIndex(this.game.gameSpace);
-			this.player.resetPosition();
-		}
 	}
 
 	centerCamera({ gameSpace, playerPosition }) {

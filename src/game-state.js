@@ -27,13 +27,13 @@ export class FlyingState extends GameState {
 			debug('switching to DialogState');
 			return new DialogState();
 		}
-		[background, player, ...gameInterface].map(
+		[background, player, ...gameInterface, currentMap].map(
 			thing => thing.update && thing.update({ currentMap, player, eventState })
 		);
 	}
 
 	handleInput({ input, background, player, gameInterface, currentMap, eventState }) {
-		[background, player, ...gameInterface].map(
+		[background, player, ...gameInterface, currentMap].map(
 			thing => thing.handleInput && thing.handleInput({ input, currentMap, eventState })
 		);
 	}
