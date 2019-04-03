@@ -57,7 +57,8 @@ export default function createGame({ gameWidth, gameHeight, setupCallback, files
 			new PIXI.extras.TilingSprite(resources[key].texture, width, height);
 		app.animatedSpriteFromSpriteSheet = spritesheet => {
 			const sheet = PIXI.loader.resources[spritesheet].spritesheet;
-			return new PIXI.extras.AnimatedSprite(sheet.animations.explosion);
+			const animationName = Object.keys(sheet.animations)[0];
+			return new PIXI.extras.AnimatedSprite(sheet.animations[animationName]);
 		};
 		app.animatedSpriteFromImages = images => {
 			return new PIXI.extras.AnimatedSprite(
