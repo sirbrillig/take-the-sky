@@ -229,7 +229,7 @@ class FlyingState extends GameState {
 class DialogState extends GameState {
 	constructor() {
 		super('dialog');
-		this.currentDialog = null;
+		this.currentDialogKey = null;
 	}
 
 	// TODO: move all this dialog stuff to a SpaceThing
@@ -312,13 +312,14 @@ class DialogState extends GameState {
 		if (!this.dialogSprite) {
 			this.dialogSprite = this.createDialog(game);
 		}
-		if (eventState.getDialog() !== this.currentDialog) {
+		if (eventState.getDialog() !== this.currentDialogKey) {
 			const dialog = new DialogManager({
 				getState: eventState.getState,
 				handleAction: eventState.dispatchAction,
 				currentMap,
 			});
 			const currentDialogObject = dialog.getDialogObjectForKey(eventState.getDialog());
+			this.currentDialogObject = currentDialogObject;
 			if (currentDialogObject.script) {
 				dialog.executeScript(currentDialogObject.script);
 			}
@@ -333,44 +334,39 @@ class DialogState extends GameState {
 			}
 		}
 		this.dialogSprite.changeSelectedOption(this.currentOption);
-		this.currentDialog = eventState.getDialog();
+		this.currentDialogKey = eventState.getDialog();
 	}
 
-	handleInput({ input, eventState, currentMap }) {
-		const dialog = new DialogManager({
-			getState: eventState.getState,
-			handleAction: eventState.dispatchAction,
-			currentMap,
-		});
-		const currentDialog = eventState.getDialog();
-		if (!currentDialog) {
+	handleInput({ input, eventState }) {
+		if (!this.currentDialogObject) {
 			return;
 		}
 		if (input.isKeyDown('KeyW') === true) {
-			const currentDialogObject = dialog.getDialogObjectForKey(currentDialog);
 			this.currentOption = clampNumber(
 				this.currentOption - 1,
 				0,
-				currentDialogObject.options.length - 1
+				this.currentDialogObject.options.length - 1
 			);
 		}
 		if (input.isKeyDown('KeyS') === true) {
-			const currentDialogObject = dialog.getDialogObjectForKey(currentDialog);
 			this.currentOption = clampNumber(
 				this.currentOption + 1,
 				0,
-				currentDialogObject.options.length - 1
+				this.currentDialogObject.options.length - 1
 			);
 		}
 		if (input.isKeyDownOnce('Space') === true) {
-			const currentDialogObject = dialog.getDialogObjectForKey(currentDialog);
-			const selectedOption = currentDialogObject.options[this.currentOption];
+			const selectedOption = this.currentDialogObject.options[this.currentOption];
 			if (!selectedOption) {
 				return;
 			}
-			if (selectedOption.script) {
-				dialog.executeScript(selectedOption.script);
-			}
+			debug(
+				'dialog',
+				this.currentDialogKey,
+				this.currentDialogObject,
+				'selectedOption',
+				selectedOption
+			);
 			if (selectedOption.link) {
 				eventState.dispatchAction({
 					type: 'DIALOG_TRIGGER',
