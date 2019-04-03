@@ -215,7 +215,7 @@ class PlayerSprite extends Sprite {
 		}
 		const smokeDelay = 150;
 		if (player.tookDamage && Date.now() - this.lastSmokedAt > smokeDelay) {
-			const smoke = new Smoke({ game: this.game, player: this.player, ship: this });
+			const smoke = new Smoke({ game: this.game, targetPosition: this.physics.position });
 			this.smokeTrail.push(smoke);
 			this.lastSmokedAt = Date.now();
 		}

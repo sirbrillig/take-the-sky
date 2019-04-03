@@ -3,11 +3,10 @@
 import { SpaceThing, Physics, Sprite } from './base-classes';
 
 export default class Smoke extends SpaceThing {
-	constructor({ game, player, ship }) {
+	constructor({ game, targetPosition }) {
 		super({ game });
-		this.player = player;
-		this.physics = new SmokePhysics({ player, ship, smoke: this });
-		this.sprite = new SmokeSprite({ game, physics: this.physics, player, smoke: this });
+		this.physics = new SmokePhysics({ targetPosition });
+		this.sprite = new SmokeSprite({ game, physics: this.physics });
 	}
 
 	update() {
@@ -16,22 +15,16 @@ export default class Smoke extends SpaceThing {
 }
 
 class SmokePhysics extends Physics {
-	constructor({ ship, player, smoke }) {
+	constructor({ targetPosition }) {
 		super();
-		this.smoke = smoke;
-		this.player = player;
-		this.startingPosition = ship.physics.position.clone();
-		this.position.set(ship.physics.position.x, ship.physics.position.y);
+		this.position.set(targetPosition.x, targetPosition.y);
 	}
 }
 
 class SmokeSprite extends Sprite {
-	constructor({ game, physics, player, smoke }) {
+	constructor({ game, physics }) {
 		super(game, physics);
 		this.alive = true;
-		this.smoke = smoke;
-		this.player = player;
-		this.physics = physics;
 
 		this.sprite = game.animatedSpriteFromSpriteSheet('assets/smoke.json');
 		this.sprite.width = 32;
@@ -47,13 +40,9 @@ class SmokeSprite extends Sprite {
 
 		this.sprite.onComplete = () => {
 			this.sprite.visible = false;
-			this.remove();
+			this.sprite.destroy();
 			this.alive = false;
 		};
 		this.sprite.play();
-	}
-
-	remove() {
-		this.sprite.destroy();
 	}
 }
