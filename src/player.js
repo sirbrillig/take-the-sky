@@ -32,6 +32,10 @@ export default class Player extends SpaceThing {
 		}
 		this.sprite.update({ eventState, currentMap, player: this });
 	}
+
+	resetPosition() {
+		this.physics.position.set(gameWidth / 2, gameHeight / 2);
+	}
 }
 
 class PlayerPhysics extends Physics {

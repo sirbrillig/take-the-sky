@@ -192,6 +192,7 @@ class GameController {
 		if (newMap) {
 			this.currentMap = newMap;
 			sortSpritesByZIndex(this.game.gameSpace);
+			this.player.resetPosition();
 		}
 	}
 
