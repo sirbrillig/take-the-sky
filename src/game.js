@@ -219,10 +219,7 @@ class PlayerSprite extends Sprite {
 			this.smokeTrail.push(smoke);
 			this.lastSmokedAt = Date.now();
 		}
-		this.smokeTrail = this.smokeTrail.filter(smoke => {
-			smoke.update();
-			return smoke.alive;
-		});
+		this.smokeTrail = this.smokeTrail.filter(smoke => smoke.update());
 		if (player.health.getHealthAsPercent() === 0) {
 			this.sprite.visible = false;
 			this.sprite = this.explosion;

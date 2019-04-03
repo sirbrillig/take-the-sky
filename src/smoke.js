@@ -8,18 +8,10 @@ export default class Smoke extends SpaceThing {
 		this.player = player;
 		this.physics = new SmokePhysics({ player, ship, smoke: this });
 		this.sprite = new SmokeSprite({ game, physics: this.physics, player, smoke: this });
-		this.alive = true;
 	}
 
 	update() {
-		if (!this.alive) {
-			return;
-		}
-		this.physics.update(this);
-		this.sprite.update(this);
-		if (!this.sprite.alive) {
-			this.alive = false;
-		}
+		return this.sprite.alive;
 	}
 }
 
