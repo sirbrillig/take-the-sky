@@ -4,7 +4,7 @@ export function getAllSystems() {
 	return {
 		Algol: {
 			star: {
-				position: { x: 800, y: 300 },
+				position: { x: 900, y: 400 },
 				size: 500,
 			},
 			planets: [
