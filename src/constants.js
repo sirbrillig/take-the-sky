@@ -13,4 +13,5 @@ export const filesToLoad = [
 	'assets/bolt-red.png',
 	'assets/explosion.json',
 	'assets/smoke.json',
+	'assets/arrow.png',
 ];

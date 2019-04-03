@@ -2,7 +2,7 @@
 
 import { SpaceThing, Physics, Sprite, Health } from './base-classes';
 import Vector from './vector';
-import { adjustSpeedForRotation, adjustRotationForDirection } from './math';
+import { adjustSpeedForRotation, adjustRotationForDirection, getAngleBetweenVectors } from './math';
 import Smoke from './smoke';
 import debugFactory from './debug';
 import { gameWidth, gameHeight } from './constants';
@@ -136,6 +136,14 @@ class PlayerSprite extends Sprite {
 
 		this.smokeTrail = [];
 		this.lastSmokedAt = Date.now();
+
+		this.starArrow = game.sprite('assets/arrow.png');
+		this.starArrow.position.set(physics.position.x, physics.position.y);
+		this.starArrow.pivot.set(0.5, 0.5);
+		this.starArrow.anchor.set(0.5, 0.5);
+		this.starArrow.rotation = physics.rotation;
+		this.starArrow.visible = false;
+		game.gameSpace.addChild(this.starArrow);
 	}
 
 	handleInput({ input }) {
@@ -157,7 +165,7 @@ class PlayerSprite extends Sprite {
 		this.sprite.visible = true;
 	}
 
-	update({ player, eventState }) {
+	update({ player, eventState, currentMap }) {
 		// TODO: stop any animations if the GameState has changed!
 		if (!this.alive) {
 			this.physics.velocity = new Vector(0, 0);
@@ -185,5 +193,16 @@ class PlayerSprite extends Sprite {
 		}
 		this.sprite.rotation = this.physics.rotation;
 		this.sprite.position.set(this.physics.position.x, this.physics.position.y);
+
+		this.starArrow.position.set(this.physics.position.x, this.physics.position.y);
+		if (!currentMap.stars.length) {
+			this.starArrow.visible = false;
+		}
+		if (currentMap.stars.length) {
+			this.starArrow.visible = true;
+			const star = currentMap.stars[0];
+			this.starArrow.rotation =
+				Math.PI + getAngleBetweenVectors(this.physics.position, star.physics.position);
+		}
 	}
 }
