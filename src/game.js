@@ -2,16 +2,12 @@
 
 import createGame from './pixi-wrapper';
 import Vector from './vector';
-import { getPlanetsInSystem, getStarsInSystem } from './planets';
-import debugFactory from './debug';
 import reducer from './state-reducer';
-import { Sprite, Physics, SpaceThing } from './base-classes';
+import { SpaceThing } from './base-classes';
 import Player from './player';
-import Ship from './ship';
 import { FlyingState } from './game-state';
 import { gameWidth, gameHeight, filesToLoad } from './constants';
-
-const debug = debugFactory('sky:game');
+import SystemMap from './system-map';
 
 class Input {
 	constructor() {
@@ -64,115 +60,6 @@ function sortSpritesByZIndex(container) {
 		b.zIndex = b.zIndex || 0;
 		return a.zIndex > b.zIndex ? 1 : -1;
 	});
-}
-
-class PlanetPhysics extends Physics {
-	constructor({ position, size }) {
-		super();
-		this.size = size;
-		this.position.set(position.x, position.y);
-		this.hitBox = new Vector(size, size);
-	}
-}
-
-class StarPhysics extends Physics {
-	constructor({ position, name, size }) {
-		super();
-		this.name = name;
-		this.size = size;
-		this.position.set(position.x, position.y);
-		// The star sprite has wide transparent edges so we make the hitBox smaller
-		this.hitBox = new Vector(size / 1.5, size / 1.5);
-	}
-}
-
-class PlanetSprite extends Sprite {
-	constructor(game, physics) {
-		super(game, physics);
-		this.sprite = game.sprite('assets/planet-1.png');
-		this.sprite.pivot.set(0.5, 0.5);
-		this.sprite.anchor.set(0.5, 0.5);
-		this.sprite.width = physics.size;
-		this.sprite.height = physics.size;
-		this.sprite.position.set(physics.position.x, physics.position.y);
-		this.sprite.zIndex = 8;
-		game.gameSpace.addChild(this.sprite);
-	}
-}
-
-class StarSprite extends Sprite {
-	constructor(game, physics) {
-		super(game, physics);
-		this.sprite = game.sprite('assets/sun.png');
-		this.sprite.pivot.set(0.5, 0.5);
-		this.sprite.anchor.set(0.5, 0.5);
-		this.sprite.width = physics.size;
-		this.sprite.height = physics.size;
-		this.sprite.position.set(physics.position.x, physics.position.y);
-		this.sprite.zIndex = 8;
-		game.gameSpace.addChild(this.sprite);
-	}
-}
-
-class Planet extends SpaceThing {
-	constructor({ game, position, size, name }) {
-		super({ game });
-		this.name = name;
-		this.physics = new PlanetPhysics({ position, size, name });
-		this.sprite = new PlanetSprite(game, this.physics);
-	}
-}
-
-class Star extends SpaceThing {
-	constructor({ game, position, size, name }) {
-		super({ game });
-		this.physics = new StarPhysics({ position, size, name });
-		this.sprite = new StarSprite(game, this.physics);
-	}
-}
-
-class SystemMap {
-	constructor({ game, systemName, player }) {
-		this.game = game;
-		this.player = player;
-		this.planets = getPlanetsInSystem(systemName).map(
-			({ position, size, name }) => new Planet({ game, position, size, name })
-		);
-		this.stars = getStarsInSystem(systemName).map(
-			({ position, size, name }) => new Star({ game, position, size, name })
-		);
-		this.ships = [];
-	}
-
-	createShip({ type, name, behavior }) {
-		debug('Creating new ship', type, name, behavior);
-		this.ships.push(new Ship({ game: this.game, type, name, behavior, player: this.player }));
-	}
-
-	update({ player, eventState }) {
-		this.ships = this.ships.filter(ship => {
-			ship.update({ currentMap: this, player, eventState });
-			return ship.alive;
-		});
-	}
-
-	remove() {
-		this.planets.forEach(planet => planet.sprite.sprite.destroy());
-		this.planets = [];
-		this.stars.forEach(star => star.sprite.sprite.destroy());
-		this.stars = [];
-		this.ships.forEach(ship => ship.sprite.sprite.destroy());
-		this.ships = [];
-	}
-
-	handleInput({ game, input, player }) {
-		if (input.isKeyDownOnce('KeyJ') === true) {
-			debug('jump');
-			this.remove();
-			// TODO: figure out next system name
-			return new SystemMap({ game, systemName: 'Betan', player });
-		}
-	}
 }
 
 class HealthBar extends SpaceThing {
