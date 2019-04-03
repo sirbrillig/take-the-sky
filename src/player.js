@@ -66,7 +66,7 @@ class PlayerPhysics extends Physics {
 			);
 			debug(`rotating player counterclockwise to ${this.rotation}`);
 		}
-		if (input.isKeyDown('KeyL') === true) {
+		if (input.isKeyDownOnce('Space') === true) {
 			const touchingPlanet = currentMap.planets.find(planet => this.isTouching(planet.physics));
 			if (touchingPlanet) {
 				this.velocity = new Vector(0, 0);
