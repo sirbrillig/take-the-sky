@@ -155,6 +155,24 @@ class SystemMap {
 			return ship.alive;
 		});
 	}
+
+	remove() {
+		this.planets.forEach(planet => planet.sprite.sprite.destroy());
+		this.planets = [];
+		this.stars.forEach(star => star.sprite.sprite.destroy());
+		this.stars = [];
+		this.ships.forEach(ship => ship.sprite.sprite.destroy());
+		this.ships = [];
+	}
+
+	handleInput({ game, input, player }) {
+		if (input.isKeyDownOnce('KeyJ') === true) {
+			debug('jump');
+			this.remove();
+			// TODO: figure out next system name
+			return new SystemMap({ game, systemName: 'Betan', player });
+		}
+	}
 }
 
 class HealthBar extends SpaceThing {
@@ -267,6 +285,7 @@ class GameController {
 		if (newState) {
 			this.state = newState;
 		}
+		this.currentMap.update({ player: this.player, eventState: this.eventState });
 	}
 
 	handleInput() {
@@ -278,6 +297,15 @@ class GameController {
 			currentMap: this.currentMap,
 			eventState: this.eventState,
 		});
+		const newMap = this.currentMap.handleInput({
+			game: this.game,
+			input: this.input,
+			player: this.player,
+		});
+		if (newMap) {
+			this.currentMap = newMap;
+			sortSpritesByZIndex(this.game.gameSpace);
+		}
 	}
 
 	centerCamera({ gameSpace, playerPosition }) {
