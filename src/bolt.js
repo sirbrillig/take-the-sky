@@ -36,11 +36,17 @@ class BoltPhysics extends Physics {
 		super();
 		this.bolt = bolt;
 		this.player = player;
-		this.startingPosition = ship.physics.position.clone();
-		this.position.set(ship.physics.position.x, ship.physics.position.y); // TODO: move this to the ship's nose
+		// move this to the ship's nose
+		const shipLength = ship.physics.hitBox.x - 50;
+		const rotationRadius = shipLength / 2;
+		this.startingPosition = new Vector(
+			ship.physics.position.x - rotationRadius * Math.cos(ship.physics.rotation),
+			ship.physics.position.y - rotationRadius * Math.sin(ship.physics.rotation)
+		);
+		this.position.set(this.startingPosition.x, this.startingPosition.y);
 		this.rotation = ship.physics.rotation;
-		this.maxVelocity = 10;
-		this.accelerationRate = 10;
+		this.maxVelocity = 9;
+		this.accelerationRate = 9;
 		this.hitBox = new Vector(32, 32);
 	}
 
@@ -49,11 +55,11 @@ class BoltPhysics extends Physics {
 			this.bolt.isExploding = true;
 		}
 		const distanceMoved = this.startingPosition.sub(this.position).magnitude();
-		if (distanceMoved > 400) {
+		const maxDistance = 400;
+		if (distanceMoved > maxDistance) {
 			this.bolt.isExploding = true;
 		}
 		if (this.bolt.isExploding) {
-			this.velocity = new Vector(0, 0);
 			return;
 		}
 		this.velocity = adjustSpeedForRotation(

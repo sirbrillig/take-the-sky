@@ -17,8 +17,8 @@ class ShipPhysics extends Physics {
 		this.position.set(x, y);
 		this.accelerationRate = 0.04;
 		this.rotationRate = 0.06;
-		this.maxVelocity = 4;
-		this.hitBox = new Vector(64, 64);
+		this.maxVelocity = 3.5;
+		this.hitBox = new Vector(64, 64); // this will be updated by ShipSprite
 	}
 
 	getOffScreenPositionFromPlayer(player) {
@@ -60,6 +60,8 @@ class ShipSprite extends Sprite {
 		this.normal.position.set(physics.position.x, physics.position.y);
 		this.normal.zIndex = 10;
 		this.normal.visible = true;
+		physics.hitBox.x = this.normal.width;
+		physics.hitBox.y = this.normal.height;
 		game.gameSpace.addChild(this.normal);
 
 		this.explosion = game.animatedSpriteFromSpriteSheet('assets/explosion.json');
