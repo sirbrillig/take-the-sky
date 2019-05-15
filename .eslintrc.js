@@ -1,7 +1,13 @@
 module.exports = {
-	extends: ['airbnb', 'prettier'],
+	parser:  '@typescript-eslint/parser',
+	extends: [
+		'plugin:@typescript-eslint/recommended',
+		'airbnb',
+		'prettier'
+	],
 	plugins: ['import', 'prettier'],
 	rules: {
+		'@typescript-eslint/indent': ['error', 'tab'],
 		'prettier/prettier': 'error',
 		'no-use-before-define': [0],
 		'no-return-assign': [0],
