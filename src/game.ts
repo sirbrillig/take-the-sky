@@ -7,7 +7,7 @@ import { SpaceThing } from './base-classes';
 import Player from './player';
 import { FlyingState } from './game-state';
 import { gameWidth, gameHeight, filesToLoad } from './constants';
-import SystemMap from './system-map';
+import SystemMap from './system-map.ts';
 
 class Input {
 	constructor() {
