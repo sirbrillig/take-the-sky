@@ -2,9 +2,10 @@
 
 import resolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
+import typescript from 'rollup-plugin-typescript';
 
 export default {
-	input: 'src/game.js',
+	input: 'src/game.ts',
 	output: {
 		file: 'public/dist/bundle.js',
 		format: 'iife',
@@ -12,5 +13,5 @@ export default {
 	watch: {
 		clearScreen: false,
 	},
-	plugins: [resolve(), commonjs()],
+	plugins: [typescript(), resolve(), commonjs()],
 };
