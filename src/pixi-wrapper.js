@@ -1,6 +1,8 @@
 /* @format */
 /* globals window, PIXI */
 
+import Game from './game';
+
 export default function createGame({ gameWidth, gameHeight, setupCallback, filesToLoad }) {
 	const app = new PIXI.Application({ width: gameWidth, height: gameHeight });
 	window.document.body.appendChild(app.view);
@@ -12,62 +14,20 @@ export default function createGame({ gameWidth, gameHeight, setupCallback, files
 	app.renderer.view.style.position = 'absolute';
 	app.renderer.view.style.display = 'block';
 
-	app.mainContainer = new PIXI.Container();
-	app.stage.addChild(app.mainContainer);
-	const scaleFactor = Math.min(window.innerWidth / gameWidth, window.innerHeight / gameHeight);
-	const newWidth = Math.ceil(gameWidth * scaleFactor);
-	const newHeight = Math.ceil(gameHeight * scaleFactor);
-	app.renderer.view.style.width = `${newWidth}px`;
-	app.renderer.view.style.height = `${newHeight}px`;
-	app.renderer.resize(newWidth, newHeight);
-	app.mainContainer.scale.set(scaleFactor);
-
-	PIXI.loader.add(filesToLoad).load((loader, resources) => {
-		app.resources = resources;
-		app.sprite = key => new PIXI.Sprite(resources[key].texture);
-		app.text = (textString, style) => new PIXI.Text(textString, style);
-		app.circle = (diameter, color) => {
-			const shape = new PIXI.Graphics();
-			shape.beginFill(color);
-			shape.drawCircle(0, 0, diameter / 2);
-			shape.width = diameter;
-			shape.height = diameter;
-			shape.endFill();
-			return shape;
-		};
-		app.rectangle = (width, height, fillColor, lineColor = 0, lineWidth = 0) => {
-			const shape = new PIXI.Graphics();
-			shape.lineStyle(lineWidth, lineColor);
-			shape.beginFill(fillColor);
-			shape.drawRect(0, 0, width, height);
-			shape.endFill();
-			shape.lineStyle();
-			return shape;
-		};
-		app.line = (startVector, endVector, lineColor = 0, lineWidth = 2) => {
-			const shape = new PIXI.Graphics();
-			shape.lineStyle(lineWidth, lineColor);
-			shape.moveTo(startVector.x, startVector.y);
-			shape.lineTo(endVector.x, endVector.y);
-			shape.lineStyle();
-			return shape;
-		};
-		app.group = () => new PIXI.Container();
-		app.tilingSprite = (key, width, height) =>
-			new PIXI.extras.TilingSprite(resources[key].texture, width, height);
-		app.animatedSpriteFromSpriteSheet = spritesheet => {
-			const sheet = PIXI.loader.resources[spritesheet].spritesheet;
-			const animationName = Object.keys(sheet.animations)[0];
-			return new PIXI.extras.AnimatedSprite(sheet.animations[animationName]);
-		};
-		app.animatedSpriteFromImages = images => {
-			return new PIXI.extras.AnimatedSprite(
-				images.map(image => {
-					return PIXI.Texture.fromImage(image);
-				})
-			);
-		};
-		setupCallback(app, loader, resources);
+	const loaderPromise = new Promise(resolve => {
+		PIXI.loader.add(filesToLoad).load((loader, resources) => {
+			resolve({ loader, resources });
+		});
 	});
-	return app;
+	loaderPromise.then(({ loader, resources }) => {
+		const game = new Game(PIXI, app, resources);
+		const scaleFactor = Math.min(window.innerWidth / gameWidth, window.innerHeight / gameHeight);
+		const newWidth = Math.ceil(gameWidth * scaleFactor);
+		const newHeight = Math.ceil(gameHeight * scaleFactor);
+		app.renderer.view.style.width = `${newWidth}px`;
+		app.renderer.view.style.height = `${newHeight}px`;
+		app.renderer.resize(newWidth, newHeight);
+		game.mainContainer.scale.set(scaleFactor);
+		setupCallback(game, loader, resources);
+	});
 }

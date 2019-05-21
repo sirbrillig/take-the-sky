@@ -5,7 +5,7 @@ import commonjs from 'rollup-plugin-commonjs';
 import typescript from 'rollup-plugin-typescript';
 
 export default {
-	input: 'src/game.ts',
+	input: 'src/main.ts',
 	output: {
 		file: 'public/dist/bundle.js',
 		format: 'iife',

@@ -3,12 +3,13 @@
 import { getPlanetsInSystem, getStarsInSystem } from './planets';
 import Ship from './ship';
 import { Star, Planet } from './stellar-objects';
+import Player from './player';
 import debugFactory from './debug';
 
 const debug = debugFactory('sky:system');
 
 export default class SystemMap {
-	constructor({ game, systemName, player }: { game: any, systemName: string, player: Player }) {
+	public constructor({ game, systemName, player }: { game; systemName: string; player: Player }) {
 		this.game = game;
 		this.player = player;
 		this.systemName = systemName;

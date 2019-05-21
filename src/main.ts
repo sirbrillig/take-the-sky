@@ -211,7 +211,7 @@ class GameController {
 function initGame() {
 	const setupCallback = game => {
 		const controller = new GameController({ game });
-		game.ticker.add(() => controller.tick());
+		game.app.ticker.add(() => controller.tick());
 	};
 	createGame({ gameWidth, gameHeight, filesToLoad, setupCallback });
 }
