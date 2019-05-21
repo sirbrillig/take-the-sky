@@ -4,12 +4,33 @@ import { getPlanetsInSystem, getStarsInSystem } from './planets';
 import Ship from './ship';
 import { Star, Planet } from './stellar-objects';
 import Player from './player';
+import Game from './game';
 import debugFactory from './debug';
 
 const debug = debugFactory('sky:system');
 
 export default class SystemMap {
-	public constructor({ game, systemName, player }: { game; systemName: string; player: Player }) {
+	public game: Game;
+
+	public player: Player;
+
+	public systemName: string;
+
+	public planets: Planet[];
+
+	public stars: Star[];
+
+	public ships: Ship[];
+
+	public constructor({
+		game,
+		systemName,
+		player,
+	}: {
+		game: Game;
+		systemName: string;
+		player: Player;
+	}) {
 		this.game = game;
 		this.player = player;
 		this.systemName = systemName;
