@@ -2,12 +2,12 @@
 
 import createGame from './pixi-wrapper';
 import Vector from './vector';
-import reducer from './state-reducer';
 import { SpaceThing } from './base-classes';
+import EventState from './event-state';
 import Player from './player';
 import { FlyingState } from './game-state';
 import { gameWidth, gameHeight, filesToLoad } from './constants';
-import SystemMap from './system-map.ts';
+import SystemMap from './system-map';
 
 class Input {
 	constructor() {
@@ -95,36 +95,6 @@ class HealthBar extends SpaceThing {
 
 	update() {
 		this.meter.innerBar.width = this.convertPercentToBarWidth(this.health.getHealthAsPercent());
-	}
-}
-
-class EventState {
-	constructor() {
-		this.stateTree = reducer(undefined, { type: 'INIT' });
-		this.getState = this.getState.bind(this);
-		this.getEvent = this.getEvent.bind(this);
-		this.getDialog = this.getDialog.bind(this);
-		this.dispatchAction = this.dispatchAction.bind(this);
-	}
-
-	dispatchAction(event) {
-		this.stateTree = reducer(this.stateTree, event);
-	}
-
-	getState() {
-		return this.stateTree;
-	}
-
-	getEvent(key) {
-		return this.stateTree.events[key];
-	}
-
-	getDialog() {
-		return this.stateTree.dialog;
-	}
-
-	getSystemName() {
-		return this.stateTree.systemName;
 	}
 }
 

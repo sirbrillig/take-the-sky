@@ -4,17 +4,18 @@ import { getPlanetsInSystem, getStarsInSystem } from './planets';
 import Ship from './ship';
 import { Star, Planet } from './stellar-objects';
 import Player from './player';
+import EventState from './event-state';
 import Game from './game';
 import debugFactory from './debug';
 
 const debug = debugFactory('sky:system');
 
 export default class SystemMap {
-	public game: Game;
+	public readonly game: Game;
 
-	public player: Player;
+	public readonly player: Player;
 
-	public systemName: string;
+	public readonly systemName: string;
 
 	public planets: Planet[];
 
@@ -35,32 +36,34 @@ export default class SystemMap {
 		this.player = player;
 		this.systemName = systemName;
 		this.planets = getPlanetsInSystem(systemName).map(
-			({ position, size, name }) => new Planet({ game, position, size, name })
+			({ position, size, name }): Planet => new Planet({ game, position, size, name })
 		);
 		this.stars = getStarsInSystem(systemName).map(
-			({ position, size, name }) => new Star({ game, position, size, name })
+			({ position, size, name }): Star => new Star({ game, position, size, name })
 		);
 		this.ships = [];
 	}
 
-	createShip({ type, name, behavior }) {
+	public createShip({ type, name, behavior }): void {
 		debug('Creating new ship', type, name, behavior);
 		this.ships.push(new Ship({ game: this.game, type, name, behavior, player: this.player }));
 	}
 
-	update({ player, eventState }) {
-		this.ships = this.ships.filter(ship => {
-			ship.update({ currentMap: this, player, eventState });
-			return ship.alive;
-		});
+	public update({ eventState }: { eventState: EventState }): void {
+		this.ships = this.ships.filter(
+			(ship: Ship): boolean => {
+				ship.update({ currentMap: this, eventState });
+				return ship.alive;
+			}
+		);
 	}
 
-	remove() {
-		this.planets.forEach(planet => planet.sprite.sprite.destroy());
+	public remove(): void {
+		this.planets.forEach((planet): void => planet.sprite.sprite.destroy());
 		this.planets = [];
-		this.stars.forEach(star => star.sprite.sprite.destroy());
+		this.stars.forEach((star): void => star.sprite.sprite.destroy());
 		this.stars = [];
-		this.ships.forEach(ship => ship.sprite.sprite.destroy());
+		this.ships.forEach((ship): void => ship.sprite.sprite.destroy());
 		this.ships = [];
 	}
 }
